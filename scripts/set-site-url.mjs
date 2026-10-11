@@ -1,5 +1,7 @@
 // Rewrites the site origin in static files (robots.txt, llms.txt) when VITE_SITE_URL is set.
 import { readFileSync, writeFileSync } from "node:fs";
+// Committed production default lives in .env.production (Vite reads it too); real env wins.
+try { process.loadEnvFile(".env.production"); } catch {}
 const url = (process.env.VITE_SITE_URL ?? "").trim().replace(/\/+$/, "");
 if (url) {
   for (const f of ["public/robots.txt", "public/llms.txt"]) {

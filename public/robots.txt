@@ -62,4 +62,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://ucl-17-0.lovable.app/sitemap.xml
+Sitemap: https://ucl17-0.com/sitemap.xml
