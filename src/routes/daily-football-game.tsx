@@ -82,7 +82,7 @@ function DailyFootballGame() {
         <Link to="/daily" className="btn-primary hover:btn-primary-hover">
           Play today's challenge
         </Link>
-        <Link to="/draft" search={{ mode: "classic" }} className="btn-ghost">
+        <Link to="/draft" className="btn-ghost">
           Unlimited classic draft
         </Link>
       </div>

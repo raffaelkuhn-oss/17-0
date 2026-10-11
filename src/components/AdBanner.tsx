@@ -28,7 +28,7 @@ export function AdBanner({
       </a>
       <p className="mt-2 text-center text-xs text-muted-foreground">
         for sponsoring inquiries write an email to:{" "}
-        <a href="mailto:ucl17zero@gmail.com" className="text-primary hover:underline">
+        <a href="mailto:ucl17zero@gmail.com" className="inline-flex min-h-11 items-center px-2 text-primary hover:underline">
           ucl17zero@gmail.com
         </a>
       </p>

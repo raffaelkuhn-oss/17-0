@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { renderShareImage } from "@/lib/share-image";
 import type { Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
+import { recordLong } from "@/lib/record";
 
 const SHARE_URL = SITE_URL;
 
@@ -14,7 +15,7 @@ function headline(campaign: Campaign) {
 }
 
 function caption(campaign: Campaign, contextLabel?: string) {
-  const record = `${campaign.won}W-${campaign.drawn}D-${campaign.lost}L`;
+  const record = recordLong(campaign);
   const ctx = contextLabel ? `${contextLabel}\n` : "";
   return `${headline(campaign)} — ${record}.\n${ctx}\nCan you beat it?\n${SHARE_URL}\n\n#ChampionsLeague #UCL #17_0 #Football`;
 }
@@ -58,7 +59,7 @@ export function ShareCard({
     if (!preview) return;
     const a = document.createElement("a");
     a.href = preview;
-    a.download = `17-0-${campaign.won}-${campaign.lost}.png`;
+    a.download = `17-0-result-${recordLong(campaign)}.png`;
     a.click();
   }
 
@@ -99,7 +100,7 @@ export function ShareCard({
   }
 
   const tweet = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    `${headline(campaign)} — ${campaign.won}W-${campaign.drawn}D-${campaign.lost}L. Can you beat it?`,
+    `${headline(campaign)} — ${recordLong(campaign)}. Can you beat it?`,
   )}&url=${encodeURIComponent(SHARE_URL)}`;
 
   return (
@@ -110,7 +111,7 @@ export function ShareCard({
       {preview ? (
         <img
           src={preview}
-          alt={`17-0 result card: ${campaign.won} wins, ${campaign.lost} losses`}
+          alt={`17-0 result card: ${campaign.won} wins, ${campaign.drawn} draws, ${campaign.lost} losses`}
           width={1200}
           height={630}
           className="mt-4 w-full rounded-xl border border-border"

@@ -86,8 +86,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "17-0" },
       { property: "og:image", content: absUrl("/og-image.jpg") },
-      { property: "og:image:width", content: "1920" },
-      { property: "og:image:height", content: "1088" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:type", content: "image/jpeg" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: absUrl("/og-image.jpg") },
       {
@@ -178,49 +179,49 @@ function SiteFooter() {
   return (
     <footer className="border-t border-border px-6 py-10">
       <div className="mx-auto flex max-w-3xl flex-col gap-6 text-sm text-muted-foreground">
-        <nav aria-label="Game modes" className="flex flex-wrap gap-x-5 gap-y-2">
-          <Link to="/draft" search={{ mode: "classic" }} className="hover:text-foreground">
+        <nav aria-label="Game modes" className="flex flex-wrap gap-x-5">
+          <Link to="/draft" className="inline-flex min-h-11 items-center hover:text-foreground">
             Draft an XI
           </Link>
-          <Link to="/daily" className="hover:text-foreground">
+          <Link to="/daily" className="inline-flex min-h-11 items-center hover:text-foreground">
             Daily challenge
           </Link>
-          <Link to="/ucl-simulator" className="hover:text-foreground">
+          <Link to="/ucl-simulator" className="inline-flex min-h-11 items-center hover:text-foreground">
             Champions League simulator
           </Link>
-          <Link to="/football-draft-game" className="hover:text-foreground">
+          <Link to="/football-draft-game" className="inline-flex min-h-11 items-center hover:text-foreground">
             Football draft game
           </Link>
-          <Link to="/daily-football-game" className="hover:text-foreground">
+          <Link to="/daily-football-game" className="inline-flex min-h-11 items-center hover:text-foreground">
             Daily football game
           </Link>
-          <Link to="/how-it-works" className="hover:text-foreground">
+          <Link to="/how-it-works" className="inline-flex min-h-11 items-center hover:text-foreground">
             How it works
           </Link>
         </nav>
-        <nav aria-label="Rankings" className="flex flex-wrap gap-x-5 gap-y-2">
-          <Link to="/best-champions-league-players" className="hover:text-foreground">
+        <nav aria-label="Rankings" className="flex flex-wrap gap-x-5">
+          <Link to="/best-champions-league-players" className="inline-flex min-h-11 items-center hover:text-foreground">
             Best Champions League players
           </Link>
-          <Link to="/best-xi-of-all-time" className="hover:text-foreground">
+          <Link to="/best-xi-of-all-time" className="inline-flex min-h-11 items-center hover:text-foreground">
             Best XI of all time
           </Link>
-          <Link to="/best/$position" params={{ position: "strikers" }} className="hover:text-foreground">
+          <Link to="/best/$position" params={{ position: "strikers" }} className="inline-flex min-h-11 items-center hover:text-foreground">
             Best strikers
           </Link>
-          <Link to="/best/$position" params={{ position: "midfielders" }} className="hover:text-foreground">
+          <Link to="/best/$position" params={{ position: "midfielders" }} className="inline-flex min-h-11 items-center hover:text-foreground">
             Best midfielders
           </Link>
-          <Link to="/best/$position" params={{ position: "centre-backs" }} className="hover:text-foreground">
+          <Link to="/best/$position" params={{ position: "centre-backs" }} className="inline-flex min-h-11 items-center hover:text-foreground">
             Best centre backs
           </Link>
-          <Link to="/best/$position" params={{ position: "goalkeepers" }} className="hover:text-foreground">
+          <Link to="/best/$position" params={{ position: "goalkeepers" }} className="inline-flex min-h-11 items-center hover:text-foreground">
             Best goalkeepers
           </Link>
-          <Link to="/legends" className="hover:text-foreground">
+          <Link to="/legends" className="inline-flex min-h-11 items-center hover:text-foreground">
             Legends pool
           </Link>
-          <Link to="/82-0-football" className="hover:text-foreground">
+          <Link to="/82-0-football" className="inline-flex min-h-11 items-center hover:text-foreground">
             82-0 for football
           </Link>
         </nav>
