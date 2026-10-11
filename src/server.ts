@@ -46,6 +46,21 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const url = new URL(request.url);
+    if (url.hostname === "www.ucl17-0.com") {
+      return Response.redirect(`https://ucl17-0.com${url.pathname}${url.search}`, 301);
+    }
+    const noindex = url.hostname.endsWith(".workers.dev");
+    const res = await handle(request, env, ctx);
+    if (!noindex) return res;
+    const out = new Response(res.body, res);
+    out.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return out;
+  },
+};
+
+const handle = async (request: Request, env: unknown, ctx: unknown): Promise<Response> => {
+  {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
@@ -57,5 +72,5 @@ export default {
         headers: { "content-type": "text/html; charset=utf-8" },
       });
     }
-  },
+  }
 };
