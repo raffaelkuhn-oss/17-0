@@ -40,14 +40,15 @@ export const PLAYOFF_CUTOFF = 11;
  * Balance knobs (the ONLY place these numbers live; the client, the daily seed and
  * the server-side leaderboard re-simulation all import this module).
  * - KO_BASE / KO_STEP: knockout opponent strength = KO_BASE + round * KO_STEP
- *   (rounds: Playoff, R16, QF, SF, Final). League opponents are rated 66-76.
+ *   (rounds: Playoff, R16, QF, SF, Final) = 72, 75, 78, 81, 84 at the current
+ *   72 / 3. League opponents are rated 66-76.
  * - MID_ATTACK_WEIGHT: weight of each midfielder's attack in the team attack
  *   rating, a true weighted average with forwards at weight 1.
  * Re-tune with `bun scripts/sim-harness.ts` (100k drafts per strategy).
  */
 export const SIM_TUNING = {
   KO_BASE: 72,
-  KO_STEP: 2,
+  KO_STEP: 3,
   MID_ATTACK_WEIGHT: 0.7,
 };
 
