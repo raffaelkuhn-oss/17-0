@@ -33,7 +33,7 @@ const FAQ = [
   },
   {
     q: "How rare is a 17-0?",
-    a: "A carefully drafted, top-tier XI wins the title roughly 1 to 2 percent of the time. Careless drafting drops that under half a percent. Most runs end in the league phase or an early knockout round.",
+    a: "In our simulations (100,000 runs per draft type, from the game's own engine), random picks win the title about 30% of the time but go a perfect 17-0 only about 0.7% of the time. A good draft wins the title about 56% of the time and goes 17-0 about 3.3% of the time. The best possible XI wins the title about 70% of the time and goes 17-0 about 5.9% of the time. These are simulation results, not guarantees; individual runs vary a lot.",
   },
   {
     q: "What is Legend IQ mode?",
@@ -52,19 +52,19 @@ export const Route = createFileRoute("/how-it-works")({
       {
         name: "description",
         content:
-          "How 17-0 works: draft an all-time Champions League XI, simulate 8 league-phase games and four two-legged knockout rounds, and learn the odds of a perfect 17-0.",
+          "How 17-0 works: draft an all-time Champions League XI, simulate 8 league-phase games and four two-legged knockout rounds, and see how often a perfect 17-0 happens in our simulations.",
       },
       { property: "og:title", content: "How the 17-0 Champions League Simulator Works" },
       { name: "twitter:title", content: "How the 17-0 Champions League Simulator Works" },
       {
         property: "og:description",
         content:
-          "The full explanation of the 17-match format, player ratings, the simulation maths and the odds of going unbeaten.",
+          "The full explanation of the 17-match format, player ratings, the simulation maths and how often a perfect run happens in our simulations.",
       },
       {
         name: "twitter:description",
         content:
-          "The full explanation of the 17-match format, player ratings, the simulation maths and the odds of going unbeaten.",
+          "The full explanation of the 17-match format, player ratings, the simulation maths and how often a perfect run happens in our simulations.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: URL },

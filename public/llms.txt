@@ -15,7 +15,7 @@
 - Goals are drawn from a Poisson distribution based on the attack/defence edge.
 - League phase: 8 matches, draws possible; 11 points are needed to advance (matching the real top-24 cutoff).
 - Knockout: playoff, round of 16, quarter-final and semi-final are two legs each; level aggregate goes to a mentality-weighted penalty shootout. The final is a single match.
-- A perfect 17-0 means winning all 17 matches and lifting the trophy. A strong XI wins the title roughly 1-2% of the time.
+- A perfect 17-0 means winning all 17 matches and lifting the trophy. In the game's own simulations (100,000 runs per draft type), random picks win the title about 30% of the time and go 17-0 about 0.7%; a good draft wins the title about 56% and goes 17-0 about 3.3%; the best possible XI wins the title about 70% and goes 17-0 about 5.9%. These are simulation results, not guarantees.
 
 ## Key pages
 - [Home / start a draft](https://ucl17-0.com/): pick a mode and begin.
@@ -24,7 +24,7 @@
 - [Daily challenge](https://ucl17-0.com/daily): one shared draft per day — every player worldwide gets the same eleven choices, with streak tracking.
 - [UCL simulator explainer](https://ucl17-0.com/ucl-simulator): what the simulator covers, season structure and FAQ.
 - [Best XI of all time](https://ucl17-0.com/best-xi-of-all-time): highest-rated all-time European XI position by position, plus the top three at every role.
-- [How it works](https://ucl17-0.com/how-it-works): full explanation of the format, ratings and odds, plus FAQ.
+- [How it works](https://ucl17-0.com/how-it-works): full explanation of the format, ratings and simulation results, plus FAQ.
 
 ## Contact
 Sponsoring inquiries: ucl17zero@gmail.com
