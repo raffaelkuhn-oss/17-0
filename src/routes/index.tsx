@@ -1,7 +1,7 @@
 import { SITE_URL, absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HomeLeaderboard } from "@/components/HomeLeaderboard";
-import stadium from "@/assets/stadium-hero.jpg";
+import stadium from "@/assets/stadium-hero.webp";
 import { AdBanner } from "@/components/AdBanner";
 import { SupportCard } from "@/components/SupportCard";
 import { PLAYERS } from "@/lib/players";
@@ -71,8 +71,10 @@ function Index() {
         <img
           src={stadium}
           alt="Floodlit European football stadium at night"
-          width={1920}
-          height={1088}
+          width={1600}
+          height={907}
+          fetchPriority="high"
+          decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
@@ -112,7 +114,7 @@ function Index() {
               <Link
                 key={m.id}
                 to="/draft"
-                search={{ mode: m.id }}
+                search={m.id === "legend" ? { mode: "legend" } : {}}
                 className="surface group rounded-2xl p-6 text-left transition-transform hover:-translate-y-1"
               >
                 <p className="text-[0.65rem] tracking-[0.35em] text-primary uppercase">
@@ -176,9 +178,9 @@ function Index() {
             82-0 for football
           </Link>
         </div>
-        <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+        <div className="mt-3 flex flex-wrap justify-center gap-x-4 text-sm text-muted-foreground">
           {POSITION_SLUGS.map((s) => (
-            <Link key={s} to="/best/$position" params={{ position: s }} className="hover:text-primary">
+            <Link key={s} to="/best/$position" params={{ position: s }} className="inline-flex min-h-11 items-center hover:text-primary">
               Best UCL {POSITION_PAGES[s].label.toLowerCase()}
             </Link>
           ))}

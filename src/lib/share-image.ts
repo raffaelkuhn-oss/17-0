@@ -1,6 +1,7 @@
 import { SITE_HOST } from "@/lib/site";
 import { FORMATION, overall, type Player } from "./players";
 import type { Campaign } from "./sim";
+import { recordLabel } from "@/lib/record";
 
 export type ShareCardData = {
   picks: Player[];
@@ -86,9 +87,9 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
   // Score
   ctx.fillStyle = INK;
   ctx.font = "800 132px system-ui, sans-serif";
-  ctx.fillText(`${campaign.won}-${campaign.lost}`, 60, 218);
+  ctx.fillText(recordLabel(campaign), 60, 218);
 
-  const scoreWidth = ctx.measureText(`${campaign.won}-${campaign.lost}`).width;
+  const scoreWidth = ctx.measureText(recordLabel(campaign)).width;
   ctx.fillStyle = MUTED;
   ctx.font = "500 22px system-ui, sans-serif";
   ctx.fillText(

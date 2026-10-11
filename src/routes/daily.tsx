@@ -17,6 +17,7 @@ import {
   type DailyStats,
 } from "@/lib/daily";
 import { ShareCard } from "@/components/ShareCard";
+import { recordLabel } from "@/lib/record";
 import { overall, PLAYERS, type Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
 
@@ -46,6 +47,24 @@ export const Route = createFileRoute("/daily")({
 
 const DAILY_INTRO =
   "The Daily Challenge gives every player in the world the same 11-slot draft each day. You get one attempt, so choose carefully, then watch your XI play out the 17-match Champions League campaign. Aim for a perfect 17-0.";
+
+/** Short rules blurb: static text, so it is part of the server-rendered HTML. */
+function DailyRules() {
+  return (
+    <ul className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground" aria-label="Daily rules">
+      {[
+        "Same 11-slot draft for everyone each day",
+        "One attempt",
+        "Fixed seed: identical choices worldwide",
+        "New draft at 00:00 UTC",
+      ].map((r) => (
+        <li key={r} className="rounded-full border border-border px-3 py-1.5">
+          {r}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function DailyPage() {
   const [key, setKey] = useState<string | null>(null);
@@ -83,7 +102,8 @@ function DailyPage() {
       <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
         <h1 className="text-4xl">Daily Challenge</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">{DAILY_INTRO}</p>
-        <p className="mt-3 text-muted-foreground">Loading today's draft…</p>
+        <DailyRules />
+        <p className="mt-4 text-muted-foreground">Loading today's draft…</p>
       </main>
     );
   }
@@ -101,6 +121,7 @@ function DailyPage() {
           fixedSeed={dailySeed(key)}
           contextLabel={label}
           kicker={label}
+          intro={<DailyRules />}
           allowReplay={false}
           onComplete={onComplete}
           sidebar={
@@ -157,6 +178,8 @@ function PlayedToday({
     .map((n) => PLAYERS.find((p) => p.name === n))
     .filter((p): p is Player => Boolean(p));
 
+  const hasCard = Boolean(record.campaign) && picks.length === 11;
+
   return (
     <div>
       <header className="border-b border-border pb-6 text-center">
@@ -170,12 +193,10 @@ function PlayedToday({
               : `Out in the ${record.eliminatedIn}.`}{" "}
           The next daily draft unlocks in {hours}h.
         </p>
-        <p className="mt-4 font-display text-5xl text-gradient">
-          {record.won}-{record.lost}
-        </p>
-        <p className="mt-2 text-sm tracking-[0.3em] text-muted-foreground uppercase">
-          {record.won} won · {record.drawn} drawn · {record.lost} lost
-        </p>
+        {!hasCard && (
+          // Fallback for old saved records without a full campaign: no ResultCard, so show the record here.
+          <p className="mt-4 font-display text-5xl text-gradient">{recordLabel(record)}</p>
+        )}
       </header>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -190,7 +211,7 @@ function PlayedToday({
           )}
           <div className="surface rounded-2xl p-6">
             <div className="flex flex-wrap gap-3">
-              <Link to="/draft" search={{ mode: "classic" }} className="btn-primary hover:btn-primary-hover">
+              <Link to="/draft" className="btn-primary hover:btn-primary-hover">
                 Play unlimited drafts
               </Link>
               <Link to="/" className="btn-ghost">

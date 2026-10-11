@@ -62,7 +62,7 @@ function BestPlayers() {
         Every legend in the 17-0 pool is rated on attack, defence, technique and big-game
         mentality. These are the top {ranked.length} by overall rating — the players everyone
         wants first in a draft. Disagree with the order?{" "}
-        <Link to="/draft" search={{ mode: "classic" }} className="text-primary underline underline-offset-4">
+        <Link to="/draft" className="text-primary underline underline-offset-4">
           Draft your own XI
         </Link>{" "}
         and let the simulation settle it.

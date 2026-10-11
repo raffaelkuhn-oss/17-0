@@ -84,7 +84,7 @@ function UclSimulator() {
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link to="/draft" search={{ mode: "classic" }} className="btn-primary hover:btn-primary-hover">
+        <Link to="/draft" className="btn-primary hover:btn-primary-hover">
           Start simulating
         </Link>
         <Link to="/daily" className="btn-ghost">

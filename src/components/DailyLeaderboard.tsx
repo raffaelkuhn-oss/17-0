@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getDailyLeaderboard, submitDailyResult, type LeaderboardEntry as Entry } from "@/lib/leaderboard.functions";
 import type { DailyRecord } from "@/lib/daily";
+import { recordLabel } from "@/lib/record";
 
 const NAME_KEY = "ucl170:daily:name";
 const SUBMIT_PREFIX = "ucl170:daily:submitted:";
@@ -125,7 +126,7 @@ export function DailyLeaderboard({
               {e.perfect ? <span title="Perfect 17-0">🏆</span> : e.champion ? <span>⭐</span> : null}
             </span>
             <span className="font-display shrink-0">
-              {e.won}-{e.lost}
+              {recordLabel(e)}
             </span>
           </li>
         ))}

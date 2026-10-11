@@ -3,9 +3,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { DraftGame, type Mode } from "@/components/DraftGame";
 
 export const Route = createFileRoute("/draft")({
-  validateSearch: (search: Record<string, unknown>): { mode: Mode } => ({
-    mode: search["mode"] === "legend" ? "legend" : "classic",
-  }),
+  // Classic is the default and has no query param, so the canonical URL is plain /draft
+  // (no redirect to ?mode=classic). Only the legend variant carries ?mode=legend.
+  validateSearch: (search: Record<string, unknown>): { mode?: Mode } =>
+    search["mode"] === "legend" ? { mode: "legend" } : {},
   head: () => ({
     meta: [
       { title: "Draft Room — 17-0 Champions League Draft" },
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/draft")({
 });
 
 function DraftPage() {
-  const { mode } = Route.useSearch();
+  const { mode = "classic" } = Route.useSearch();
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
       <DraftGame mode={mode} />
