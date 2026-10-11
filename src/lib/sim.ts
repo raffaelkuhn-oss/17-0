@@ -36,6 +36,21 @@ export type Campaign = {
 /** Points needed to finish inside the top 24 of the league phase. */
 export const PLAYOFF_CUTOFF = 11;
 
+/**
+ * Balance knobs (the ONLY place these numbers live; the client, the daily seed and
+ * the server-side leaderboard re-simulation all import this module).
+ * - KO_BASE / KO_STEP: knockout opponent strength = KO_BASE + round * KO_STEP
+ *   (rounds: Playoff, R16, QF, SF, Final). League opponents are rated 66-76.
+ * - MID_ATTACK_WEIGHT: weight of each midfielder's attack in the team attack
+ *   rating, a true weighted average with forwards at weight 1.
+ * Re-tune with `bun scripts/sim-harness.ts` (100k drafts per strategy).
+ */
+export const SIM_TUNING = {
+  KO_BASE: 72,
+  KO_STEP: 2,
+  MID_ATTACK_WEIGHT: 0.7,
+};
+
 const LEAGUE_OPPONENTS = [
   "Sparta Praha",
   "Club Brugge",
@@ -80,7 +95,14 @@ export function teamRatings(squad: Squad) {
   const by = (pos: Position) => slotted.filter((s) => s.pos === pos).map((s) => s.p);
   const avg = (arr: number[]) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
 
-  const attack = avg([...by("FWD").map((p) => p.att), ...by("MID").map((p) => p.att * 0.7)]);
+  const mw = SIM_TUNING.MID_ATTACK_WEIGHT;
+  const fwd = by("FWD");
+  const mid = by("MID");
+  const attack =
+    fwd.length + mid.length
+      ? (fwd.reduce((a, p) => a + p.att, 0) + mid.reduce((a, p) => a + p.att * mw, 0)) /
+        (fwd.length + mid.length * mw)
+      : 0;
   const midfield = avg(by("MID").map((p) => p.tec * 0.6 + p.def * 0.2 + p.att * 0.2));
   const defence = avg([...by("DEF").map((p) => p.def), ...by("GK").map((p) => p.def)]);
   const mentality = avg(slotted.map((s) => s.p.men));
@@ -146,7 +168,7 @@ export function simulate(squad: Squad, seed = Date.now()): Campaign {
   // ---- Knockout: two legs per tie, no draws, elimination each round ----
   for (let k = 0; k < KO_ROUNDS.length; k++) {
     const round = KO_ROUNDS[k]!;
-    const oppStrength = 87 + k * 3.4;
+    const oppStrength = SIM_TUNING.KO_BASE + k * SIM_TUNING.KO_STEP;
     const clutch = (r.mentality - 88) / 12;
 
     if (round.name === "Final") {

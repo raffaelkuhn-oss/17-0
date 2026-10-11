@@ -39,3 +39,11 @@ The daily leaderboard is the only backend. It is **disabled and hidden** if the 
 2. Run the two files in `supabase/migrations/` in order (SQL editor): table + policies, then lock writes to the service role and add the unique-name index.
 3. Set the Cloudflare secrets `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (service role key stays server-side only; it is never sent to the browser).
 For local dev put the same two vars in `.env`/`.dev.vars` (git-ignored).
+
+## Sim balance knobs
+
+All balance numbers live in `SIM_TUNING` in `src/lib/sim.ts`, the single module used by the client, the daily seed and the server-side leaderboard re-simulation (`submitDailyResult`).
+- `KO_BASE` / `KO_STEP`: knockout opponent strength = `KO_BASE + round * KO_STEP` (league opponents are 66-76).
+- `MID_ATTACK_WEIGHT`: weight of midfielders' attack in the team attack rating (weighted average; forwards weigh 1).
+
+Re-tune with `bun scripts/sim-harness.ts 100000` (random, greedy best-of-4, best XI). Env `KO_BASE`, `KO_STEP`, `MID_W` override knobs for sweeps.
