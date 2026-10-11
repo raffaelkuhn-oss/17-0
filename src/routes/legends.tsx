@@ -25,6 +25,7 @@ export const Route = createFileRoute("/legends")({
         content: "Every legend in the 17-0 draft pool with full ratings, roles, clubs and eras.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: absUrl("/legends") },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: absUrl("/legends") }],
