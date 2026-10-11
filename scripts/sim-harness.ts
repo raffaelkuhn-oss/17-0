@@ -1,0 +1,27 @@
+// Headless balance harness using the real sim code. Usage:
+//   bun scripts/sim-harness.ts [N=100000]   (env KO_BASE, KO_STEP, MID_W override knobs in-memory)
+import { FORMATION, PLAYERS, overall } from "../src/lib/players";
+import { SIM_TUNING, candidatesFor, simulate, teamRatings } from "../src/lib/sim";
+if (process.env.KO_BASE) SIM_TUNING.KO_BASE = +process.env.KO_BASE;
+if (process.env.KO_STEP) SIM_TUNING.KO_STEP = +process.env.KO_STEP;
+if (process.env.MID_W) SIM_TUNING.MID_ATTACK_WEIGHT = +process.env.MID_W;
+const N = +(process.argv[2] ?? 100000);
+const rf = (s: number) => { let a = s; return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+let st = 12345; const rng = () => rf(st++)();
+function tally(name: string, mk: (i: number) => { picks: any[]; seed: number }) {
+  let w = 0, c = 0, p = 0;
+  for (let n = 0; n < N; n++) { const { picks, seed } = mk(n); const g = simulate(picks, seed); w += g.won; if (g.champion) c++; if (g.perfect) p++; }
+  console.log(`${name.padEnd(8)} avgWins ${(w / N).toFixed(2)}  champ ${((c / N) * 100).toFixed(2)}%  17-0 ${((p / N) * 100).toFixed(3)}%`);
+}
+const draft = (strategy: "random" | "greedy") => (n: number) => {
+  const seed = Math.floor(rng() * 1e9); const picks: any[] = [];
+  for (let s = 0; s < 11; s++) {
+    const c = candidatesFor(FORMATION[s]!.role, new Set(picks.map((x) => x.id)), 4, rf(seed + s * 7919));
+    picks.push(strategy === "greedy" ? c.reduce((a, b) => (overall(b) > overall(a) ? b : a)) : c[Math.floor(rng() * c.length)]);
+  }
+  return { picks, seed };
+};
+const best: any[] = [];
+for (const sl of FORMATION) best.push(PLAYERS.filter((p) => p.roles.includes(sl.role) && !best.includes(p)).sort((a, b) => overall(b) - overall(a))[0]);
+console.log("tuning", JSON.stringify(SIM_TUNING), "bestXI", JSON.stringify(teamRatings(best)));
+tally("random", draft("random")); tally("greedy", draft("greedy")); tally("bestXI", (n) => ({ picks: best, seed: n * 7 + 1 }));
