@@ -1,0 +1,44 @@
+# 17-0 — Champions League Draft Simulator
+
+> 17-0 is a free browser game where you draft an all-time Champions League XI from a pool of 152 European legends and simulate a full 17-match campaign: 8 league-phase games, four two-legged knockout rounds, and the final. No sign-up, no download, no account.
+
+## What it is
+- Site: https://ucl-17-0.lovable.app
+- Type: free web game / football (soccer) draft simulator
+- Inspired by the basketball draft game 82-0.com
+- Two modes: Classic (all player ratings visible) and Legend IQ (ratings hidden, draft from memory)
+
+## How the simulation works
+- You pick 11 players, one per position, in a 4-3-3 shape (GK, RB, CB, CB, LB, DM, CM, AM, RW, ST, LW).
+- Each player has four attributes: Attack, Defence, Technique, Mentality.
+- Team ratings are aggregated by unit (attack, midfield, defence) and compared to an opponent strength that ramps up round by round.
+- Goals are drawn from a Poisson distribution based on the attack/defence edge.
+- League phase: 8 matches, draws possible; 11 points are needed to advance (matching the real top-24 cutoff).
+- Knockout: playoff, round of 16, quarter-final and semi-final are two legs each; level aggregate goes to a mentality-weighted penalty shootout. The final is a single match.
+- A perfect 17-0 means winning all 17 matches and lifting the trophy. A strong XI wins the title roughly 1-2% of the time.
+
+## Key pages
+- [Home / start a draft](https://ucl-17-0.lovable.app/): pick a mode and begin.
+- [Draft room](https://ucl-17-0.lovable.app/draft): make the 11 picks and simulate the campaign.
+- [Legends pool](https://ucl-17-0.lovable.app/legends): searchable table of all 152 legends with roles, clubs, eras and ratings.
+- [Daily challenge](https://ucl-17-0.lovable.app/daily): one shared draft per day — every player worldwide gets the same eleven choices, with streak tracking.
+- [UCL simulator explainer](https://ucl-17-0.lovable.app/ucl-simulator): what the simulator covers, season structure and FAQ.
+- [Best XI of all time](https://ucl-17-0.lovable.app/best-xi-of-all-time): highest-rated all-time European XI position by position, plus the top three at every role.
+- [How it works](https://ucl-17-0.lovable.app/how-it-works): full explanation of the format, ratings and odds, plus FAQ.
+
+## Contact
+Sponsoring inquiries: ucl17zero@gmail.com
+
+## Rankings and comparisons
+- [82-0 for football](https://ucl-17-0.lovable.app/82-0-football): how 17-0 compares to the basketball game 82-0
+- [Best Champions League goalkeepers](https://ucl-17-0.lovable.app/best/goalkeepers)
+- [Best Champions League centre backs](https://ucl-17-0.lovable.app/best/centre-backs)
+- [Best Champions League full backs](https://ucl-17-0.lovable.app/best/full-backs)
+- [Best Champions League midfielders](https://ucl-17-0.lovable.app/best/midfielders)
+- [Best Champions League wingers](https://ucl-17-0.lovable.app/best/wingers)
+- [Best Champions League strikers](https://ucl-17-0.lovable.app/best/strikers)
+
+## More guides
+- [Football draft game](https://ucl-17-0.lovable.app/football-draft-game): how the draft modes work
+- [Daily football game](https://ucl-17-0.lovable.app/daily-football-game): the daily challenge and leaderboard
+- [Best Champions League players of all time](https://ucl-17-0.lovable.app/best-champions-league-players): top 25 ranked

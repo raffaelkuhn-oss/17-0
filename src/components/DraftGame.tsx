@@ -1,0 +1,353 @@
+import { Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { AdBanner } from "@/components/AdBanner";
+import { Celebration } from "@/components/Celebration";
+import { ShareCard } from "@/components/ShareCard";
+import { FORMATION, overall, type Player } from "@/lib/players";
+import { candidatesFor, PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
+
+export type Mode = "classic" | "legend";
+
+function rngFactory(seed: number) {
+  let a = seed;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export type DraftGameProps = {
+  mode: Mode;
+  /** Fixed seed (daily challenge). When absent, each run is randomised. */
+  fixedSeed?: number | undefined;
+  /** Extra label shown on the result and share card, e.g. "Daily Challenge · 11 Aug". */
+  contextLabel?: string | undefined;
+  kicker?: string | undefined;
+  /** Extra panel rendered above the squad panel (streaks, countdown…). */
+  sidebar?: React.ReactNode | undefined;
+  onComplete?: ((campaign: Campaign, picks: Player[]) => void) | undefined;
+  /** Hides "draft again" for one-shot modes. */
+  allowReplay?: boolean | undefined;
+};
+
+export function DraftGame({
+  mode,
+  fixedSeed,
+  contextLabel,
+  kicker,
+  sidebar,
+  onComplete,
+  allowReplay = true,
+}: DraftGameProps) {
+  // Fixed initial seed so SSR and hydration render identical candidate orders.
+  const [seed, setSeed] = useState(fixedSeed ?? 12345);
+  const [picks, setPicks] = useState<Player[]>([]);
+  const [results, setResults] = useState<Campaign | null>(null);
+
+  useEffect(() => {
+    if (fixedSeed === undefined) setSeed(Math.floor(Math.random() * 1e9));
+  }, [fixedSeed]);
+
+  const step = picks.length;
+  const slot = FORMATION[step];
+
+  const candidates = useMemo(() => {
+    if (!slot) return [];
+    const taken = new Set(picks.map((p) => p.id));
+    return candidatesFor(slot.role, taken, 4, rngFactory(seed + step * 7919));
+  }, [slot, picks, seed, step]);
+
+  function reset() {
+    setPicks([]);
+    setResults(null);
+    if (fixedSeed === undefined) setSeed(Math.floor(Math.random() * 1e9));
+  }
+
+  function run() {
+    const campaign = simulate(picks, seed);
+    setResults(campaign);
+    onComplete?.(campaign, picks);
+  }
+
+  if (results) {
+    return (
+      <Results
+        picks={picks}
+        campaign={results}
+        onReset={allowReplay ? reset : undefined}
+        contextLabel={contextLabel}
+      />
+    );
+  }
+
+  return (
+    <>
+      <Header
+        kicker={kicker ?? (mode === "legend" ? "Legend IQ draft" : "Classic draft")}
+        title={slot ? `Pick ${step + 1} of 11` : "Squad complete"}
+        subtitle={slot ? slot.label : "Eleven legends locked in"}
+      />
+
+      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
+        <div>
+          {slot ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {candidates.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPicks((prev) => [...prev, p])}
+                  className="surface rounded-2xl p-5 text-left transition-transform hover:-translate-y-1 hover:border-primary"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-2xl leading-tight">{p.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {p.club} · {p.era}
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-border px-3 py-1 text-xs tracking-widest uppercase">
+                      {p.roles.join(" / ")}
+                    </span>
+                  </div>
+
+                  {mode === "classic" ? (
+                    <div className="mt-4 grid grid-cols-4 gap-2 text-center">
+                      {[
+                        ["ATT", p.att],
+                        ["DEF", p.def],
+                        ["TEC", p.tec],
+                        ["MEN", p.men],
+                      ].map(([k, v]) => (
+                        <div key={k as string} className="rounded-lg bg-secondary py-2">
+                          <p className="text-[0.6rem] tracking-widest text-muted-foreground">{k}</p>
+                          <p className="font-display text-lg">{v}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-4 rounded-lg bg-secondary px-3 py-3 text-center text-xs tracking-[0.3em] text-muted-foreground uppercase">
+                      Stats hidden
+                    </p>
+                  )}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="surface rounded-2xl p-8 text-center">
+              <h3 className="text-3xl">Ready for Europe</h3>
+              <p className="mt-2 text-muted-foreground">
+                Seventeen matches between you and an unbeaten campaign.
+              </p>
+              <button onClick={run} className="btn-primary hover:btn-primary-hover mt-6">
+                Simulate the campaign
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-6">
+          {sidebar}
+          <SquadPanel picks={picks} mode={mode} />
+          <AdBanner />
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Header({
+  kicker,
+  title,
+  subtitle,
+}: {
+  kicker: string;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
+      <div>
+        <p className="text-xs tracking-[0.4em] text-primary uppercase">{kicker}</p>
+        <h1 className="mt-2 text-4xl">{title}</h1>
+        <p className="text-muted-foreground">{subtitle}</p>
+      </div>
+      <Link to="/" className="btn-ghost text-sm">
+        Exit
+      </Link>
+    </header>
+  );
+}
+
+function SquadPanel({ picks, mode }: { picks: Player[]; mode: Mode }) {
+  const r = teamRatings(picks);
+  return (
+    <aside className="surface h-fit rounded-2xl p-5">
+      <h2 className="text-xl">Your XI</h2>
+      <ol className="mt-4 space-y-1.5">
+        {FORMATION.map((slot, i) => {
+          const p = picks[i];
+          return (
+            <li
+              key={i}
+              className="flex items-center justify-between gap-3 rounded-lg bg-secondary/60 px-3 py-2 text-sm"
+            >
+              <span className="text-muted-foreground">{slot.label}</span>
+              <span className={p ? "font-semibold" : "text-muted-foreground/50"}>
+                {p ? p.name : "—"}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+      {mode === "classic" && picks.length > 0 && (
+        <div className="mt-5 grid grid-cols-4 gap-2 text-center">
+          {[
+            ["ATK", r.attack],
+            ["MID", r.midfield],
+            ["DEF", r.defence],
+            ["MEN", r.mentality],
+          ].map(([k, v]) => (
+            <div key={k as string} className="rounded-lg border border-border py-2">
+              <p className="text-[0.6rem] tracking-widest text-muted-foreground">{k}</p>
+              <p className="font-display text-lg">{v}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </aside>
+  );
+}
+
+export function Results({
+  picks,
+  campaign,
+  onReset,
+  contextLabel,
+}: {
+  picks: Player[];
+  campaign: Campaign;
+  onReset?: (() => void) | undefined;
+  contextLabel?: string | undefined;
+}) {
+  const { results, won: w, drawn: d, lost: l, points, eliminatedIn, champion, perfect } = campaign;
+  const r = teamRatings(picks);
+
+  const verdict = perfect
+    ? "17-0. Seventeen matches, seventeen wins, the trophy and immortality."
+    : champion
+      ? "Champions of Europe — but the unbeaten run got away."
+      : eliminatedIn === "League Phase"
+        ? `Out in the league phase — ${points} points, short of the ${PLAYOFF_CUTOFF} needed for the top 24.`
+        : eliminatedIn === "Final"
+          ? "Beaten in the final. The cruellest night in football."
+          : `Knocked out in the ${eliminatedIn}.`;
+
+  return (
+    <>
+      {champion && <Celebration perfect={perfect} />}
+      <div className="text-center">
+        <p className="text-xs tracking-[0.45em] text-primary uppercase">
+          {contextLabel ?? (champion ? "Champions of Europe" : "Campaign over")}
+        </p>
+        <h1 className={`mt-4 text-5xl sm:text-6xl ${champion ? "animate-scale-in" : ""}`}>
+          <span className="text-gradient">
+            {w}-{l}
+          </span>
+        </h1>
+        <p className="mt-2 text-sm tracking-[0.3em] text-muted-foreground uppercase">
+          {w} won · {d} drawn · {l} lost · {points} league pts
+        </p>
+
+        <p className="mt-3 text-lg text-muted-foreground">{verdict}</p>
+        {champion && (
+          <p className="animate-fade-in mt-4 font-display text-3xl text-primary">
+            {perfect ? "PERFECT CAMPAIGN 🏆" : "EUROPEAN CHAMPIONS 🏆"}
+          </p>
+        )}
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {onReset && (
+            <button onClick={onReset} className="btn-primary hover:btn-primary-hover">
+              Draft again
+            </button>
+          )}
+          <Link to="/" className="btn-ghost">
+            Home
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_300px]">
+        <ol className="space-y-2">
+          {results.map((m, i) => (
+            <li
+              key={i}
+              className="surface flex items-center justify-between gap-4 rounded-xl px-4 py-3"
+            >
+              <div>
+                <p className="text-[0.65rem] tracking-[0.25em] text-muted-foreground uppercase">
+                  {m.round}
+                </p>
+                <p className="text-lg">
+                  {m.opponent}
+                  {m.note ? (
+                    <span className="ml-2 text-xs text-muted-foreground">({m.note})</span>
+                  ) : null}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="font-display text-2xl">
+                  {m.gf}–{m.ga}
+                </span>
+                <span
+                  className="grid size-8 place-items-center rounded-full font-display text-sm"
+                  style={{
+                    backgroundColor:
+                      m.outcome === "W"
+                        ? "var(--color-pitch)"
+                        : m.outcome === "D"
+                          ? "var(--color-secondary)"
+                          : "var(--color-destructive)",
+                    color:
+                      m.outcome === "D"
+                        ? "var(--color-foreground)"
+                        : "var(--color-primary-foreground)",
+                    border: m.outcome === "D" ? "1px solid var(--color-border)" : "none",
+                  }}
+                >
+                  {m.outcome}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <div className="space-y-6">
+          <ShareCard
+            picks={picks}
+            campaign={campaign}
+            rating={r.rating}
+            contextLabel={contextLabel}
+          />
+          <aside className="surface h-fit rounded-2xl p-5">
+            <h2 className="text-xl">Final XI</h2>
+            <ol className="mt-4 space-y-1.5 text-sm">
+              {picks.map((p) => (
+                <li key={p.id} className="flex justify-between gap-3">
+                  <span>{p.name}</span>
+                  <span className="font-display text-muted-foreground">{overall(p)}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-5 border-t border-border pt-4 text-sm text-muted-foreground">
+              Squad rating <span className="font-display text-2xl text-foreground">{r.rating}</span>
+            </p>
+          </aside>
+          <AdBanner />
+        </div>
+      </div>
+    </>
+  );
+}
