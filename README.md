@@ -24,6 +24,13 @@ bun run preview    # serve the production build locally
 4. **Custom domain:** Cloudflare dashboard → Workers & Pages → `ucl-17-0` → Settings → Domains & Routes → Add → Custom domain (domain's DNS must be on Cloudflare). Or add to `wrangler.jsonc`: `"routes": [{ "pattern": "example.com", "custom_domain": true }]`.
 5. **Site URL:** canonicals, og:url, sitemap, JSON-LD and share links come from `src/lib/site.ts`. Set `VITE_SITE_URL=https://example.com` at build time (e.g. `VITE_SITE_URL=https://example.com bun run deploy`, or in `.env`); the build also rewrites `public/robots.txt` and `public/llms.txt`. Default is still `https://ucl-17-0.lovable.app` until a domain exists.
 
+## Optional build-time settings
+
+Set in `.env` or the build environment (they are inlined at build time):
+
+- `VITE_CF_ANALYTICS_TOKEN` — Cloudflare Web Analytics token. When set, the beacon (`https://static.cloudflareinsights.com/beacon.min.js`, `defer`) is added to every page; when unset (default) no analytics script is rendered.
+- `VITE_TIP_URL` — link for the "Support the project" card on the home page (see `src/lib/tip.ts`). When unset (default) the card is not rendered at all.
+
 ## Leaderboard (optional, Supabase)
 
 The daily leaderboard is the only backend. It is **disabled and hidden** if the secrets above are missing — the game itself works without it.

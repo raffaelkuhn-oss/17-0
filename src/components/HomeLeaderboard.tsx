@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { getDailyLeaderboard } from "@/lib/leaderboard.functions";
 import { Link } from "@tanstack/react-router";
 import { DailyLeaderboard } from "@/components/DailyLeaderboard";
 import { dailyKey } from "@/lib/daily";
 
 export function HomeLeaderboard() {
   const [key, setKey] = useState<string | null>(null);
-  useEffect(() => setKey(dailyKey()), []);
+  const [enabled, setEnabled] = useState(false);
+  const fetchBoard = useServerFn(getDailyLeaderboard);
+  useEffect(() => {
+    const k = dailyKey();
+    setKey(k);
+    fetchBoard({ data: { dayKey: k } })
+      .then((res) => setEnabled(res.enabled))
+      .catch(() => setEnabled(false));
+  }, [fetchBoard]);
+
+  // Leaderboard disabled (missing Supabase env): hide heading and intro too.
+  if (!enabled) return null;
 
   return (
     <div>
