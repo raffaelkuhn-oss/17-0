@@ -77,7 +77,7 @@ function Page() {
         </div>
         <p className="mt-4 text-sm text-muted-foreground">
           Where 82-0 wins: a longer season and the NBA crowd. Where 17-0 differs: knockout ties can
-          end your run in one bad night, so even a top XI goes 17-0 only around 1–2% of the time.
+          end your run in one bad night, so even the best possible XI goes a perfect 17-0 only about 6% of the time in our simulations (a good draft: about 3%).
         </p>
       </section>
 

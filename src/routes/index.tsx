@@ -199,8 +199,9 @@ function Index() {
           download. You draft eleven all-time European legends, one per position, then the game
           simulates the full campaign: eight league-phase matches where draws are possible, a
           knockout playoff, round of 16, quarter-final and semi-final over two legs each, and the
-          final. Going 17-0 means winning all seventeen matches and lifting the trophy, which even a
-          top-tier XI manages only about 1–2% of the time.{" "}
+          final. Going 17-0 means winning all seventeen matches and lifting the trophy, which is rare:
+          in our simulations, about 3% of good drafts and about 6% of the best possible XI go 17-0
+          (random picks: under 1%).{" "}
           <Link to="/how-it-works" className="text-primary underline underline-offset-4">
             Read the full rules and FAQ
           </Link>

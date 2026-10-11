@@ -19,7 +19,7 @@ const FAQ = [
   },
   {
     q: "How is the draft scored?",
-    a: "Your XI produces attack, midfield, defence and mentality ratings. The engine simulates eight league-phase matches, four two-legged knockout rounds and the final. Winning all seventeen matches — a 17-0 — happens only about 1-2% of the time even for elite drafts.",
+    a: "Your XI produces attack, midfield, defence and mentality ratings. The engine simulates eight league-phase matches, four two-legged knockout rounds and the final. Winning all seventeen matches — a 17-0 — is rare. In the game's own simulations, about 3% of good drafts and about 6% of the best possible XI go 17-0, versus under 1% for random picks.",
   },
 ];
 

@@ -27,7 +27,7 @@ const FAQ = [
   },
   {
     q: "What does a 17-0 mean?",
-    a: "Seventeen wins from seventeen matches plus the trophy. Even a top-rated XI achieves it only about 1-2% of the time.",
+    a: "Seventeen wins from seventeen matches plus the trophy. In our simulations, about 3% of good drafts and about 6% of the best possible XI achieve it, versus under 1% for random picks.",
   },
 ];
 
