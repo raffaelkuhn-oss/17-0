@@ -13,6 +13,8 @@ import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 
+const CF_ANALYTICS_TOKEN = (import.meta.env["VITE_CF_ANALYTICS_TOKEN"] as string | undefined)?.trim();
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -82,7 +84,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Draft an all-time Champions League XI and simulate the whole campaign. Can you go 17-0?",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "17-0" },
+      { property: "og:image", content: absUrl("/og-image.jpg") },
+      { property: "og:image:width", content: "1920" },
+      { property: "og:image:height", content: "1088" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: absUrl("/og-image.jpg") },
       {
         name: "google-site-verification",
         content: "pviOn8YkPYYbzu_PP2vp8OapSTcaA2DubHk8MZymVeU",
@@ -102,6 +109,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.png", type: "image/png" },
     ],
     scripts: [
+      // Cloudflare Web Analytics: off unless VITE_CF_ANALYTICS_TOKEN is set at build time.
+      ...(CF_ANALYTICS_TOKEN
+        ? [
+            {
+              src: "https://static.cloudflareinsights.com/beacon.min.js",
+              defer: true,
+              "data-cf-beacon": JSON.stringify({ token: CF_ANALYTICS_TOKEN }),
+            },
+          ]
+        : []),
       {
         type: "application/ld+json",
         children: JSON.stringify({

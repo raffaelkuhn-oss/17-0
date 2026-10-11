@@ -44,6 +44,9 @@ export const Route = createFileRoute("/daily")({
   component: DailyPage,
 });
 
+const DAILY_INTRO =
+  "The Daily Challenge gives every player in the world the same 11-slot draft each day. You get one attempt, so choose carefully, then watch your XI play out the 17-match Champions League campaign. Aim for a perfect 17-0.";
+
 function DailyPage() {
   const [key, setKey] = useState<string | null>(null);
   const [record, setRecord] = useState<DailyRecord | null>(null);
@@ -79,6 +82,7 @@ function DailyPage() {
     return (
       <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
         <h1 className="text-4xl">Daily Challenge</h1>
+        <p className="mt-3 max-w-2xl text-muted-foreground">{DAILY_INTRO}</p>
         <p className="mt-3 text-muted-foreground">Loading today's draft…</p>
       </main>
     );
