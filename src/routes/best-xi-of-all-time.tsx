@@ -36,7 +36,16 @@ export const Route = createFileRoute("/best-xi-of-all-time")({
         content: "Best Champions League XI of All Time — Ranked by Position",
       },
       {
+        name: "twitter:title",
+        content: "Best Champions League XI of All Time — Ranked by Position",
+      },
+      {
         property: "og:description",
+        content:
+          "Goalkeeper to left wing: the strongest all-time European XI, with ratings for every position.",
+      },
+      {
+        name: "twitter:description",
         content:
           "Goalkeeper to left wing: the strongest all-time European XI, with ratings for every position.",
       },

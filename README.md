@@ -47,3 +47,10 @@ All balance numbers live in `SIM_TUNING` in `src/lib/sim.ts`, the single module 
 - `MID_ATTACK_WEIGHT`: weight of midfielders' attack in the team attack rating (weighted average; forwards weigh 1).
 
 Re-tune with `bun scripts/sim-harness.ts 100000` (random, greedy best-of-4, best XI). Env `KO_BASE`, `KO_STEP`, `MID_W` override knobs for sweeps.
+
+## Daily replay deterrent (optional env)
+
+`DAILY_COOKIE_SECRET` (Worker secret, e.g. `wrangler secret put DAILY_COOKIE_SECRET`) enables a signed,
+httpOnly, SameSite=Lax cookie set when the daily is completed / submitted to the leaderboard. If unset the
+daily falls back to localStorage only. Without accounts this is a deterrent, not a guarantee: clearing
+cookies and storage (or switching browser/device) gives a fresh attempt.

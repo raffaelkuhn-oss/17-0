@@ -55,8 +55,14 @@ export const Route = createFileRoute("/how-it-works")({
           "How 17-0 works: draft an all-time Champions League XI, simulate 8 league-phase games and four two-legged knockout rounds, and learn the odds of a perfect 17-0.",
       },
       { property: "og:title", content: "How the 17-0 Champions League Simulator Works" },
+      { name: "twitter:title", content: "How the 17-0 Champions League Simulator Works" },
       {
         property: "og:description",
+        content:
+          "The full explanation of the 17-match format, player ratings, the simulation maths and the odds of going unbeaten.",
+      },
+      {
+        name: "twitter:description",
         content:
           "The full explanation of the 17-match format, player ratings, the simulation maths and the odds of going unbeaten.",
       },

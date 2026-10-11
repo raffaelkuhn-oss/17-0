@@ -1,6 +1,8 @@
 import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { getDailyPlayedStatus, markDailyCompleted } from "@/lib/daily-cookie.functions";
 import { DraftGame } from "@/components/DraftGame";
 import { DailyLeaderboard } from "@/components/DailyLeaderboard";
 import { ResultCard } from "@/components/ResultCard";
@@ -31,8 +33,14 @@ export const Route = createFileRoute("/daily")({
           "Every player in the world gets the same eleven draft choices each day. Draft your XI, simulate the 17-match campaign, and build a streak.",
       },
       { property: "og:title", content: "17-0 Daily Challenge — Same Draft for Everyone" },
+      { name: "twitter:title", content: "17-0 Daily Challenge — Same Draft for Everyone" },
       {
         property: "og:description",
+        content:
+          "One shared Champions League draft per day. Same picks for everyone, compare results, keep your streak alive.",
+      },
+      {
+        name: "twitter:description",
         content:
           "One shared Champions League draft per day. Same picks for everyone, compare results, keep your streak alive.",
       },
@@ -71,6 +79,10 @@ function DailyPage() {
   const [record, setRecord] = useState<DailyRecord | null>(null);
   const [stats, setStats] = useState<DailyStats | null>(null);
   const [hours, setHours] = useState(0);
+  // Signed cookie says played, even if localStorage was cleared.
+  const [cookiePlayed, setCookiePlayed] = useState(false);
+  const fetchStatus = useServerFn(getDailyPlayedStatus);
+  const markCompleted = useServerFn(markDailyCompleted);
 
   // Date-dependent state is client-only so SSR and hydration match.
   useEffect(() => {
@@ -79,7 +91,10 @@ function DailyPage() {
     setRecord(loadDailyResult(k));
     setStats(loadDailyStats());
     setHours(hoursUntilNext());
-  }, []);
+    fetchStatus({ data: { dayKey: k } })
+      .then((r) => setCookiePlayed(r.played))
+      .catch(() => {});
+  }, [fetchStatus]);
 
   const onComplete = useCallback(
     (campaign: Campaign, picks: Player[]) => {
@@ -93,8 +108,9 @@ function DailyPage() {
       );
       setRecord(saved.record);
       setStats(saved.stats);
+      markCompleted({ data: { dayKey: key } }).catch(() => {});
     },
-    [key],
+    [key, markCompleted],
   );
 
   if (!key) {
@@ -109,7 +125,7 @@ function DailyPage() {
   }
 
   const label = `Daily Challenge · ${dailyLabel(key)}`;
-  const alreadyPlayed = record !== null;
+  const alreadyPlayed = record !== null || cookiePlayed;
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
@@ -167,18 +183,18 @@ function PlayedToday({
   label,
   dayKey,
 }: {
-  record: DailyRecord;
+  record: DailyRecord | null;
   stats: DailyStats | null;
   hours: number;
   label: string;
   dayKey: string;
 }) {
   // Rebuild a display-only campaign shell from the stored summary.
-  const picks = record.names
+  const picks = (record?.names ?? [])
     .map((n) => PLAYERS.find((p) => p.name === n))
     .filter((p): p is Player => Boolean(p));
 
-  const hasCard = Boolean(record.campaign) && picks.length === 11;
+  const hasCard = Boolean(record?.campaign) && picks.length === 11;
 
   return (
     <div>
@@ -186,14 +202,19 @@ function PlayedToday({
         <p className="text-xs tracking-[0.4em] text-primary uppercase">{label}</p>
         <h1 className="mt-3 text-4xl">You've played today</h1>
         <p className="mt-2 text-muted-foreground">
-          {record.perfect
-            ? "A perfect 17-0. Nothing left to prove until tomorrow."
-            : record.champion
-              ? "Champions of Europe — but not unbeaten."
-              : `Out in the ${record.eliminatedIn}.`}{" "}
-          The next daily draft unlocks in {hours}h.
+          You've played today's challenge. Come back tomorrow for a new draft.
         </p>
-        {!hasCard && (
+        {record && (
+          <p className="mt-2 text-muted-foreground">
+            {record.perfect
+              ? "A perfect 17-0. Nothing left to prove until tomorrow."
+              : record.champion
+                ? "Champions of Europe — but not unbeaten."
+                : `Out in the ${record.eliminatedIn}.`}{" "}
+            The next daily draft unlocks in {hours}h.
+          </p>
+        )}
+        {record && !hasCard && (
           // Fallback for old saved records without a full campaign: no ResultCard, so show the record here.
           <p className="mt-4 font-display text-5xl text-gradient">{recordLabel(record)}</p>
         )}
@@ -201,7 +222,7 @@ function PlayedToday({
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
-          {record.campaign && picks.length === 11 && (
+          {record?.campaign && picks.length === 11 && (
             <ResultCard
               picks={picks}
               campaign={record.campaign}
@@ -224,7 +245,7 @@ function PlayedToday({
           </div>
         </div>
         <div className="space-y-6">
-          {record.campaign && picks.length === 11 && (
+          {record?.campaign && picks.length === 11 && (
             <ShareCard
               picks={picks}
               campaign={record.campaign}

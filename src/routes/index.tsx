@@ -17,8 +17,13 @@ export const Route = createFileRoute("/")({
           "Draft an all-time XI from Champions League legends, simulate all 17 nights of the campaign, and find out if you can go 17-0.",
       },
       { property: "og:title", content: "17-0 — Draft the Perfect Champions League XI" },
+      { name: "twitter:title", content: "17-0 — Draft the Perfect Champions League XI" },
       {
         property: "og:description",
+        content: "Draft legends, simulate the campaign, chase the unbeaten European treble run.",
+      },
+      {
+        name: "twitter:description",
         content: "Draft legends, simulate the campaign, chase the unbeaten European treble run.",
       },
       { property: "og:type", content: "website" },

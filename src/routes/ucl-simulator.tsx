@@ -41,8 +41,14 @@ export const Route = createFileRoute("/ucl-simulator")({
           "Free UCL simulator: draft an all-time XI and simulate a full Champions League season — 8 league-phase games, 4 two-legged knockout rounds and the final. No sign-up.",
       },
       { property: "og:title", content: "Champions League Simulator — Free UCL Season Simulator | 17-0" },
+      { name: "twitter:title", content: "Champions League Simulator — Free UCL Season Simulator | 17-0" },
       {
         property: "og:description",
+        content:
+          "Simulate a full 17-match Champions League campaign in your browser. Draft eleven legends, survive the league phase, win the final.",
+      },
+      {
+        name: "twitter:description",
         content:
           "Simulate a full 17-match Champions League campaign in your browser. Draft eleven legends, survive the league phase, win the final.",
       },

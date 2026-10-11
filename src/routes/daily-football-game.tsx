@@ -32,8 +32,14 @@ export const Route = createFileRoute("/daily-football-game")({
           "A daily football game for Champions League fans: everyone gets the same legend pool, drafts one XI, and the simulation decides. Free, no account, new challenge every day.",
       },
       { property: "og:title", content: "Daily Football Game — One Champions League Draft a Day | 17-0" },
+      { name: "twitter:title", content: "Daily Football Game — One Champions League Draft a Day | 17-0" },
       {
         property: "og:description",
+        content:
+          "Same draft pool for everyone, one XI, one simulated season. Post your score to the daily leaderboard — free, no account.",
+      },
+      {
+        name: "twitter:description",
         content:
           "Same draft pool for everyone, one XI, one simulated season. Post your score to the daily leaderboard — free, no account.",
       },
