@@ -20,8 +20,13 @@ export const Route = createFileRoute("/legends")({
           "Browse the full 17-0 legends pool: every Champions League great with their role, club, era and attack, defence, technique and mentality ratings.",
       },
       { property: "og:title", content: "Legends Pool — Every Player and Rating | 17-0" },
+      { name: "twitter:title", content: "Legends Pool — Every Player and Rating | 17-0" },
       {
         property: "og:description",
+        content: "Every legend in the 17-0 draft pool with full ratings, roles, clubs and eras.",
+      },
+      {
+        name: "twitter:description",
         content: "Every legend in the 17-0 draft pool with full ratings, roles, clubs and eras.",
       },
       { property: "og:type", content: "website" },
@@ -128,7 +133,54 @@ function LegendsPage() {
       </p>
 
       <div className="mt-4 grid gap-8 lg:grid-cols-[1fr_300px]">
-        <div className="surface overflow-x-auto rounded-2xl">
+        {/* Phones: card list (no sideways scrolling). Rendered in SSR HTML too. */}
+        <ul className="space-y-3 md:hidden" aria-label="Legends list">
+          {rows.map((p) => (
+            <li key={p.id} className="surface rounded-2xl p-4" data-testid="legend-card">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="leading-tight font-medium break-words">{p.name}</p>
+                  <p className="mt-1 text-xs break-words text-muted-foreground">
+                    {p.club} · {p.era} · {positionOf(p)}
+                  </p>
+                  <p className="mt-1 text-xs tracking-wider text-muted-foreground uppercase">
+                    {p.roles.join(" / ")}
+                  </p>
+                </div>
+                <div className="shrink-0 text-center">
+                  <p className="text-[0.55rem] tracking-widest text-muted-foreground uppercase">
+                    OVR
+                  </p>
+                  <p className="font-display text-2xl text-gradient">{overall(p)}</p>
+                </div>
+              </div>
+              <dl className="mt-3 grid grid-cols-4 gap-2 text-center">
+                {(
+                  [
+                    ["ATT", p.att],
+                    ["DEF", p.def],
+                    ["TEC", p.tec],
+                    ["MEN", p.men],
+                  ] as const
+                ).map(([k, v]) => (
+                  <div key={k} className="rounded-lg border border-border py-1.5">
+                    <dt className="text-[0.55rem] tracking-widest text-muted-foreground uppercase">
+                      {k}
+                    </dt>
+                    <dd className="font-display">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </li>
+          ))}
+          {rows.length === 0 && (
+            <li className="px-4 py-10 text-center text-muted-foreground">
+              No legends match that search.
+            </li>
+          )}
+        </ul>
+
+        <div className="surface hidden overflow-x-auto rounded-2xl md:block">
           <table className="w-full min-w-[560px] text-left text-sm">
             <thead>
               <tr className="border-b border-border text-[0.6rem] tracking-[0.2em] text-muted-foreground uppercase">

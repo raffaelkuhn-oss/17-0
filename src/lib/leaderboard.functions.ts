@@ -3,6 +3,7 @@ import { z } from "zod";
 import { dailyKey, dailySeed } from "@/lib/daily";
 import { FORMATION, overall, type Player } from "@/lib/players";
 import { candidatesFor, simulate } from "@/lib/sim";
+import { readDailyCookie, writeDailyCookie } from "@/lib/daily-cookie.functions";
 
 const inputSchema = z.object({
   dayKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -65,6 +66,13 @@ export const submitDailyResult = createServerFn({ method: "POST" })
     if (!supabaseAdmin) {
       return { ok: false as const, error: "The leaderboard is not available right now." };
     }
+    // One leaderboard entry per day per browser (signed cookie). A deterrent only:
+    // without accounts, clearing cookies resets it. No-op if DAILY_COOKIE_SECRET is unset.
+    const prior = await readDailyCookie(data.dayKey);
+    if (prior?.state === "b") {
+      return { ok: false as const, error: "You've already submitted today's result." };
+    }
+
     const { error } = await supabaseAdmin.from("daily_leaderboard").insert({
       day_key: data.dayKey,
       name,
@@ -86,6 +94,11 @@ export const submitDailyResult = createServerFn({ method: "POST" })
       return { ok: false as const, error: "Could not submit your result. Try again." };
     }
 
+    try {
+      await writeDailyCookie(data.dayKey, "b");
+    } catch (e) {
+      console.error("daily cookie set failed", e);
+    }
     return { ok: true as const };
   });
 

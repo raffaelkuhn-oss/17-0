@@ -15,8 +15,14 @@ export const Route = createFileRoute("/best-champions-league-players")({
           "The 25 best Champions League players of all time, ranked by attack, defence, technique and big-game mentality — from a pool of 150+ European legends you can draft in the free 17-0 game.",
       },
       { property: "og:title", content: "Best Champions League Players of All Time (Top 25 Ranked) | 17-0" },
+      { name: "twitter:title", content: "Best Champions League Players of All Time (Top 25 Ranked) | 17-0" },
       {
         property: "og:description",
+        content:
+          "The 25 greatest Champions League players ever, ranked across four ratings. Draft them yourself in the free 17-0 simulator.",
+      },
+      {
+        name: "twitter:description",
         content:
           "The 25 greatest Champions League players ever, ranked across four ratings. Draft them yourself in the free 17-0 simulator.",
       },

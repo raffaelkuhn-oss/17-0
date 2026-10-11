@@ -33,8 +33,14 @@ export const Route = createFileRoute("/football-draft-game")({
           "Free football draft game in your browser: pick eleven Champions League legends, one per position, and simulate a full 17-match season. No sign-up, no download.",
       },
       { property: "og:title", content: "Football Draft Game — Draft All-Time Legends Free | 17-0" },
+      { name: "twitter:title", content: "Football Draft Game — Draft All-Time Legends Free | 17-0" },
       {
         property: "og:description",
+        content:
+          "Draft eleven all-time Champions League legends and simulate the whole campaign. Free, in your browser, no account.",
+      },
+      {
+        name: "twitter:description",
         content:
           "Draft eleven all-time Champions League legends and simulate the whole campaign. Free, in your browser, no account.",
       },

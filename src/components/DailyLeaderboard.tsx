@@ -73,7 +73,14 @@ export function DailyLeaderboard({
     void load();
   }
 
-  if (!enabled) return null;
+  if (!enabled) {
+    return (
+      <aside className="surface h-fit rounded-2xl p-5">
+        <p className="text-xs tracking-[0.35em] text-primary uppercase">Leaderboard</p>
+        <p className="mt-3 text-sm text-muted-foreground">Leaderboard coming soon.</p>
+      </aside>
+    );
+  }
 
   return (
     <aside className="surface h-fit rounded-2xl p-5">

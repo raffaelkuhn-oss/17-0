@@ -16,8 +16,13 @@ export const Route = createFileRoute("/draft")({
           "Pick your eleven from Champions League legends, then simulate all 17 matches of the campaign.",
       },
       { property: "og:title", content: "Draft Room — 17-0 Champions League Draft" },
+      { name: "twitter:title", content: "Draft Room — 17-0 Champions League Draft" },
       {
         property: "og:description",
+        content: "Pick eleven legends and simulate the full European campaign.",
+      },
+      {
+        name: "twitter:description",
         content: "Pick eleven legends and simulate the full European campaign.",
       },
       { property: "og:type", content: "website" },
