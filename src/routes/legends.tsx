@@ -1,3 +1,4 @@
+import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdBanner } from "@/components/AdBanner";
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/legends")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://ucl-17-0.lovable.app/legends" }],
+    links: [{ rel: "canonical", href: absUrl("/legends") }],
     scripts: [
       {
         type: "application/ld+json",
@@ -36,7 +37,7 @@ export const Route = createFileRoute("/legends")({
           name: "Legends Pool",
           description:
             "Every Champions League legend in the 17-0 draft pool with role, club, era and ratings.",
-          url: "https://ucl-17-0.lovable.app/legends",
+          url: absUrl("/legends"),
         }),
       },
     ],

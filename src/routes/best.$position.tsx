@@ -1,8 +1,9 @@
+import { SITE_URL } from "@/lib/site";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { overall, PLAYERS, ROLE_LABEL } from "@/lib/players";
 import { POSITION_PAGES, POSITION_SLUGS, type PositionSlug } from "@/lib/position-pages";
 
-const BASE = "https://ucl-17-0.lovable.app";
+const BASE = SITE_URL;
 
 export const Route = createFileRoute("/best/$position")({
   loader: ({ params }) => {

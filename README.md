@@ -1,29 +1,34 @@
-# Welcome to your Lovable project
+# 17-0 — Champions League draft & sim game
 
-This project was built with [Lovable](https://lovable.dev).
+TanStack Start (React 19, Tailwind v4) running on **Cloudflare Workers** (static assets + SSR worker).
 
-## Build with Lovable
+## Develop
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+```bash
+bun install
+bun run dev        # local dev server
+bun run typecheck
+bun run build      # outputs dist/client + dist/server
+bun run preview    # serve the production build locally
 ```
 
-## Built with
+## Deploy to Cloudflare
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+1. `bunx wrangler login` (or set `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` for CI).
+2. *(Optional, leaderboard)* add secrets after the first deploy:
+   ```bash
+   bunx wrangler secret put SUPABASE_URL
+   bunx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+   ```
+3. `bun run deploy` — builds and runs `wrangler deploy`. Live at `https://ucl-17-0.<your-subdomain>.workers.dev`.
+4. **Custom domain:** Cloudflare dashboard → Workers & Pages → `ucl-17-0` → Settings → Domains & Routes → Add → Custom domain (domain's DNS must be on Cloudflare). Or add to `wrangler.jsonc`: `"routes": [{ "pattern": "example.com", "custom_domain": true }]`.
+5. **Site URL:** canonicals, og:url, sitemap, JSON-LD and share links come from `src/lib/site.ts`. Set `VITE_SITE_URL=https://example.com` at build time (e.g. `VITE_SITE_URL=https://example.com bun run deploy`, or in `.env`); the build also rewrites `public/robots.txt` and `public/llms.txt`. Default is still `https://ucl-17-0.lovable.app` until a domain exists.
+
+## Leaderboard (optional, Supabase)
+
+The daily leaderboard is the only backend. It is **disabled and hidden** if the secrets above are missing — the game itself works without it.
+
+1. Create a Supabase project.
+2. Run the two files in `supabase/migrations/` in order (SQL editor): table + policies, then lock writes to the service role and add the unique-name index.
+3. Set the Cloudflare secrets `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (service role key stays server-side only; it is never sent to the browser).
+For local dev put the same two vars in `.env`/`.dev.vars` (git-ignored).

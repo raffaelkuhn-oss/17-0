@@ -1,8 +1,9 @@
+import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { overall, PLAYERS, ROLE_LABEL } from "@/lib/players";
 import { POSITION_PAGES, POSITION_SLUGS } from "@/lib/position-pages";
 
-const URL = "https://ucl-17-0.lovable.app/best-champions-league-players";
+const URL = absUrl("/best-champions-league-players");
 
 export const Route = createFileRoute("/best-champions-league-players")({
   head: () => ({

@@ -1,7 +1,8 @@
+import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { FORMATION, overall, PLAYERS, ROLE_LABEL, type Player, type Role } from "@/lib/players";
 
-const URL = "https://ucl-17-0.lovable.app/best-xi-of-all-time";
+const URL = absUrl("/best-xi-of-all-time");
 
 /** Highest-rated available player for each slot, no player used twice. */
 function buildBestXI(): { role: Role; label: string; player: Player }[] {

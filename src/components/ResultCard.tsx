@@ -1,3 +1,4 @@
+import { SITE_HOST } from "@/lib/site";
 import { FORMATION, overall, type Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
 
@@ -95,7 +96,7 @@ export function ResultCard({
           <p>
             Squad rating <span className="font-display text-xl text-foreground">{rating}</span>
           </p>
-          <p className="font-semibold text-foreground">ucl-17-0.lovable.app</p>
+          <p className="font-semibold text-foreground">{SITE_HOST}</p>
         </div>
       </div>
     </div>

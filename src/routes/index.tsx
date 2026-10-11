@@ -1,3 +1,4 @@
+import { SITE_URL, absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HomeLeaderboard } from "@/components/HomeLeaderboard";
 import stadium from "@/assets/stadium-hero.jpg";
@@ -21,10 +22,10 @@ export const Route = createFileRoute("/")({
         content: "Draft legends, simulate the campaign, chase the unbeaten European treble run.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://ucl-17-0.lovable.app/" },
+      { property: "og:url", content: absUrl("/") },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://ucl-17-0.lovable.app/" }],
+    links: [{ rel: "canonical", href: absUrl("/") }],
     scripts: [
       {
         type: "application/ld+json",
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "VideoGame",
           name: "17-0 — Champions League Draft Simulator",
-          url: "https://ucl-17-0.lovable.app",
+          url: SITE_URL,
           description:
             "Free browser game: draft an all-time Champions League XI from a pool of European legends and simulate a 17-match campaign — 8 league-phase games, four two-legged knockout rounds and the final.",
           genre: ["Sports", "Simulation", "Football"],

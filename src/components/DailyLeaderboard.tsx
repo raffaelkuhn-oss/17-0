@@ -1,21 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { supabase } from "@/integrations/supabase/client";
-import { submitDailyResult } from "@/lib/leaderboard.functions";
+import { getDailyLeaderboard, submitDailyResult, type LeaderboardEntry as Entry } from "@/lib/leaderboard.functions";
 import type { DailyRecord } from "@/lib/daily";
-
-type Entry = {
-  id: string;
-  name: string;
-  won: number;
-  drawn: number;
-  lost: number;
-  points: number;
-  rating: number;
-  champion: boolean;
-  perfect: boolean;
-  eliminated_in: string | null;
-};
 
 const NAME_KEY = "ucl170:daily:name";
 const SUBMIT_PREFIX = "ucl170:daily:submitted:";
@@ -37,23 +23,18 @@ export function DailyLeaderboard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submitResult = useServerFn(submitDailyResult);
+  const fetchBoard = useServerFn(getDailyLeaderboard);
+  const [enabled, setEnabled] = useState(true);
 
   const load = useCallback(async () => {
-    const { data, error: e } = await supabase
-      .from("daily_leaderboard")
-      .select("id,name,won,drawn,lost,points,rating,champion,perfect,eliminated_in")
-      .eq("day_key", dayKey)
-      .order("champion", { ascending: false })
-      .order("won", { ascending: false })
-      .order("points", { ascending: false })
-      .order("created_at", { ascending: true })
-      .limit(100);
-    if (e) {
-      setError("Leaderboard unavailable right now.");
-      return;
+    try {
+      const res = await fetchBoard({ data: { dayKey } });
+      setEnabled(res.enabled);
+      setEntries(res.entries);
+    } catch {
+      setEnabled(false);
     }
-    setEntries((data ?? []) as Entry[]);
-  }, [dayKey]);
+  }, [dayKey, fetchBoard]);
 
   useEffect(() => {
     if (typeof localStorage !== "undefined") {
@@ -90,6 +71,8 @@ export function DailyLeaderboard({
     setSubmitted(true);
     void load();
   }
+
+  if (!enabled) return null;
 
   return (
     <aside className="surface h-fit rounded-2xl p-5">

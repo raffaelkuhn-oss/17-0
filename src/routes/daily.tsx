@@ -1,3 +1,4 @@
+import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { DraftGame } from "@/components/DraftGame";
@@ -35,10 +36,10 @@ export const Route = createFileRoute("/daily")({
           "One shared Champions League draft per day. Same picks for everyone, compare results, keep your streak alive.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://ucl-17-0.lovable.app/daily" },
+      { property: "og:url", content: absUrl("/daily") },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://ucl-17-0.lovable.app/daily" }],
+    links: [{ rel: "canonical", href: absUrl("/daily") }],
   }),
   component: DailyPage,
 });
