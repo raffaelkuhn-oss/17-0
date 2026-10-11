@@ -4,6 +4,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { Celebration } from "@/components/Celebration";
 import { ShareCard } from "@/components/ShareCard";
 import { FORMATION, overall, type Player } from "@/lib/players";
+import { recordLabel } from "@/lib/record";
 import { candidatesFor, PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
 
 export type Mode = "classic" | "legend";
@@ -29,6 +30,8 @@ export type DraftGameProps = {
   /** Extra panel rendered above the squad panel (streaks, countdown…). */
   sidebar?: React.ReactNode | undefined;
   onComplete?: ((campaign: Campaign, picks: Player[]) => void) | undefined;
+  /** Short blurb rendered under the header (e.g. daily rules). */
+  intro?: React.ReactNode | undefined;
   /** Hides "draft again" for one-shot modes. */
   allowReplay?: boolean | undefined;
 };
@@ -40,6 +43,7 @@ export function DraftGame({
   kicker,
   sidebar,
   onComplete,
+  intro,
   allowReplay = true,
 }: DraftGameProps) {
   // Fixed initial seed so SSR and hydration render identical candidate orders.
@@ -91,19 +95,24 @@ export function DraftGame({
         subtitle={slot ? slot.label : "Eleven legends locked in"}
       />
 
+      {intro}
+
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div>
           {slot ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {candidates.map((p) => (
+            <div className="grid auto-rows-fr gap-4 sm:grid-cols-2">
+              {candidates.map((p, i) => (
                 <button
-                  key={p.id}
+                  // Keyed by slot, not player: when a pick swaps the candidates, cards update in place
+                  // instead of being re-ordered (which the browser reports as layout shift).
+                  key={i}
                   onClick={() => setPicks((prev) => [...prev, p])}
-                  className="surface rounded-2xl p-5 text-left transition-transform hover:-translate-y-1 hover:border-primary"
+                  aria-label={pickLabel(p, mode)}
+                  className={`surface rounded-2xl p-5 text-left transition-transform hover:-translate-y-1 hover:border-primary ${CARD_MIN_H}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-2xl leading-tight">{p.name}</h3>
+                      <h3 className="line-clamp-2 text-2xl leading-tight">{p.name}</h3>
                       <p className="text-sm text-muted-foreground">
                         {p.club} · {p.era}
                       </p>
@@ -136,7 +145,7 @@ export function DraftGame({
               ))}
             </div>
           ) : (
-            <div className="surface rounded-2xl p-8 text-center">
+            <div className={`surface flex flex-col items-center justify-center rounded-2xl p-8 text-center ${READY_MIN_H}`}>
               <h3 className="text-3xl">Ready for Europe</h3>
               <p className="mt-2 text-muted-foreground">
                 Seventeen matches between you and an unbeaten campaign.
@@ -156,6 +165,22 @@ export function DraftGame({
       </div>
     </>
   );
+}
+
+/**
+ * Layout stability (CLS): the candidate grid and the "Ready for Europe" panel that replaces it
+ * reserve the same minimum height, so the sidebar / squad panel below them on mobile does not
+ * jump as picks change. 4 stacked cards on phones, 2 rows of 2 from the sm breakpoint.
+ */
+const CARD_MIN_H = "min-h-[13rem]";
+const READY_MIN_H = "min-h-[55rem] sm:min-h-[27rem]";
+
+function pickLabel(p: Player, mode: Mode) {
+  const position = p.roles.join("/");
+  // Legend IQ hides ratings on screen, so the accessible name must not leak them either.
+  return mode === "classic"
+    ? `Pick ${p.name}, ${position}, rating ${overall(p)}`
+    : `Pick ${p.name}, ${position}`;
 }
 
 function Header({
@@ -202,7 +227,7 @@ function SquadPanel({ picks, mode }: { picks: Player[]; mode: Mode }) {
           );
         })}
       </ol>
-      {mode === "classic" && picks.length > 0 && (
+      {mode === "classic" && (
         <div className="mt-5 grid grid-cols-4 gap-2 text-center">
           {[
             ["ATK", r.attack],
@@ -212,7 +237,7 @@ function SquadPanel({ picks, mode }: { picks: Player[]; mode: Mode }) {
           ].map(([k, v]) => (
             <div key={k as string} className="rounded-lg border border-border py-2">
               <p className="text-[0.6rem] tracking-widest text-muted-foreground">{k}</p>
-              <p className="font-display text-lg">{v}</p>
+              <p className="font-display text-lg">{picks.length > 0 ? v : "–"}</p>
             </div>
           ))}
         </div>
@@ -254,7 +279,7 @@ export function Results({
         </p>
         <h1 className={`mt-4 text-5xl sm:text-6xl ${champion ? "animate-scale-in" : ""}`}>
           <span className="text-gradient">
-            {w}-{l}
+            {recordLabel(campaign)}
           </span>
         </h1>
         <p className="mt-2 text-sm tracking-[0.3em] text-muted-foreground uppercase">

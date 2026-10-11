@@ -113,7 +113,7 @@ function HowItWorks() {
           the trophy — that is a 17-0.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <Link to="/draft" search={{ mode: "classic" }} className="btn-primary text-sm">
+          <Link to="/draft" className="btn-primary text-sm">
             Start a draft
           </Link>
           <Link to="/legends" className="btn-ghost text-sm">

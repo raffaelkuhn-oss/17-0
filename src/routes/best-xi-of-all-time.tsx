@@ -65,7 +65,7 @@ function BestXI() {
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link to="/draft" search={{ mode: "classic" }} className="btn-primary hover:btn-primary-hover">
+        <Link to="/draft" className="btn-primary hover:btn-primary-hover">
           Draft your own XI
         </Link>
         <Link to="/ucl-simulator" className="btn-ghost">

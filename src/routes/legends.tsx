@@ -88,13 +88,13 @@ function LegendsPage() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search player or club"
           aria-label="Search player or club"
-          className="w-full max-w-xs rounded-full border border-border bg-secondary px-4 py-2 text-sm outline-none focus:border-primary sm:w-auto"
+          className="min-h-11 w-full max-w-xs rounded-full border border-border bg-secondary px-4 py-2 text-sm outline-none focus:border-primary sm:w-auto"
         />
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortKey)}
           aria-label="Sort by"
-          className="rounded-full border border-border bg-secondary px-4 py-2 text-sm outline-none focus:border-primary"
+          className="min-h-11 rounded-full border border-border bg-secondary px-4 py-2 text-sm outline-none focus:border-primary"
         >
           <option value="ovr">Sort: Overall</option>
           <option value="att">Sort: Attack</option>
@@ -111,7 +111,7 @@ function LegendsPage() {
             key={r}
             onClick={() => setRole(r)}
             aria-pressed={role === r}
-            className={`rounded-full border px-3 py-1.5 text-xs tracking-widest uppercase transition-colors ${
+            className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-4 text-xs tracking-widest uppercase transition-colors ${
               role === r
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border text-muted-foreground hover:border-primary"

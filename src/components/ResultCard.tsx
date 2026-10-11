@@ -1,6 +1,7 @@
 import { SITE_HOST } from "@/lib/site";
 import { FORMATION, overall, type Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
+import { recordLabel } from "@/lib/record";
 
 function headline(campaign: Campaign) {
   if (campaign.perfect) return "PERFECT 17-0";
@@ -36,7 +37,7 @@ export function ResultCard({
 
         <div className="mt-4 flex flex-wrap items-end gap-4">
           <h2 className="font-display text-6xl leading-none sm:text-7xl text-gradient">
-            {campaign.won}-{campaign.lost}
+            {recordLabel(campaign)}
           </h2>
           <div className="mb-1.5">
             {contextLabel && (

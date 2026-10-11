@@ -129,6 +129,7 @@
 }
 
 @utility btn-primary {
+  min-height: 2.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -149,6 +150,7 @@
 }
 
 @utility btn-ghost {
+  min-height: 2.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
