@@ -1,9 +1,10 @@
+import { SITE_URL, absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdBanner } from "@/components/AdBanner";
 import { PLAYERS } from "@/lib/players";
 import { PLAYOFF_CUTOFF } from "@/lib/sim";
 
-const URL = "https://ucl-17-0.lovable.app/how-it-works";
+const URL = absUrl("/how-it-works");
 
 const FAQ = [
   {
@@ -83,7 +84,7 @@ export const Route = createFileRoute("/how-it-works")({
           "@context": "https://schema.org",
           "@type": "VideoGame",
           name: "17-0 — Champions League Draft Simulator",
-          url: "https://ucl-17-0.lovable.app",
+          url: SITE_URL,
           description:
             "Free browser game: draft an all-time Champions League XI from 152 legends and simulate a 17-match European campaign.",
           genre: ["Sports", "Simulation", "Football"],

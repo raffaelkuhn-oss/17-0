@@ -1,8 +1,9 @@
+import { SITE_URL } from "@/lib/site";
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { POSITION_SLUGS } from "@/lib/position-pages";
 
-const BASE_URL = "https://ucl-17-0.lovable.app";
+const BASE_URL = SITE_URL;
 
 interface SitemapEntry {
   path: string;

@@ -1,9 +1,10 @@
+import { SITE_URL } from "@/lib/site";
 import { useEffect, useState } from "react";
 import { renderShareImage } from "@/lib/share-image";
 import type { Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
 
-const SHARE_URL = "https://ucl-17-0.lovable.app";
+const SHARE_URL = SITE_URL;
 
 function headline(campaign: Campaign) {
   if (campaign.perfect) return "I went 17-0 in the Champions League draft game";

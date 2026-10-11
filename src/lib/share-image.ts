@@ -1,3 +1,4 @@
+import { SITE_HOST } from "@/lib/site";
 import { FORMATION, overall, type Player } from "./players";
 import type { Campaign } from "./sim";
 
@@ -153,7 +154,7 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
 
   ctx.fillStyle = INK;
   ctx.font = "700 26px system-ui, sans-serif";
-  const url = "ucl-17-0.lovable.app";
+  const url = SITE_HOST;
   ctx.fillText(url, W - 64 - ctx.measureText(url).width, H - 42);
 
   return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));

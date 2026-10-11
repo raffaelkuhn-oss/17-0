@@ -1,3 +1,4 @@
+import { SITE_URL, absUrl } from "@/lib/site";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -8,10 +9,9 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
   return (
@@ -38,9 +38,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -112,7 +109,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "WebSite",
           name: "17-0",
           alternateName: "17-0 Champions League Draft Simulator",
-          url: "https://ucl-17-0.lovable.app",
+          url: SITE_URL,
         }),
       },
       {
@@ -121,8 +118,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "17-0",
-          url: "https://ucl-17-0.lovable.app",
-          logo: "https://ucl-17-0.lovable.app/favicon.png",
+          url: SITE_URL,
+          logo: absUrl("/favicon.png"),
         }),
       },
     ],

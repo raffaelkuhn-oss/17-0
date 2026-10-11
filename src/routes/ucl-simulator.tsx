@@ -1,7 +1,8 @@
+import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PLAYERS } from "@/lib/players";
 
-const URL = "https://ucl-17-0.lovable.app/ucl-simulator";
+const URL = absUrl("/ucl-simulator");
 
 const FAQ = [
   {

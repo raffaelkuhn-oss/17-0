@@ -1,6 +1,7 @@
+import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-const URL = "https://ucl-17-0.lovable.app/82-0-football";
+const URL = absUrl("/82-0-football");
 const TITLE = "82-0 for Football — The Champions League Version (17-0)";
 const DESC =
   "Love 82-0? 17-0 is the football alternative: draft an all-time Champions League XI and simulate 17 matches to chase a perfect unbeaten season. Free, no sign-up.";
