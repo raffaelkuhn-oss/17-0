@@ -57,6 +57,16 @@ export default {
     out.headers.set("X-Robots-Tag", "noindex, nofollow");
     return out;
   },
+  // Weekly live-form job (feature-flagged). Only runs if a cron trigger is configured AND
+  // FOOTBALL_DATA_API_KEY + the LIVE_FORM KV binding exist; otherwise it logs and returns.
+  async scheduled(_controller: unknown, env: unknown, ctx: { waitUntil(p: Promise<unknown>): void }) {
+    const { runWeeklyUpdate } = await import("./lib/live/update");
+    ctx.waitUntil(
+      runWeeklyUpdate(env as Parameters<typeof runWeeklyUpdate>[0]).then((r) =>
+        console.log("live form update", r.ok ? "ok" : r.reason),
+      ),
+    );
+  },
 };
 
 const handle = async (request: Request, env: unknown, ctx: unknown): Promise<Response> => {

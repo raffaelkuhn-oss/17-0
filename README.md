@@ -54,3 +54,36 @@ Re-tune with `bun scripts/sim-harness.ts 100000` (random, greedy best-of-4, best
 httpOnly, SameSite=Lax cookie set when the daily is completed / submitted to the leaderboard. If unset the
 daily falls back to localStorage only. Without accounts this is a deterrent, not a guarantee: clearing
 cookies and storage (or switching browser/device) gives a fresh attempt.
+
+## Live current players (feature flag, OFF by default)
+
+~20 current UCL players (`src/lib/live/current-players.ts`, one line each) mixed into the **Classic / Legend IQ draft** pool next to the 152 legends, with a weekly form bonus from football-data.org. **The Daily and the server-side leaderboard re-simulation never use them** (`candidatesFor` defaults to the legends array), so daily seeds stay identical.
+
+**Flags (Worker vars / `.dev.vars`):**
+- `LIVE_PLAYERS_ENABLED=1`: on for everyone. Unset = off (production today).
+- `LIVE_PLAYERS_PREVIEW=1`: on only for `/draft?live=1`. Without this switch `?live=1` is ignored.
+
+**Form formula** (`src/lib/live/form.ts`, from the Notion spec): `events = goals×(FWD 1 | others 1.5) + assists×0.5 + per CL match (win +0.5, loss −0.5) + GK/DEF clean sheet +1`; `form' = clamp(round(0.7·form + events), form±3)`, then clamp to ±5. Goals/assists are deltas of the cumulative CL scorers list between runs (first run = baseline). Effective ATT/DEF/TEC/MEN = base + form. The free tier has no line-ups/minutes, so there's no "did not play" penalty and no per-90 rates.
+
+**Data:** a weekly cron makes 2 calls (`/v4/competitions/CL/scorers?limit=100`, `/v4/competitions/CL/matches?status=FINISHED&dateFrom&dateTo`), well within the free tier's 10 req/min. It stores `current-form:v1` (plus `:prev` for rollback) in KV. If the key, the KV binding or the API fails, the game uses the last stored ratings, or base ratings (form 0). "Data provided by football-data.org" is shown wherever live players are shown.
+
+**Preview locally:**
+```bash
+echo 'LIVE_PLAYERS_PREVIEW=1' > .dev.vars
+bun run build && bun run preview      # open http://localhost:4173/draft?live=1
+rm .dev.vars && bun run build         # IMPORTANT: the build copies .dev.vars into dist/server
+```
+Without KV locally you'll see base ratings ("no form data yet").
+
+**Enable later (PM, not done):**
+```bash
+npx wrangler kv namespace create LIVE_FORM            # copy the id
+npx wrangler secret put FOOTBALL_DATA_API_KEY         # free key: https://www.football-data.org/client/register
+```
+```jsonc
+// wrangler.jsonc
+"kv_namespaces": [{ "binding": "LIVE_FORM", "id": "<id from above>" }],
+"triggers": { "crons": ["0 4 * * 4"] },               // Thu 04:00 UTC = 06:00 Zurich (summer)
+"vars": { "LIVE_PLAYERS_PREVIEW": "1" }               // then "LIVE_PLAYERS_ENABLED": "1" to go public
+```
+Deploy, then check `npx wrangler secret list`. Balance: `LIVE=1 bun scripts/sim-harness.ts 100000` (`LIVE_FORM=5` = every current player at +5).
