@@ -9,7 +9,8 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
+import { trackVisit } from "@/lib/retention";
 
 import appCss from "../styles.css?url";
 
@@ -165,6 +166,8 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Cookieless retention flag (localStorage only); no-op unless VITE_RETENTION_ENABLED=1.
+  useEffect(() => trackVisit(), []);
 
   return (
     <QueryClientProvider client={queryClient}>

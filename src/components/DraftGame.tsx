@@ -5,6 +5,7 @@ import { Celebration } from "@/components/Celebration";
 import { ShareCard } from "@/components/ShareCard";
 import { FORMATION, overall, type Player } from "@/lib/players";
 import { recordLabel } from "@/lib/record";
+import { trackEvent } from "@/lib/retention";
 import { candidatesFor, PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
 
 export type Mode = "classic" | "legend";
@@ -73,6 +74,8 @@ export function DraftGame({
   function run() {
     const campaign = simulate(picks, seed);
     setResults(campaign);
+    trackEvent("sim_complete", fixedSeed !== undefined ? "daily" : mode);
+    if (fixedSeed !== undefined) trackEvent("daily_complete", "daily");
     onComplete?.(campaign, picks);
   }
 
@@ -106,7 +109,10 @@ export function DraftGame({
                   // Keyed by slot, not player: when a pick swaps the candidates, cards update in place
                   // instead of being re-ordered (which the browser reports as layout shift).
                   key={i}
-                  onClick={() => setPicks((prev) => [...prev, p])}
+                  onClick={() => {
+                    if (step === 0) trackEvent("draft_start", fixedSeed !== undefined ? "daily" : mode);
+                    setPicks((prev) => [...prev, p]);
+                  }}
                   aria-label={pickLabel(p, mode)}
                   className={`surface rounded-2xl p-5 text-left transition-transform hover:-translate-y-1 hover:border-primary ${CARD_MIN_H}`}
                 >
