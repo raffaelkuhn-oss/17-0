@@ -55,6 +55,32 @@ httpOnly, SameSite=Lax cookie set when the daily is completed / submitted to the
 daily falls back to localStorage only. Without accounts this is a deterrent, not a guarantee: clearing
 cookies and storage (or switching browser/device) gives a fresh attempt.
 
+## Retention tracking (optional, off by default)
+
+Cookieless D1/D7 retention by acquisition source. No cookie banner needed: nothing personal or cross-site is stored.
+
+- **Browser:** one localStorage key `ucl170:retention` = `{ firstSeen, lastSeen, source }` (UTC days + a source bucket from a closed list: `utm_source`, else referrer host, else `direct`). No ID.
+- **Worker:** `POST /e` with `{event, bucket, mode, source}` writes one Workers Analytics Engine data point (`blobs = [event, bucket, mode, source]`, `double = 1`). No IP, user agent, cookie or identifier is read or stored. Unknown values are dropped; always answers 204.
+- **Events:** `visit` (max once per UTC day per browser), `return_d1`, `return_d7`, `draft_start`, `sim_complete`, `daily_complete`, `share_click`. Buckets: `d0`, `d1`, `d2-6`, `d7`, `d8+`.
+- **Harmless when off:** the client sends nothing unless built with `VITE_RETENTION_ENABLED=1`; the endpoint is a no-op unless the `RETENTION` binding exists.
+
+**Enable (PM):** Analytics Engine is on the Workers Free plan and the dataset is created on first write (no create command). Add to `wrangler.jsonc`, then build with `VITE_RETENTION_ENABLED=1` and deploy:
+
+```jsonc
+"analytics_engine_datasets": [{ "binding": "RETENTION", "dataset": "ucl170_retention" }]
+```
+
+**Read D1/D7** (Analytics Engine SQL API, `POST https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/analytics_engine/sql`, token with *Account Analytics: Read*):
+
+```sql
+SELECT toDate(timestamp) AS day, blob4 AS source, blob1 AS event, blob2 AS bucket, SUM(_sample_interval) AS n
+FROM ucl170_retention
+WHERE timestamp > NOW() - INTERVAL '30' DAY AND blob1 IN ('visit','return_d1','return_d7')
+GROUP BY day, source, event, bucket ORDER BY day
+```
+
+D1 for day N = `return_d1` on day N ÷ `visit`/`d0` on day N-1 (same source). D7 = `return_d7` on day N ÷ `visit`/`d0` on day N-7. Approximate (clearing storage or switching device looks like a new visitor) but honest without accounts. Analytics Engine keeps data for 3 months.
+
 ## Live current players (feature flag, OFF by default)
 
 ~20 current UCL players (`src/lib/live/current-players.ts`, one line each) mixed into the **Classic / Legend IQ draft** pool next to the 152 legends, with a weekly form bonus from football-data.org. **The Daily and the server-side leaderboard re-simulation never use them** (`candidatesFor` defaults to the legends array), so daily seeds stay identical.
