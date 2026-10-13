@@ -1,5 +1,6 @@
 import { SITE_URL } from "@/lib/site";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { copyText, isAbortError } from "@/lib/copy-text";
 import { renderShareImage } from "@/lib/share-image";
 import { trackEvent } from "@/lib/retention";
 import type { Player } from "@/lib/players";
@@ -35,6 +36,10 @@ export function ShareCard({
   const [preview, setPreview] = useState<string | null>(null);
   const [blob, setBlob] = useState<Blob | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [copyError, setCopyError] = useState(false);
+  const [manualText, setManualText] = useState<string | null>(null);
+  const manualRef = useRef<HTMLTextAreaElement | null>(null);
+  const captionText = caption(campaign, contextLabel);
 
   useEffect(() => {
     let url: string | null = null;
@@ -51,7 +56,15 @@ export function ShareCard({
     };
   }, [picks, campaign, rating, contextLabel]);
 
+  useEffect(() => {
+    if (manualText && manualRef.current) {
+      manualRef.current.focus();
+      manualRef.current.setSelectionRange(0, manualText.length);
+    }
+  }, [manualText]);
+
   function flash(msg: string) {
+    setCopyError(false);
     setCopied(msg);
     setTimeout(() => setCopied(null), 2200);
   }
@@ -64,41 +77,49 @@ export function ShareCard({
     a.click();
   }
 
-  async function copyCaption() {
-    try {
-      await navigator.clipboard.writeText(caption(campaign, contextLabel));
-      flash("Caption copied");
-    } catch {
-      /* unsupported */
-    }
+  /** Synchronous entry point: must run directly inside the click handler. */
+  function copyCaption(text: string = captionText) {
+    void copyText(text).then((ok) => {
+      if (ok) {
+        setManualText(null);
+        flash("Copied!");
+      } else {
+        setCopyError(true);
+        setManualText(text);
+      }
+    });
   }
 
-  async function shareImage() {
-    trackEvent("share_click");
-    const text = caption(campaign, contextLabel);
+  function shareImage() {
+    const text = captionText;
     const file =
       blob && typeof File !== "undefined"
         ? new File([blob], "17-0-result.png", { type: "image/png" })
         : null;
 
+    // navigator.share must be the first thing we do inside the gesture.
+    let data: ShareData | null = null;
     if (file && navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], text, title: "17-0 Champions League Draft" });
-        return;
-      } catch {
-        /* cancelled or unsupported */
-      }
+      data = { files: [file], text, title: "17-0 Champions League Draft" };
+    } else if (typeof navigator.share === "function") {
+      data = { title: "17-0", text, url: SHARE_URL };
     }
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "17-0", text, url: SHARE_URL });
-        return;
-      } catch {
-        /* cancelled */
-      }
+
+    if (data) {
+      navigator.share(data).catch((e: unknown) => {
+        if (isAbortError(e)) return; // user closed the sheet
+        // Gesture is gone now, so we can't copy automatically: show manual copy.
+        download();
+        setCopyError(true);
+        setManualText(text);
+      });
+      trackEvent("share_click"); // after share() so the gesture goes to the share sheet first
+      return;
     }
+    // No Web Share: copy synchronously in the gesture, then download.
+    copyCaption(text);
     download();
-    await copyCaption();
+    trackEvent("share_click");
   }
 
   const tweet = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
@@ -144,10 +165,33 @@ export function ShareCard({
         >
           Post on X
         </a>
-        <button onClick={copyCaption} className="btn-ghost w-full px-4 text-sm whitespace-nowrap">
-          {copied ?? "Copy caption for Instagram"}
+        <button
+          onClick={() => copyCaption()}
+          className="btn-ghost w-full px-4 text-sm whitespace-nowrap"
+          data-testid="copy-caption"
+        >
+          {copied ?? (copyError ? "Couldn't copy — select below" : "Copy caption for Instagram")}
         </button>
+        <span aria-live="polite" className="sr-only">
+          {copied ?? ""}
+        </span>
       </div>
+      {manualText && (
+        <div className="mt-3 text-left" data-testid="manual-copy">
+          <label className="text-xs text-muted-foreground" htmlFor="manual-caption">
+            Copy didn't work in this browser. Press and hold to copy the caption:
+          </label>
+          <textarea
+            id="manual-caption"
+            ref={manualRef}
+            readOnly
+            value={manualText}
+            rows={6}
+            onFocus={(e) => e.currentTarget.select()}
+            className="mt-1 w-full rounded-lg border border-border bg-secondary p-2 text-base"
+          />
+        </div>
+      )}
       <p className="mt-3 text-xs text-muted-foreground">
         Download the card, then attach it to your post — image posts get far more reach than links.
       </p>
