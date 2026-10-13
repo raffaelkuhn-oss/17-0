@@ -54,3 +54,62 @@ Re-tune with `bun scripts/sim-harness.ts 100000` (random, greedy best-of-4, best
 httpOnly, SameSite=Lax cookie set when the daily is completed / submitted to the leaderboard. If unset the
 daily falls back to localStorage only. Without accounts this is a deterrent, not a guarantee: clearing
 cookies and storage (or switching browser/device) gives a fresh attempt.
+
+## Retention tracking (optional, off by default)
+
+Cookieless D1/D7 retention by acquisition source. No cookie banner needed: nothing personal or cross-site is stored.
+
+- **Browser:** one localStorage key `ucl170:retention` = `{ firstSeen, lastSeen, source }` (UTC days + a source bucket from a closed list: `utm_source`, else referrer host, else `direct`). No ID.
+- **Worker:** `POST /e` with `{event, bucket, mode, source}` writes one Workers Analytics Engine data point (`blobs = [event, bucket, mode, source]`, `double = 1`). No IP, user agent, cookie or identifier is read or stored. Unknown values are dropped; always answers 204.
+- **Events:** `visit` (max once per UTC day per browser), `return_d1`, `return_d7`, `draft_start`, `sim_complete`, `daily_complete`, `share_click`. Buckets: `d0`, `d1`, `d2-6`, `d7`, `d8+`.
+- **Harmless when off:** the client sends nothing unless built with `VITE_RETENTION_ENABLED=1`; the endpoint is a no-op unless the `RETENTION` binding exists.
+
+**Enable (PM):** Analytics Engine is on the Workers Free plan and the dataset is created on first write (no create command). Add to `wrangler.jsonc`, then build with `VITE_RETENTION_ENABLED=1` and deploy:
+
+```jsonc
+"analytics_engine_datasets": [{ "binding": "RETENTION", "dataset": "ucl170_retention" }]
+```
+
+**Read D1/D7** (Analytics Engine SQL API, `POST https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/analytics_engine/sql`, token with *Account Analytics: Read*):
+
+```sql
+SELECT toDate(timestamp) AS day, blob4 AS source, blob1 AS event, blob2 AS bucket, SUM(_sample_interval) AS n
+FROM ucl170_retention
+WHERE timestamp > NOW() - INTERVAL '30' DAY AND blob1 IN ('visit','return_d1','return_d7')
+GROUP BY day, source, event, bucket ORDER BY day
+```
+
+D1 for day N = `return_d1` on day N ÷ `visit`/`d0` on day N-1 (same source). D7 = `return_d7` on day N ÷ `visit`/`d0` on day N-7. Approximate (clearing storage or switching device looks like a new visitor) but honest without accounts. Analytics Engine keeps data for 3 months.
+
+## Live current players (feature flag, OFF by default)
+
+~20 current UCL players (`src/lib/live/current-players.ts`, one line each) mixed into the **Classic / Legend IQ draft** pool next to the 152 legends, with a weekly form bonus from football-data.org. **The Daily and the server-side leaderboard re-simulation never use them** (`candidatesFor` defaults to the legends array), so daily seeds stay identical.
+
+**Flags (Worker vars / `.dev.vars`):**
+- `LIVE_PLAYERS_ENABLED=1`: on for everyone. Unset = off (production today).
+- `LIVE_PLAYERS_PREVIEW=1`: on only for `/draft?live=1`. Without this switch `?live=1` is ignored.
+
+**Form formula** (`src/lib/live/form.ts`, from the Notion spec): `events = goals×(FWD 1 | others 1.5) + assists×0.5 + per CL match (win +0.5, loss −0.5) + GK/DEF clean sheet +1`; `form' = clamp(round(0.7·form + events), form±3)`, then clamp to ±5. Goals/assists are deltas of the cumulative CL scorers list between runs (first run = baseline). Effective ATT/DEF/TEC/MEN = base + form. The free tier has no line-ups/minutes, so there's no "did not play" penalty and no per-90 rates.
+
+**Data:** a weekly cron makes 2 calls (`/v4/competitions/CL/scorers?limit=100`, `/v4/competitions/CL/matches?status=FINISHED&dateFrom&dateTo`), well within the free tier's 10 req/min. It stores `current-form:v1` (plus `:prev` for rollback) in KV. If the key, the KV binding or the API fails, the game uses the last stored ratings, or base ratings (form 0). "Data provided by football-data.org" is shown wherever live players are shown.
+
+**Preview locally:**
+```bash
+echo 'LIVE_PLAYERS_PREVIEW=1' > .dev.vars
+bun run build && bun run preview      # open http://localhost:4173/draft?live=1
+rm .dev.vars && bun run build         # IMPORTANT: the build copies .dev.vars into dist/server
+```
+Without KV locally you'll see base ratings ("no form data yet").
+
+**Enable later (PM, not done):**
+```bash
+npx wrangler kv namespace create LIVE_FORM            # copy the id
+npx wrangler secret put FOOTBALL_DATA_API_KEY         # free key: https://www.football-data.org/client/register
+```
+```jsonc
+// wrangler.jsonc
+"kv_namespaces": [{ "binding": "LIVE_FORM", "id": "<id from above>" }],
+"triggers": { "crons": ["0 4 * * 4"] },               // Thu 04:00 UTC = 06:00 Zurich (summer)
+"vars": { "LIVE_PLAYERS_PREVIEW": "1" }               // then "LIVE_PLAYERS_ENABLED": "1" to go public
+```
+Deploy, then check `npx wrangler secret list`. Balance: `LIVE=1 bun scripts/sim-harness.ts 100000` (`LIVE_FORM=5` = every current player at +5).

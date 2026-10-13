@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { handleRetentionEvent } from "./lib/retention-server";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -51,11 +52,22 @@ export default {
       return Response.redirect(`https://ucl17-0.com${url.pathname}${url.search}`, 301);
     }
     const noindex = url.hostname.endsWith(".workers.dev");
-    const res = await handle(request, env, ctx);
+    // Anonymous retention counters (no-op without the RETENTION Analytics Engine binding).
+    const res = url.pathname === "/e" ? await handleRetentionEvent(request, env) : await handle(request, env, ctx);
     if (!noindex) return res;
     const out = new Response(res.body, res);
     out.headers.set("X-Robots-Tag", "noindex, nofollow");
     return out;
+  },
+  // Weekly live-form job (feature-flagged). Only runs if a cron trigger is configured AND
+  // FOOTBALL_DATA_API_KEY + the LIVE_FORM KV binding exist; otherwise it logs and returns.
+  async scheduled(_controller: unknown, env: unknown, ctx: { waitUntil(p: Promise<unknown>): void }) {
+    const { runWeeklyUpdate } = await import("./lib/live/update");
+    ctx.waitUntil(
+      runWeeklyUpdate(env as Parameters<typeof runWeeklyUpdate>[0]).then((r) =>
+        console.log("live form update", r.ok ? "ok" : r.reason),
+      ),
+    );
   },
 };
 

@@ -232,8 +232,15 @@ function poisson(rnd: () => number, lambda: number) {
   return Math.min(k - 1, 7);
 }
 
-export function candidatesFor(role: Role, taken: Set<string>, count: number, rnd: () => number) {
-  const pool = PLAYERS.filter((p) => p.roles.includes(role) && !taken.has(p.id));
+/** `pool` defaults to the 152 legends; only the flagged live-players draft passes a larger pool. */
+export function candidatesFor(
+  role: Role,
+  taken: Set<string>,
+  count: number,
+  rnd: () => number,
+  from: readonly Player[] = PLAYERS,
+) {
+  const pool = from.filter((p) => p.roles.includes(role) && !taken.has(p.id));
   // Fisher-Yates shuffle so the result is identical across server and client engines.
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(rnd() * (i + 1));

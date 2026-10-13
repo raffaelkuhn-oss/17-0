@@ -42,6 +42,8 @@ export type Player = {
   tec: number;
   /** big-game mentality */
   men: number;
+  /** Present only for flagged current players (live form feature). Legends never set it. */
+  live?: { form: number; base: number };
 };
 
 export const PLAYERS: Player[] = [

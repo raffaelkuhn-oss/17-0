@@ -3,8 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { AdBanner } from "@/components/AdBanner";
 import { Celebration } from "@/components/Celebration";
 import { ShareCard } from "@/components/ShareCard";
-import { FORMATION, overall, type Player } from "@/lib/players";
+import { FORMATION, PLAYERS, overall, type Player } from "@/lib/players";
 import { recordLabel } from "@/lib/record";
+import { trackEvent } from "@/lib/retention";
 import { candidatesFor, PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
 
 export type Mode = "classic" | "legend";
@@ -34,6 +35,8 @@ export type DraftGameProps = {
   intro?: React.ReactNode | undefined;
   /** Hides "draft again" for one-shot modes. */
   allowReplay?: boolean | undefined;
+  /** Flagged live-players feature only: extra current players mixed into the legends pool. */
+  extraPool?: Player[] | undefined;
 };
 
 export function DraftGame({
@@ -45,7 +48,10 @@ export function DraftGame({
   onComplete,
   intro,
   allowReplay = true,
+  extraPool,
 }: DraftGameProps) {
+  // Without extraPool this is the exact legends array, so seeds/candidates are unchanged.
+  const pool = useMemo(() => (extraPool?.length ? [...PLAYERS, ...extraPool] : PLAYERS), [extraPool]);
   // Fixed initial seed so SSR and hydration render identical candidate orders.
   const [seed, setSeed] = useState(fixedSeed ?? 12345);
   const [picks, setPicks] = useState<Player[]>([]);
@@ -61,8 +67,8 @@ export function DraftGame({
   const candidates = useMemo(() => {
     if (!slot) return [];
     const taken = new Set(picks.map((p) => p.id));
-    return candidatesFor(slot.role, taken, 4, rngFactory(seed + step * 7919));
-  }, [slot, picks, seed, step]);
+    return candidatesFor(slot.role, taken, 4, rngFactory(seed + step * 7919), pool);
+  }, [slot, picks, seed, step, pool]);
 
   function reset() {
     setPicks([]);
@@ -73,6 +79,8 @@ export function DraftGame({
   function run() {
     const campaign = simulate(picks, seed);
     setResults(campaign);
+    trackEvent("sim_complete", fixedSeed !== undefined ? "daily" : mode);
+    if (fixedSeed !== undefined) trackEvent("daily_complete", "daily");
     onComplete?.(campaign, picks);
   }
 
@@ -106,7 +114,10 @@ export function DraftGame({
                   // Keyed by slot, not player: when a pick swaps the candidates, cards update in place
                   // instead of being re-ordered (which the browser reports as layout shift).
                   key={i}
-                  onClick={() => setPicks((prev) => [...prev, p])}
+                  onClick={() => {
+                    if (step === 0) trackEvent("draft_start", fixedSeed !== undefined ? "daily" : mode);
+                    setPicks((prev) => [...prev, p]);
+                  }}
                   aria-label={pickLabel(p, mode)}
                   className={`surface rounded-2xl p-5 text-left transition-transform hover:-translate-y-1 hover:border-primary ${CARD_MIN_H}`}
                 >
@@ -116,6 +127,7 @@ export function DraftGame({
                       <p className="text-sm text-muted-foreground">
                         {p.club} · {p.era}
                       </p>
+                      {p.live && <LiveBadge form={p.live.form} showForm={mode === "classic"} />}
                     </div>
                     <span className="rounded-full border border-border px-3 py-1 text-xs tracking-widest uppercase">
                       {p.roles.join(" / ")}
@@ -172,6 +184,17 @@ export function DraftGame({
  * reserve the same minimum height, so the sidebar / squad panel below them on mobile does not
  * jump as picks change. 4 stacked cards on phones, 2 rows of 2 from the sm breakpoint.
  */
+function LiveBadge({ form, showForm }: { form: number; showForm: boolean }) {
+  return (
+    <p className="mt-1 inline-flex items-center gap-2 rounded-full bg-primary/15 px-2 py-0.5 text-[0.65rem] tracking-widest text-primary uppercase" data-testid="live-badge">
+      Live
+      {showForm && (
+        <span>{form > 0 ? `▲ +${form}` : form < 0 ? `▼ ${form}` : "form 0"}</span>
+      )}
+    </p>
+  );
+}
+
 const CARD_MIN_H = "min-h-[13rem]";
 const READY_MIN_H = "min-h-[55rem] sm:min-h-[27rem]";
 

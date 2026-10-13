@@ -2,6 +2,7 @@ import { SITE_URL } from "@/lib/site";
 import { useEffect, useRef, useState } from "react";
 import { copyText, isAbortError } from "@/lib/copy-text";
 import { renderShareImage } from "@/lib/share-image";
+import { trackEvent } from "@/lib/retention";
 import type { Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
 import { recordLong } from "@/lib/record";
@@ -112,11 +113,13 @@ export function ShareCard({
         setCopyError(true);
         setManualText(text);
       });
+      trackEvent("share_click"); // after share() so the gesture goes to the share sheet first
       return;
     }
     // No Web Share: copy synchronously in the gesture, then download.
     copyCaption(text);
     download();
+    trackEvent("share_click");
   }
 
   const tweet = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
