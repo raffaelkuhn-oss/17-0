@@ -1,6 +1,7 @@
 import { SITE_URL } from "@/lib/site";
 import { useEffect, useState } from "react";
 import { renderShareImage } from "@/lib/share-image";
+import { trackEvent } from "@/lib/retention";
 import type { Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
 import { recordLong } from "@/lib/record";
@@ -73,6 +74,7 @@ export function ShareCard({
   }
 
   async function shareImage() {
+    trackEvent("share_click");
     const text = caption(campaign, contextLabel);
     const file =
       blob && typeof File !== "undefined"
