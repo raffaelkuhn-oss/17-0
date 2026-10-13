@@ -1,12 +1,18 @@
 import { absUrl } from "@/lib/site";
 import { createFileRoute } from "@tanstack/react-router";
 import { DraftGame, type Mode } from "@/components/DraftGame";
+import { getLivePool } from "@/lib/live/live.functions";
 
 export const Route = createFileRoute("/draft")({
   // Classic is the default and has no query param, so the canonical URL is plain /draft
   // (no redirect to ?mode=classic). Only the legend variant carries ?mode=legend.
-  validateSearch: (search: Record<string, unknown>): { mode?: Mode } =>
-    search["mode"] === "legend" ? { mode: "legend" } : {},
+  // ?live=1 asks for the live-players preview; the server ignores it unless LIVE_PLAYERS_PREVIEW=1.
+  validateSearch: (search: Record<string, unknown>): { mode?: Mode; live?: 1 } => ({
+    ...(search["mode"] === "legend" ? { mode: "legend" as const } : {}),
+    ...(search["live"] === 1 || search["live"] === "1" ? { live: 1 as const } : {}),
+  }),
+  loaderDeps: ({ search }) => ({ live: search.live === 1 }),
+  loader: ({ deps }) => getLivePool({ data: { preview: deps.live } }),
   head: () => ({
     meta: [
       { title: "Draft Room — 17-0 Champions League Draft" },
@@ -36,9 +42,21 @@ export const Route = createFileRoute("/draft")({
 
 function DraftPage() {
   const { mode = "classic" } = Route.useSearch();
+  const live = Route.useLoaderData();
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
-      <DraftGame mode={mode} />
+      <DraftGame mode={mode} extraPool={live.enabled ? live.players : undefined} />
+      {live.enabled && (
+        <p className="mt-10 text-center text-xs text-muted-foreground" data-testid="fd-attribution">
+          Includes {live.players.length} current players (marked Live).{" "}
+          {live.updatedAt
+            ? `Form updated ${live.updatedAt.slice(0, 10)}.`
+            : "Showing base ratings (no form data yet)."}{" "}
+          <a href="https://www.football-data.org" target="_blank" rel="noopener noreferrer" className="underline">
+            Data provided by football-data.org
+          </a>
+        </p>
+      )}
     </main>
   );
 }
