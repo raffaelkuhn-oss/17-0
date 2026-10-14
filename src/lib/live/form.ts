@@ -1,4 +1,4 @@
-import { ROLE_GROUP, overall, type Player } from "../players";
+import { FORMATION, PLAYERS, ROLE_GROUP, overall, type Player, type Role } from "../players";
 import { CURRENT_PLAYERS, type CurrentPlayerDef } from "./current-players";
 
 /**
@@ -98,13 +98,52 @@ export function computeWeeklyForm(
   return { version: 1, updatedAt: now.toISOString(), windowFrom, players };
 }
 
-/** Builds draftable Player objects; missing state = base ratings (form 0). */
+/**
+ * Rating mapping (balance, Oct 2026): effective stat =
+ *   min(base + BASE_OFFSET + round(form × FORM_STAT_PER_5 / 5), legend ceiling for that stat), clamped 40..99.
+ * - BASE_OFFSET lifts the hand-set base ratings so a form-0 current XI is competitive.
+ * - FORM_STAT_PER_5: stat change at form ±5 (form itself stays −5..+5).
+ * - Legend ceiling: per stat, the lowest value among the legends that fill this player's roles in the
+ *   best legends XI. A current player can therefore never beat the legend he would replace, which keeps
+ *   every current or mixed XI's 17-0 chance at or below the legends' best XI.
+ */
+export const BASE_OFFSET = 8;
+/** Stats a current player may sit above the legend ceiling (0 = never above). */
+export const CEILING_MARGIN = 0;
+export const FORM_STAT_PER_5 = 5;
+type Stats = { att: number; def: number; tec: number; men: number };
+let ceilings: Partial<Record<Role, Stats>> | null = null;
+export function legendCeiling(role: Role): Stats {
+  if (!ceilings) {
+    ceilings = {};
+    const xi: Player[] = [];
+    const slots: { role: Role; p: Player }[] = [];
+    for (const sl of FORMATION) {
+      const p = PLAYERS.filter((x) => x.roles.includes(sl.role) && !xi.includes(x)).sort((a, b) => overall(b) - overall(a))[0]!;
+      xi.push(p); slots.push({ role: sl.role, p });
+    }
+    for (const { role: r, p } of slots) {
+      const c = ceilings[r];
+      ceilings[r] = c ? { att: Math.min(c.att, p.att), def: Math.min(c.def, p.def), tec: Math.min(c.tec, p.tec), men: Math.min(c.men, p.men) } : { att: p.att, def: p.def, tec: p.tec, men: p.men };
+    }
+  }
+  return ceilings[role] ?? { att: 99, def: 99, tec: 99, men: 99 };
+}
+function ceilingFor(roles: Role[]): Stats {
+  const cs = roles.map(legendCeiling);
+  const m = (k: keyof Stats) => Math.min(...cs.map((c) => c[k])) + CEILING_MARGIN;
+  return { att: m("att"), def: m("def"), tec: m("tec"), men: m("men") };
+}
+
+/** Builds draftable Player objects; missing state = form 0. */
 export function buildLivePlayers(state: FormState | null, defs: CurrentPlayerDef[] = CURRENT_PLAYERS): Player[] {
   return defs.map((d) => {
     const form = clamp(Math.round(state?.players[d.id]?.form ?? 0), -FORM_MAX, FORM_MAX);
-    const base: Player = { id: d.id, name: d.name, roles: d.roles, club: d.club, era: "Current", att: d.att, def: d.def, tec: d.tec, men: d.men };
-    const adj = (v: number) => clamp(v + form, 40, 99);
-    return { ...base, att: adj(d.att), def: adj(d.def), tec: adj(d.tec), men: adj(d.men), live: { form, base: overall(base) } };
+    const raw: Player = { id: d.id, name: d.name, roles: d.roles, club: d.club, era: "Current", att: d.att, def: d.def, tec: d.tec, men: d.men };
+    const cap = ceilingFor(d.roles);
+    const eff = (v: number, f: number, c: number) => clamp(Math.min(v + BASE_OFFSET + Math.round((f * FORM_STAT_PER_5) / FORM_MAX), c), 40, 99);
+    const base: Player = { ...raw, att: eff(d.att, 0, cap.att), def: eff(d.def, 0, cap.def), tec: eff(d.tec, 0, cap.tec), men: eff(d.men, 0, cap.men) };
+    return { ...raw, att: eff(d.att, form, cap.att), def: eff(d.def, form, cap.def), tec: eff(d.tec, form, cap.tec), men: eff(d.men, form, cap.men), live: { form, base: overall(base) } };
   });
 }
 

@@ -1,7 +1,7 @@
 // Run: bun scripts/test-live.ts   (fixture-based; no API key or network needed)
 import scorersFx from "./fixtures/fd-cl-scorers.json";
 import matchesFx from "./fixtures/fd-cl-matches.json";
-import { buildLivePlayers, computeWeeklyForm, isLiveEnabled, nextForm, type FdMatch, type FdScorer, type FormState } from "../src/lib/live/form";
+import { CEILING_MARGIN, legendCeiling, buildLivePlayers, computeWeeklyForm, isLiveEnabled, nextForm, type FdMatch, type FdScorer, type FormState } from "../src/lib/live/form";
 import { CURRENT_PLAYERS } from "../src/lib/live/current-players";
 import { KV_CURRENT, KV_PREVIOUS, runWeeklyUpdate } from "../src/lib/live/update";
 import { FORMATION, PLAYERS, overall } from "../src/lib/players";
@@ -44,7 +44,13 @@ t("no state -> base ratings, form 0", base.every((p) => p.live!.form === 0 && ov
 t("ids unique & never collide with legends", new Set([...PLAYERS, ...base].map((p) => p.id)).size === PLAYERS.length + base.length);
 t("names do not duplicate legends", !base.some((b) => PLAYERS.some((p) => p.name === b.name)));
 const hot = buildLivePlayers(s2).find((p) => p.id === "cur-lautaro")!;
-t("form shifts effective overall by ~form", Math.abs(overall(hot) - (hot.live!.base + 4)) <= 1);
+t("positive form raises effective overall (or hits the legend ceiling)", overall(hot) >= hot.live!.base);
+{
+  const cold = buildLivePlayers({ version: 1, updatedAt: "", windowFrom: "", players: { "cur-pedri": { form: -5, goals: 0, assists: 0, lastDelta: 0, note: "" } } }).find((p) => p.id === "cur-pedri")!;
+  t("form -5 lowers effective overall", overall(cold) < cold.live!.base);
+  const all5 = buildLivePlayers({ version: 1, updatedAt: "", windowFrom: "", players: Object.fromEntries(CURRENT_PLAYERS.map((d) => [d.id, { form: 5, goals: 0, assists: 0, lastDelta: 0, note: "" }])) });
+  t("at +5 no current player beats the legend ceiling for any of his roles", all5.every((p) => p.roles.every((r) => { const c = legendCeiling(r); return p.att <= c.att + CEILING_MARGIN && p.def <= c.def + CEILING_MARGIN && p.tec <= c.tec + CEILING_MARGIN && p.men <= c.men + CEILING_MARGIN; })));
+}
 const evil = buildLivePlayers({ ...s2, players: { "cur-lautaro": { ...s2.players["cur-lautaro"]!, form: 99 } } }).find((p) => p.id === "cur-lautaro")!;
 t("stored form clamped to 5 on read", evil.live!.form === 5);
 t("every formation role has >=1 current player", FORMATION.every((f) => base.some((p) => p.roles.includes(f.role))));
