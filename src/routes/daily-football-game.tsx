@@ -25,14 +25,14 @@ const FAQ = [
 export const Route = createFileRoute("/daily-football-game")({
   head: () => ({
     meta: [
-      { title: "Daily Football Game — One Champions League Draft a Day | 17-0" },
+      { title: "Daily Football Game — One Champions League Draft a Day | 17-0 Draft" },
       {
         name: "description",
         content:
           "A daily football game for Champions League fans: everyone gets the same legend pool, drafts one XI, and the simulation decides. Free, no account, new challenge every day.",
       },
-      { property: "og:title", content: "Daily Football Game — One Champions League Draft a Day | 17-0" },
-      { name: "twitter:title", content: "Daily Football Game — One Champions League Draft a Day | 17-0" },
+      { property: "og:title", content: "Daily Football Game — One Champions League Draft a Day | 17-0 Draft" },
+      { name: "twitter:title", content: "Daily Football Game — One Champions League Draft a Day | 17-0 Draft" },
       {
         property: "og:description",
         content:

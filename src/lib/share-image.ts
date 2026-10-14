@@ -14,12 +14,12 @@ export type ShareCardData = {
 const W = 1200;
 const H = 630;
 
-const INK = "#e8eefc";
-const MUTED = "#8fa0c0";
-const CYAN = "#22d3ee";
+const INK = "#ffffff";
+const MUTED = "#dceedc";
+const LINE = "#ebf5eb";
 const GOLD = "#f5c451";
 const RED = "#ef4470";
-const GREEN = "#28c76f";
+const GREEN = "#ebf5eb";
 
 function roundRect(
   ctx: CanvasRenderingContext2D,
@@ -56,13 +56,13 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
   if (!ctx) return null;
 
   const { picks, campaign, rating, context } = data;
-  const accent = campaign.perfect ? GOLD : campaign.champion ? CYAN : RED;
+  const accent = campaign.perfect ? GOLD : campaign.champion ? LINE : RED;
 
   // Background
   const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, "#080e1c");
-  bg.addColorStop(0.55, "#0c1730");
-  bg.addColorStop(1, "#060a15");
+  bg.addColorStop(0, "#246828");
+  bg.addColorStop(0.55, "#1f4f24");
+  bg.addColorStop(1, "#1b3a20");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
@@ -143,7 +143,7 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
     ctx.fillStyle = m.outcome === "W" ? GREEN : m.outcome === "D" ? "#ffffff28" : RED;
     roundRect(ctx, x, stripY, box, box, 7);
     ctx.fill();
-    ctx.fillStyle = m.outcome === "D" ? INK : "#04101f";
+    ctx.fillStyle = m.outcome === "D" ? INK : "#1b3a20";
     ctx.font = "700 14px system-ui, sans-serif";
     ctx.fillText(m.outcome, x + 8, stripY + 18);
   });

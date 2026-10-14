@@ -13,14 +13,14 @@ import {
 export const Route = createFileRoute("/legends")({
   head: () => ({
     meta: [
-      { title: "Legends Pool — Every Player and Rating | 17-0" },
+      { title: "Legends Pool — Every Player and Rating | 17-0 Draft" },
       {
         name: "description",
         content:
           "Browse the full 17-0 legends pool: every Champions League great with their role, club, era and attack, defence, technique and mentality ratings.",
       },
-      { property: "og:title", content: "Legends Pool — Every Player and Rating | 17-0" },
-      { name: "twitter:title", content: "Legends Pool — Every Player and Rating | 17-0" },
+      { property: "og:title", content: "Legends Pool — Every Player and Rating | 17-0 Draft" },
+      { name: "twitter:title", content: "Legends Pool — Every Player and Rating | 17-0 Draft" },
       {
         property: "og:description",
         content: "Every legend in the 17-0 draft pool with full ratings, roles, clubs and eras.",

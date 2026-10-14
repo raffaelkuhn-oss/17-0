@@ -26,14 +26,14 @@ const FAQ = [
 export const Route = createFileRoute("/football-draft-game")({
   head: () => ({
     meta: [
-      { title: "Football Draft Game — Draft All-Time Legends Free | 17-0" },
+      { title: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft" },
       {
         name: "description",
         content:
           "Free football draft game in your browser: pick eleven Champions League legends, one per position, and simulate a full 17-match season. No sign-up, no download.",
       },
-      { property: "og:title", content: "Football Draft Game — Draft All-Time Legends Free | 17-0" },
-      { name: "twitter:title", content: "Football Draft Game — Draft All-Time Legends Free | 17-0" },
+      { property: "og:title", content: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft" },
+      { name: "twitter:title", content: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft" },
       {
         property: "og:description",
         content:
