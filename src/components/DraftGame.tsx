@@ -392,6 +392,12 @@ export function Results({
             <p className="mt-5 border-t border-border pt-4 text-sm text-muted-foreground">
               Squad rating <span className="font-display text-2xl text-foreground">{r.rating}</span>
             </p>
+            <Link
+              to="/how-the-chances-work"
+              className="mt-3 inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
+            >
+              How the chances work
+            </Link>
           </aside>
           <AdBanner />
         </div>
