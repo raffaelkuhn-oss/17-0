@@ -290,6 +290,7 @@ function SiteFooter() {
           daily challenge from being replayed, and Cloudflare Web Analytics counts visits without
           cookies.
         </p>
+        <p className="text-xs">Fan-made, not affiliated with UEFA.</p>
       </div>
     </footer>
   );
