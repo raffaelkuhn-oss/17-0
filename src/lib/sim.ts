@@ -39,17 +39,20 @@ export const PLAYOFF_CUTOFF = 11;
 /**
  * Balance knobs (the ONLY place these numbers live; the client, the daily seed and
  * the server-side leaderboard re-simulation all import this module).
- * - KO_BASE / KO_STEP: knockout opponent strength = KO_BASE + round * KO_STEP
- *   (rounds: Playoff, R16, QF, SF, Final) = 72, 75, 78, 81, 84 at the current
- *   72 / 3. League opponents are rated 66-76.
+ * - KO_BASE / KO_STEP / FINAL_BONUS: knockout opponent strength =
+ *   KO_BASE + round * KO_STEP (+ FINAL_BONUS in the Final only).
+ *   Current: 77 / 4 / +8 → Playoff 77, R16 81, QF 85, SF 89, Final 101.
+ *   League opponents stay rated 66-76.
  * - MID_ATTACK_WEIGHT: weight of each midfielder's attack in the team attack
  *   rating, a true weighted average with forwards at weight 1.
  * Re-tune with `bun scripts/sim-harness.ts` (100k drafts per strategy).
+ * Targets (Oct 2026): good XI reaches the final ~40%; best XI wins the title ~20-25%; 17-0 rarest.
  */
 export const SIM_TUNING = {
-  KO_BASE: 72,
-  KO_STEP: 3,
+  KO_BASE: 77,
+  KO_STEP: 4,
   MID_ATTACK_WEIGHT: 0.7,
+  FINAL_BONUS: 8,
 };
 
 const LEAGUE_OPPONENTS = [
@@ -117,7 +120,6 @@ export function teamRatings(squad: Squad) {
   };
 }
 
-
 function playMatch(
   rnd: () => number,
   r: ReturnType<typeof teamRatings>,
@@ -169,7 +171,10 @@ export function simulate(squad: Squad, seed = Date.now()): Campaign {
   // ---- Knockout: two legs per tie, no draws, elimination each round ----
   for (let k = 0; k < KO_ROUNDS.length; k++) {
     const round = KO_ROUNDS[k]!;
-    const oppStrength = SIM_TUNING.KO_BASE + k * SIM_TUNING.KO_STEP;
+    const oppStrength =
+      SIM_TUNING.KO_BASE +
+      k * SIM_TUNING.KO_STEP +
+      (round.name === "Final" ? SIM_TUNING.FINAL_BONUS : 0);
     const clutch = (r.mentality - 88) / 12;
 
     if (round.name === "Final") {
@@ -232,7 +237,7 @@ function poisson(rnd: () => number, lambda: number) {
   return Math.min(k - 1, 7);
 }
 
-/** `pool` defaults to the 152 legends; only the flagged live-players draft passes a larger pool. */
+/** `pool` defaults to the legends; only the flagged live-players draft passes a larger pool. */
 export function candidatesFor(
   role: Role,
   taken: Set<string>,

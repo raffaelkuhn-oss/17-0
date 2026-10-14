@@ -28,7 +28,11 @@ const ROWS = [
   ["Sport", "Basketball (NBA)", "Football (Champions League)"],
   ["Perfect season", "82-0", "17-0"],
   ["Squad size", "Starting five", "Starting XI, one per position"],
-  ["Season format", "82 regular-season games", "8 league-phase games + 4 two-legged knockout ties + final"],
+  [
+    "Season format",
+    "82 regular-season games",
+    "8 league-phase games + 4 two-legged knockout ties + final",
+  ],
   ["Draws", "No", "Yes, in the league phase"],
   ["Daily challenge", "Yes", "Yes, with a streak kept in your browser"],
   ["Price", "Free", "Free, no sign-up"],
@@ -80,16 +84,23 @@ function Page() {
         </div>
         <p className="mt-4 text-sm text-muted-foreground">
           Where 82-0 wins: a longer season and the NBA crowd. Where 17-0 differs: knockout ties can
-          end your run in one bad night, so even the best possible XI goes a perfect 17-0 only about 6% of the time in our simulations (a good draft: about 3%).
+          end your run in one bad night, so even the best possible XI goes a perfect 17-0 only about
+          1.2% of the time in our simulations (a good draft: about 0.4%).
         </p>
       </section>
 
       <section className="mt-14 border-t border-border pt-8">
         <h2 className="text-2xl">Learn more</h2>
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link to="/how-it-works" className="btn-ghost text-sm">How the simulation works</Link>
-          <Link to="/best-xi-of-all-time" className="btn-ghost text-sm">Best XI of all time</Link>
-          <Link to="/legends" className="btn-ghost text-sm">All legends and stats</Link>
+          <Link to="/how-it-works" className="btn-ghost text-sm">
+            How the simulation works
+          </Link>
+          <Link to="/best-xi-of-all-time" className="btn-ghost text-sm">
+            Best XI of all time
+          </Link>
+          <Link to="/legends" className="btn-ghost text-sm">
+            All legends and stats
+          </Link>
         </div>
       </section>
     </main>
