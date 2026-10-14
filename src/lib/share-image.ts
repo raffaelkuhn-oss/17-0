@@ -17,8 +17,8 @@ const H = 630;
 const INK = "#ffffff";
 const MUTED = "#dceedc";
 const LINE = "#ebf5eb";
-const GOLD = "#f5c451";
-const RED = "#ef4470";
+const GOLD = "#fae3ab";
+const RED = "#d23c63";
 const GREEN = "#ebf5eb";
 
 function roundRect(
@@ -60,9 +60,9 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
 
   // Background
   const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, "#246828");
-  bg.addColorStop(0.55, "#1f4f24");
-  bg.addColorStop(1, "#1b3a20");
+  bg.addColorStop(0, "#2e7d32");
+  bg.addColorStop(0.55, "#2a7330");
+  bg.addColorStop(1, "#246828");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
@@ -143,7 +143,7 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
     ctx.fillStyle = m.outcome === "W" ? GREEN : m.outcome === "D" ? "#ffffff28" : RED;
     roundRect(ctx, x, stripY, box, box, 7);
     ctx.fill();
-    ctx.fillStyle = m.outcome === "D" ? INK : "#1b3a20";
+    ctx.fillStyle = m.outcome === "W" ? "#1b3a20" : INK;
     ctx.font = "700 14px system-ui, sans-serif";
     ctx.fillText(m.outcome, x + 8, stripY + 18);
   });
