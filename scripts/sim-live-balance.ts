@@ -26,7 +26,7 @@ const run = (xi: any[]) => {
   }
   return `${((c / N) * 100).toFixed(2)}% / ${((p / N) * 100).toFixed(2)}% / ${(w / N).toFixed(2)}`;
 };
-const defs = CURRENT_PLAYERS.filter((d) => d.id !== "cur-palmer");
+const defs = CURRENT_PLAYERS;
 const live = (f: number) =>
   buildLivePlayers(
     {
@@ -44,6 +44,13 @@ const names = (xi: any[]) =>
   xi.map((p) => p.name.split(" ").pop() + (p.era === "Current" ? "*" : "")).join(",");
 for (const f of [-5, 0, 5]) {
   const xi = pickBest(live(f));
+  const missing = FORMATION.filter((_, i) => !xi[i]).map((sl) => sl.role);
+  if (missing.length) {
+    console.log(
+      `current best XI form ${f}: no full current-only XI (missing ${missing.join(", ")})`,
+    );
+    continue;
+  }
   console.log(`current best XI form ${f}: ${run(xi)} avg ${avg(xi)}`);
 }
 const L = pickBest(PLAYERS);

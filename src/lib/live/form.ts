@@ -30,10 +30,19 @@ export type FdMatch = {
   utcDate: string;
   homeTeam: { id: number };
   awayTeam: { id: number };
-  score: { winner: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null; fullTime: { home: number | null; away: number | null } };
+  score: {
+    winner: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
+    fullTime: { home: number | null; away: number | null };
+  };
 };
 
-export type PlayerFormState = { form: number; goals: number; assists: number; lastDelta: number; note: string };
+export type PlayerFormState = {
+  form: number;
+  goals: number;
+  assists: number;
+  lastDelta: number;
+  note: string;
+};
 export type FormState = {
   version: 1;
   updatedAt: string; // ISO
@@ -42,16 +51,31 @@ export type FormState = {
 };
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
-const norm = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, "");
+const norm = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
 
 export function findScorer(def: CurrentPlayerDef, scorers: FdScorer[]): FdScorer | undefined {
   if (def.fdPersonId != null) return scorers.find((s) => s.player.id === def.fdPersonId);
   const n = norm(def.name);
-  return scorers.find((s) => s.team.id === def.fdTeamId && (norm(s.player.name) === n || norm(s.player.name).endsWith(n) || n.endsWith(norm(s.player.name))));
+  return scorers.find(
+    (s) =>
+      s.team.id === def.fdTeamId &&
+      (norm(s.player.name) === n ||
+        norm(s.player.name).endsWith(n) ||
+        n.endsWith(norm(s.player.name))),
+  );
 }
 
 export function teamEvents(teamId: number, matches: FdMatch[], defensive: boolean) {
-  let pts = 0, w = 0, d = 0, l = 0, cs = 0;
+  let pts = 0,
+    w = 0,
+    d = 0,
+    l = 0,
+    cs = 0;
   for (const m of matches) {
     if (m.status !== "FINISHED") continue;
     const home = m.homeTeam.id === teamId;
@@ -59,8 +83,17 @@ export function teamEvents(teamId: number, matches: FdMatch[], defensive: boolea
     const ga = home ? m.score.fullTime.away : m.score.fullTime.home;
     const won = m.score.winner === (home ? "HOME_TEAM" : "AWAY_TEAM");
     const lost = m.score.winner === (home ? "AWAY_TEAM" : "HOME_TEAM");
-    if (won) { pts += 0.5; w++; } else if (lost) { pts -= 0.5; l++; } else d++;
-    if (defensive && ga === 0) { pts += 1; cs++; }
+    if (won) {
+      pts += 0.5;
+      w++;
+    } else if (lost) {
+      pts -= 0.5;
+      l++;
+    } else d++;
+    if (defensive && ga === 0) {
+      pts += 1;
+      cs++;
+    }
   }
   return { pts, w, d, l, cs };
 }
@@ -92,8 +125,21 @@ export function computeWeeklyForm(
     const events = dg * (group === "FWD" ? 1 : 1.5) + da * 0.5 + t.pts;
     const before = p?.form ?? 0;
     const form = nextForm(before, events);
-    const bits = [dg && `${dg} goal${dg > 1 ? "s" : ""}`, da && `${da} assist${da > 1 ? "s" : ""}`, t.w && `${t.w}W`, t.d && `${t.d}D`, t.l && `${t.l}L`, t.cs && `${t.cs} clean sheet${t.cs > 1 ? "s" : ""}`].filter(Boolean);
-    players[def.id] = { form, goals, assists, lastDelta: form - before, note: bits.join(", ") || "no CL action" };
+    const bits = [
+      dg && `${dg} goal${dg > 1 ? "s" : ""}`,
+      da && `${da} assist${da > 1 ? "s" : ""}`,
+      t.w && `${t.w}W`,
+      t.d && `${t.d}D`,
+      t.l && `${t.l}L`,
+      t.cs && `${t.cs} clean sheet${t.cs > 1 ? "s" : ""}`,
+    ].filter(Boolean);
+    players[def.id] = {
+      form,
+      goals,
+      assists,
+      lastDelta: form - before,
+      note: bits.join(", ") || "no CL action",
+    };
   }
   return { version: 1, updatedAt: now.toISOString(), windowFrom, players };
 }
@@ -119,12 +165,22 @@ export function legendCeiling(role: Role): Stats {
     const xi: Player[] = [];
     const slots: { role: Role; p: Player }[] = [];
     for (const sl of FORMATION) {
-      const p = PLAYERS.filter((x) => x.roles.includes(sl.role) && !xi.includes(x)).sort((a, b) => overall(b) - overall(a))[0]!;
-      xi.push(p); slots.push({ role: sl.role, p });
+      const p = PLAYERS.filter((x) => x.roles.includes(sl.role) && !xi.includes(x)).sort(
+        (a, b) => overall(b) - overall(a),
+      )[0]!;
+      xi.push(p);
+      slots.push({ role: sl.role, p });
     }
     for (const { role: r, p } of slots) {
       const c = ceilings[r];
-      ceilings[r] = c ? { att: Math.min(c.att, p.att), def: Math.min(c.def, p.def), tec: Math.min(c.tec, p.tec), men: Math.min(c.men, p.men) } : { att: p.att, def: p.def, tec: p.tec, men: p.men };
+      ceilings[r] = c
+        ? {
+            att: Math.min(c.att, p.att),
+            def: Math.min(c.def, p.def),
+            tec: Math.min(c.tec, p.tec),
+            men: Math.min(c.men, p.men),
+          }
+        : { att: p.att, def: p.def, tec: p.tec, men: p.men };
     }
   }
   return ceilings[role] ?? { att: 99, def: 99, tec: 99, men: 99 };
@@ -136,19 +192,49 @@ function ceilingFor(roles: Role[]): Stats {
 }
 
 /** Builds draftable Player objects; missing state = form 0. */
-export function buildLivePlayers(state: FormState | null, defs: CurrentPlayerDef[] = CURRENT_PLAYERS): Player[] {
+export function buildLivePlayers(
+  state: FormState | null,
+  defs: CurrentPlayerDef[] = CURRENT_PLAYERS,
+): Player[] {
   return defs.map((d) => {
     const form = clamp(Math.round(state?.players[d.id]?.form ?? 0), -FORM_MAX, FORM_MAX);
-    const raw: Player = { id: d.id, name: d.name, roles: d.roles, club: d.club, era: "Current", att: d.att, def: d.def, tec: d.tec, men: d.men };
+    const raw: Player = {
+      id: d.id,
+      name: d.name,
+      roles: d.roles,
+      club: d.club,
+      era: "Current",
+      att: d.att,
+      def: d.def,
+      tec: d.tec,
+      men: d.men,
+    };
     const cap = ceilingFor(d.roles);
-    const eff = (v: number, f: number, c: number) => clamp(Math.min(v + BASE_OFFSET + Math.round((f * FORM_STAT_PER_5) / FORM_MAX), c), 40, 99);
-    const base: Player = { ...raw, att: eff(d.att, 0, cap.att), def: eff(d.def, 0, cap.def), tec: eff(d.tec, 0, cap.tec), men: eff(d.men, 0, cap.men) };
-    return { ...raw, att: eff(d.att, form, cap.att), def: eff(d.def, form, cap.def), tec: eff(d.tec, form, cap.tec), men: eff(d.men, form, cap.men), live: { form, base: overall(base) } };
+    const eff = (v: number, f: number, c: number) =>
+      clamp(Math.min(v + BASE_OFFSET + Math.round((f * FORM_STAT_PER_5) / FORM_MAX), c), 40, 99);
+    const base: Player = {
+      ...raw,
+      att: eff(d.att, 0, cap.att),
+      def: eff(d.def, 0, cap.def),
+      tec: eff(d.tec, 0, cap.tec),
+      men: eff(d.men, 0, cap.men),
+    };
+    return {
+      ...raw,
+      att: eff(d.att, form, cap.att),
+      def: eff(d.def, form, cap.def),
+      tec: eff(d.tec, form, cap.tec),
+      men: eff(d.men, form, cap.men),
+      live: { form, base: overall(base) },
+    };
   });
 }
 
 /** Flag logic: prod switch, or preview switch + explicit ?live=1. Anything else = off. */
-export function isLiveEnabled(vars: { LIVE_PLAYERS_ENABLED?: string | undefined; LIVE_PLAYERS_PREVIEW?: string | undefined }, previewRequested: boolean): boolean {
+export function isLiveEnabled(
+  vars: { LIVE_PLAYERS_ENABLED?: string | undefined; LIVE_PLAYERS_PREVIEW?: string | undefined },
+  previewRequested: boolean,
+): boolean {
   if (vars.LIVE_PLAYERS_ENABLED === "1") return true;
   return previewRequested && vars.LIVE_PLAYERS_PREVIEW === "1";
 }
