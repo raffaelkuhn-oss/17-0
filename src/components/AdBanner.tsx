@@ -1,11 +1,12 @@
 /**
  * AdBanner
  *
- * Promotes the original basketball drafting game at 82-0.com.
- * Styled as a display-ad unit.
+ * Unpaid "Friends of 17-0" link to the original basketball drafting game at 82-0.com.
+ * Label by relationship: friend -> "Friends of 17-0" + rel noopener; use "Sponsored" and
+ * rel="sponsored" only when money or a link swap is involved.
  */
 export function AdBanner({
-  label = "Sponsored",
+  label = "Friends of 17-0",
   className = "",
 }: {
   label?: string;
@@ -17,7 +18,7 @@ export function AdBanner({
       <a
         href="https://www.82-0.com/"
         target="_blank"
-        rel="noreferrer noopener sponsored"
+        rel="noreferrer noopener"
         className="ad-banner-slot group flex-col gap-1 text-foreground no-underline transition-colors hover:border-primary"
       >
         <span className="font-display text-lg tracking-wide">82-0</span>
