@@ -97,7 +97,7 @@ function DailyFootballGame() {
         <h2 className="text-2xl">Why one draft a day works</h2>
         <ol className="mt-5 space-y-4 text-muted-foreground">
           <li>
-            <strong className="text-foreground">Same pool, same odds.</strong> Nobody can reroll
+            <strong className="text-foreground">Same pool, same chances.</strong> Nobody can reroll
             for a better draw. The leaderboard measures drafting skill, not luck of the pool.
           </li>
           <li>

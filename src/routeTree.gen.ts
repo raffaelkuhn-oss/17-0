@@ -18,6 +18,7 @@ import { Route as DailyFootballGameRouteImport } from './routes/daily-football-g
 import { Route as DraftRouteImport } from './routes/draft'
 import { Route as FootballDraftGameRouteImport } from './routes/football-draft-game'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as HowTheChancesWorkRouteImport } from './routes/how-the-chances-work'
 import { Route as LegendsRouteImport } from './routes/legends'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UclSimulatorRouteImport } from './routes/ucl-simulator'
@@ -69,6 +70,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HowTheChancesWorkRoute = HowTheChancesWorkRouteImport.update({
+  id: '/how-the-chances-work',
+  path: '/how-the-chances-work',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LegendsRoute = LegendsRouteImport.update({
   id: '/legends',
   path: '/legends',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/draft': typeof DraftRoute
   '/football-draft-game': typeof FootballDraftGameRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/how-the-chances-work': typeof HowTheChancesWorkRoute
   '/legends': typeof LegendsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ucl-simulator': typeof UclSimulatorRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/draft': typeof DraftRoute
   '/football-draft-game': typeof FootballDraftGameRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/how-the-chances-work': typeof HowTheChancesWorkRoute
   '/legends': typeof LegendsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ucl-simulator': typeof UclSimulatorRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/draft': typeof DraftRoute
   '/football-draft-game': typeof FootballDraftGameRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/how-the-chances-work': typeof HowTheChancesWorkRoute
   '/legends': typeof LegendsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ucl-simulator': typeof UclSimulatorRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/draft'
     | '/football-draft-game'
     | '/how-it-works'
+    | '/how-the-chances-work'
     | '/legends'
     | '/sitemap.xml'
     | '/ucl-simulator'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/draft'
     | '/football-draft-game'
     | '/how-it-works'
+    | '/how-the-chances-work'
     | '/legends'
     | '/sitemap.xml'
     | '/ucl-simulator'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/draft'
     | '/football-draft-game'
     | '/how-it-works'
+    | '/how-the-chances-work'
     | '/legends'
     | '/sitemap.xml'
     | '/ucl-simulator'
@@ -194,6 +206,7 @@ export interface RootRouteChildren {
   DraftRoute: typeof DraftRoute
   FootballDraftGameRoute: typeof FootballDraftGameRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  HowTheChancesWorkRoute: typeof HowTheChancesWorkRoute
   LegendsRoute: typeof LegendsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UclSimulatorRoute: typeof UclSimulatorRoute
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/how-the-chances-work': {
+      id: '/how-the-chances-work'
+      path: '/how-the-chances-work'
+      fullPath: '/how-the-chances-work'
+      preLoaderRoute: typeof HowTheChancesWorkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/legends': {
       id: '/legends'
       path: '/legends'
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   DraftRoute: DraftRoute,
   FootballDraftGameRoute: FootballDraftGameRoute,
   HowItWorksRoute: HowItWorksRoute,
+  HowTheChancesWorkRoute: HowTheChancesWorkRoute,
   LegendsRoute: LegendsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UclSimulatorRoute: UclSimulatorRoute,
