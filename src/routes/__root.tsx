@@ -223,6 +223,12 @@ function SiteFooter() {
           >
             How it works
           </Link>
+          <Link
+            to="/how-the-chances-work"
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
+            How the chances work
+          </Link>
         </nav>
         <nav aria-label="Rankings" className="flex flex-wrap gap-x-5">
           <Link

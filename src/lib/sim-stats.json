@@ -1,0 +1,18 @@
+{
+  "runs": 100000,
+  "random": {
+    "avgWins": 11.41,
+    "titlePct": 29.9,
+    "perfectPct": 0.68
+  },
+  "greedy": {
+    "avgWins": 13.33,
+    "titlePct": 55.9,
+    "perfectPct": 3.34
+  },
+  "bestXI": {
+    "avgWins": 14.03,
+    "titlePct": 70.3,
+    "perfectPct": 5.89
+  }
+}

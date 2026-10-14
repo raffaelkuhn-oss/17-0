@@ -113,3 +113,6 @@ npx wrangler secret put FOOTBALL_DATA_API_KEY         # free key: https://www.fo
 "vars": { "LIVE_PLAYERS_PREVIEW": "1" }               // then "LIVE_PLAYERS_ENABLED": "1" to go public
 ```
 Deploy, then check `npx wrangler secret list`. Balance: `LIVE=1 bun scripts/sim-harness.ts 100000` (`LIVE_FORM=5` = every current player at +5).
+
+## OG image
+`public/og-image.jpg` is the brand-v2 share card (1200x630, JPEG quality 85, ~65 KB), converted from `brand-v2/share-card-1200x630.png`. `scripts/gen-og-image.mjs` would overwrite it with the older generated design, so it now refuses to run without `--force`.

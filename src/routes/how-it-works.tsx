@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdBanner } from "@/components/AdBanner";
 import { PLAYERS } from "@/lib/players";
 import { PLAYOFF_CUTOFF } from "@/lib/sim";
+import { STATS } from "@/lib/chances-copy";
 
 const URL = absUrl("/how-it-works");
 
@@ -33,7 +34,7 @@ const FAQ = [
   },
   {
     q: "How rare is a 17-0?",
-    a: "In our simulations (100,000 runs per draft type, from the game's own engine), random picks win the title about 30% of the time but go a perfect 17-0 only about 0.7% of the time. A good draft wins the title about 56% of the time and goes 17-0 about 3.3% of the time. The best possible XI wins the title about 70% of the time and goes 17-0 about 5.9% of the time. These are simulation results, not guarantees; individual runs vary a lot.",
+    a: `In our simulations (${STATS.runs.toLocaleString("en-US")} runs per draft type, from the game's own engine), random picks win the title ${STATS.random.titlePct}% of the time but go a perfect 17-0 only ${STATS.random.perfectPct}% of the time. A good draft wins the title ${STATS.greedy.titlePct}% of the time and goes 17-0 ${STATS.greedy.perfectPct}% of the time. The best possible XI wins the title ${STATS.bestXI.titlePct}% of the time and goes 17-0 ${STATS.bestXI.perfectPct}% of the time. These are simulation results, not guarantees; individual runs vary a lot. See how the chances work for a plain-words explanation.`,
   },
   {
     q: "What is Legend IQ mode?",
