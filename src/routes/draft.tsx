@@ -2,12 +2,15 @@ import { absUrl } from "@/lib/site";
 import { createFileRoute } from "@tanstack/react-router";
 import { DraftGame, type Mode } from "@/components/DraftGame";
 import { getLivePool } from "@/lib/live/live.functions";
+import { decodeChallenge } from "@/lib/challenge";
+import { useMemo } from "react";
 
 export const Route = createFileRoute("/draft")({
   // Classic is the default and has no query param, so the canonical URL is plain /draft
   // (no redirect to ?mode=classic). Only the legend variant carries ?mode=legend.
   // ?live=1 asks for the live-players preview; the server ignores it unless LIVE_PLAYERS_PREVIEW=1.
-  validateSearch: (search: Record<string, unknown>): { mode?: Mode; live?: 1 } => ({
+  validateSearch: (search: Record<string, unknown>): { mode?: Mode; live?: 1; c?: string } => ({
+    ...(typeof search["c"] === "string" ? { c: search["c"] } : {}),
     ...(search["mode"] === "legend" ? { mode: "legend" as const } : {}),
     ...(search["live"] === 1 || search["live"] === "1" ? { live: 1 as const } : {}),
   }),
@@ -41,11 +44,24 @@ export const Route = createFileRoute("/draft")({
 });
 
 function DraftPage() {
-  const { mode = "classic" } = Route.useSearch();
+  const { mode: urlMode = "classic", c } = Route.useSearch();
   const live = Route.useLoaderData();
+  // Untrusted: anything invalid falls back to a normal draft with a neutral note.
+  const challenge = useMemo(() => (c ? decodeChallenge(c) : null), [c]);
+  const mode = challenge?.mode ?? urlMode;
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
-      <DraftGame mode={mode} extraPool={live.enabled ? live.players : undefined} />
+      {c && !challenge && (
+        <p className="mb-6 text-sm text-muted-foreground" data-testid="challenge-invalid">
+          This challenge link didn't work, so here is a new draft.
+        </p>
+      )}
+      <DraftGame
+        key={challenge ? c : "draft"}
+        mode={mode}
+        challenge={challenge ?? undefined}
+        extraPool={live.enabled ? live.players : undefined}
+      />
       {live.enabled && (
         <p className="mt-10 text-center text-xs text-muted-foreground" data-testid="fd-attribution">
           Includes {live.players.length} current players (marked Live).{" "}
