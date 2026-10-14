@@ -34,14 +34,14 @@ const FAQ = [
 export const Route = createFileRoute("/ucl-simulator")({
   head: () => ({
     meta: [
-      { title: "Champions League Simulator — Free UCL Season Simulator | 17-0" },
+      { title: "Champions League Simulator — Free UCL Season Simulator | 17-0 Draft" },
       {
         name: "description",
         content:
           "Free UCL simulator: draft an all-time XI and simulate a full Champions League season — 8 league-phase games, 4 two-legged knockout rounds and the final. No sign-up.",
       },
-      { property: "og:title", content: "Champions League Simulator — Free UCL Season Simulator | 17-0" },
-      { name: "twitter:title", content: "Champions League Simulator — Free UCL Season Simulator | 17-0" },
+      { property: "og:title", content: "Champions League Simulator — Free UCL Season Simulator | 17-0 Draft" },
+      { name: "twitter:title", content: "Champions League Simulator — Free UCL Season Simulator | 17-0 Draft" },
       {
         property: "og:description",
         content:

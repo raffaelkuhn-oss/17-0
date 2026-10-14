@@ -26,7 +26,7 @@ import type { Campaign } from "@/lib/sim";
 export const Route = createFileRoute("/daily")({
   head: () => ({
     meta: [
-      { title: "Daily Challenge — One Champions League Draft a Day | 17-0" },
+      { title: "Daily Challenge — One Champions League Draft a Day | 17-0 Draft" },
       {
         name: "description",
         content:

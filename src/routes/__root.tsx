@@ -80,7 +80,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "17-0 — Champions League All-Time Draft" },
+      { name: "theme-color", content: "#246828" },
+      { title: "Champions League All-Time Draft | 17-0 Draft" },
       {
         name: "description",
         content:
@@ -116,9 +117,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
       },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
     ],
     scripts: [
       // Cloudflare Web Analytics: off unless VITE_CF_ANALYTICS_TOKEN is set at build time.
@@ -182,9 +186,29 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <SiteHeader />
       <Outlet />
       <SiteFooter />
     </QueryClientProvider>
+  );
+}
+
+function SiteHeader() {
+  return (
+    <header className="border-b border-border bg-background px-4 py-2 sm:px-6">
+      <div className="mx-auto flex max-w-5xl items-center">
+        <Link
+          to="/"
+          className="inline-flex min-h-11 items-center gap-2.5"
+          aria-label="17-0 Draft home"
+        >
+          <img src="/logo-64.png" alt="" width={32} height={32} className="size-8 rounded-full" />
+          <span className="text-lg leading-none whitespace-nowrap">
+            <span className="font-black">17-0</span> <span className="font-medium">Draft</span>
+          </span>
+        </Link>
+      </div>
+    </header>
   );
 }
 

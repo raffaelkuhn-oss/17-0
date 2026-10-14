@@ -407,9 +407,9 @@ export function Results({
                           ? "var(--color-secondary)"
                           : "var(--color-destructive)",
                     color:
-                      m.outcome === "D"
-                        ? "var(--color-foreground)"
-                        : "var(--color-primary-foreground)",
+                      m.outcome === "W"
+                        ? "var(--color-primary-foreground)"
+                        : "var(--color-foreground)",
                     border: m.outcome === "D" ? "1px solid var(--color-border)" : "none",
                   }}
                 >

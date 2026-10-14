@@ -1,7 +1,6 @@
 import { SITE_URL, absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HomeLeaderboard } from "@/components/HomeLeaderboard";
-import stadium from "@/assets/stadium-hero.webp";
 import { AdBanner } from "@/components/AdBanner";
 import { SupportCard } from "@/components/SupportCard";
 import { PLAYERS } from "@/lib/players";
@@ -10,7 +9,7 @@ import { POSITION_PAGES, POSITION_SLUGS } from "@/lib/position-pages";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "17-0 — Draft the Perfect Champions League XI" },
+      { title: "Draft the Perfect Champions League XI | 17-0 Draft" },
       {
         name: "description",
         content:
@@ -75,15 +74,6 @@ function Index() {
   return (
     <main className="min-h-screen">
       <section className="relative isolate overflow-hidden">
-        <img
-          src={stadium}
-          alt="Floodlit European football stadium at night"
-          width={1600}
-          height={907}
-          fetchPriority="high"
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
         <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
 
         <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-16 text-center sm:pt-32">
