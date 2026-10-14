@@ -99,7 +99,8 @@ function Index() {
               </p>
               <h2 className="mt-1 text-2xl">Daily Challenge</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Everyone in the world gets the same eleven choices. Build a streak, compare results.
+                Everyone in the world starts from the same first four choices. Build a streak,
+                compare results.
               </p>
             </div>
             <span className="btn-primary hover:btn-primary-hover min-h-0! shrink-0 flex-col gap-0! rounded-xl! px-4! py-2! text-center text-xs leading-tight">

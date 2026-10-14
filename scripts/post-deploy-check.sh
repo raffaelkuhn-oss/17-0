@@ -41,5 +41,41 @@ fails=$OG_MISSING
 for p in "${PATHS[@]}"; do check "$BASE$p" || fails=$((fails + 1)); done
 [ -n "$OG" ] && { check "$OG" || fails=$((fails + 1)); }
 
+# --- http -> https redirect and HSTS ---
+# Port 80 may be unreachable from the machine running this, so try a direct request first
+# (5s timeout) and fall back to an external header fetch (api.hackertarget.com).
+HOST="${BASE#https://}"; HOST="${HOST#http://}"; HOST="${HOST%%/*}"
+if [[ "$HOST" == localhost* || "$HOST" == 127.* ]]; then
+  echo "skip http->https and HSTS checks for $HOST"
+else
+  APEX="${HOST#www.}"
+  for h in "$APEX" "www.$APEX"; do
+    out=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 5 "http://$h/")
+    rc=$?
+    code="${out%% *}"; loc="${out#* }"
+    if [ $rc -eq 0 ] && { [ "$code" = "301" ] || [ "$code" = "308" ]; } && [[ "$loc" == https://* ]]; then
+      echo "ok   http://$h/ -> $code $loc (direct)"
+      continue
+    fi
+    echo "info direct http://$h/ gave '${code:-none}' (curl exit $rc); trying hackertarget fallback"
+    hdrs=$(curl -s --max-time 20 "https://api.hackertarget.com/httpheaders/?q=http://$h/")
+    fcode=$(printf '%s\n' "$hdrs" | head -1 | grep -oE ' [0-9]{3} ' | tr -d ' ')
+    floc=$(printf '%s\n' "$hdrs" | grep -i '^location:' | head -1 | sed -E 's/^[Ll]ocation: *//' | tr -d '\r')
+    if { [ "$fcode" = "301" ] || [ "$fcode" = "308" ]; } && [[ "$floc" == https://* ]]; then
+      echo "ok   http://$h/ -> $fcode $floc (via hackertarget)"
+    else
+      echo "FAIL http://$h/ does not redirect to https (direct: '${code:-none}' exit $rc; fallback: '${fcode:-none}' '${floc:-no location}')"
+      fails=$((fails + 1))
+    fi
+  done
+  hsts=$(curl -sI --max-time 15 "https://$APEX/" | grep -i '^strict-transport-security:' | tr -d '\r')
+  if printf '%s' "$hsts" | grep -qi 'max-age=15552000'; then
+    echo "ok   HSTS on https://$APEX/: ${hsts#*: }"
+  else
+    echo "FAIL HSTS: https://$APEX/ has no strict-transport-security with max-age=15552000 (got: '${hsts:-none}')"
+    fails=$((fails + 1))
+  fi
+fi
+
 if [ "$fails" -gt 0 ]; then echo "post-deploy-check: $fails failure(s)"; exit 1; fi
 echo "post-deploy-check: all good"

@@ -21,7 +21,7 @@
 - [Home / start a draft](https://ucl17-0.com/): pick a mode and begin.
 - [Draft room](https://ucl17-0.com/draft): make the 11 picks and simulate the campaign.
 - [Legends pool](https://ucl17-0.com/legends): searchable table of all 152 legends with roles, clubs, eras and ratings.
-- [Daily challenge](https://ucl17-0.com/daily): one seeded draft per day (resets at 00:00 UTC) — everyone gets the same first four choices, later choices depend on earlier picks; streak tracking in your browser. The daily leaderboard is currently switched off.
+- [Daily challenge](https://ucl17-0.com/daily): one seeded draft per day (resets at 00:00 UTC) — everyone gets the same first four choices, later choices depend on earlier picks; streak tracking in your browser. There is no leaderboard.
 - [UCL simulator explainer](https://ucl17-0.com/ucl-simulator): what the simulator covers, season structure and FAQ.
 - [Best XI of all time](https://ucl17-0.com/best-xi-of-all-time): highest-rated all-time European XI position by position, plus the top three at every role.
 - [How it works](https://ucl17-0.com/how-it-works): full explanation of the format, ratings and simulation results, plus FAQ.

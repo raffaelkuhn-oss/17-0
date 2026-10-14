@@ -6,7 +6,7 @@ const URL = absUrl("/daily-football-game");
 const FAQ = [
   {
     q: "What is the 17-0 daily football game?",
-    a: "Every day all players worldwide start from the same seeded draft: the first four choices are identical for everyone, and later choices can differ depending on who you have already picked. You draft one XI and the season is simulated once. The daily leaderboard is currently switched off.",
+    a: "Every day all players worldwide start from the same seeded draft: the first four choices are identical for everyone, and later choices can differ depending on who you have already picked. You draft one XI and the season is simulated once. There is no leaderboard.",
   },
   {
     q: "Do I need an account for the daily challenge?",
@@ -17,8 +17,8 @@ const FAQ = [
     a: "At midnight UTC. A new draft is generated for everyone at the same moment.",
   },
   {
-    q: "How is the daily leaderboard ranked?",
-    a: "The daily leaderboard is currently switched off. When it is on, it ranks by how far your XI went in the simulated season — wins, draws and the round you reached — and the server re-simulates your exact draft before accepting a score.",
+    q: "Is there a daily leaderboard?",
+    a: "No. The daily leaderboard is not available. Your result and streak are kept in your browser.",
   },
 ];
 
@@ -42,12 +42,12 @@ export const Route = createFileRoute("/daily-football-game")({
       {
         property: "og:description",
         content:
-          "Same draft pool for everyone, one XI, one simulated season. Post your score to the daily leaderboard — free, no account.",
+          "One seeded draft for everyone, one XI, one simulated season, and a streak kept in your browser — free, no account.",
       },
       {
         name: "twitter:description",
         content:
-          "Same draft pool for everyone, one XI, one simulated season. Post your score to the daily leaderboard — free, no account.",
+          "One seeded draft for everyone, one XI, one simulated season, and a streak kept in your browser — free, no account.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: URL },
@@ -77,17 +77,17 @@ function DailyFootballGame() {
     <main className="mx-auto min-h-screen max-w-3xl px-6 py-16">
       <p className="text-xs tracking-[0.4em] text-primary uppercase">New every day</p>
       <h1 className="mt-4 text-4xl sm:text-5xl">
-        A daily football game where everyone drafts from the same pool
+        A daily football game where everyone starts from the same draft
       </h1>
       <p className="mt-5 text-lg text-muted-foreground">
         The 17-0 daily challenge is a daily football game in the Wordle mould: one puzzle per day,
-        the same for every player on earth. A fresh pool of Champions League legends is drawn at
-        midnight UTC, you draft your eleven, and the{" "}
+        seeded the same for every player on earth. A fresh draft of Champions League legends is
+        drawn at midnight UTC, you draft your eleven, and the{" "}
         <Link to="/ucl-simulator" className="text-primary underline underline-offset-4">
           Champions League simulator
         </Link>{" "}
-        plays your season once. Then you post the result to the leaderboard and see how your
-        football knowledge stacked up.
+        plays your season once. Then you see how your football knowledge stacked up and keep your
+        streak going.
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">
@@ -103,16 +103,16 @@ function DailyFootballGame() {
         <h2 className="text-2xl">Why one draft a day works</h2>
         <ol className="mt-5 space-y-4 text-muted-foreground">
           <li>
-            <strong className="text-foreground">Same pool, same chances.</strong> Nobody can reroll
-            for a better draw. The leaderboard measures drafting skill, not luck of the pool.
+            <strong className="text-foreground">Same start, same chances.</strong> Nobody can reroll
+            for a better draw, so your result reflects your drafting, not the luck of the pool.
           </li>
           <li>
             <strong className="text-foreground">Thirty seconds to play.</strong> Eleven picks, one
             simulated season, one score. It fits between matches on a Champions League night.
           </li>
           <li>
-            <strong className="text-foreground">Verified scores.</strong> The server re-runs your
-            draft before posting, so the names above you earned it.
+            <strong className="text-foreground">One go per day.</strong> A small cookie stops casual
+            replays of the daily draft, so you play it once.
           </li>
         </ol>
       </section>
