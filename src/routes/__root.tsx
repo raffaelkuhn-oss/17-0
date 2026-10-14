@@ -14,7 +14,9 @@ import { trackVisit } from "@/lib/retention";
 
 import appCss from "../styles.css?url";
 
-const CF_ANALYTICS_TOKEN = (import.meta.env["VITE_CF_ANALYTICS_TOKEN"] as string | undefined)?.trim();
+const CF_ANALYTICS_TOKEN = (
+  import.meta.env["VITE_CF_ANALYTICS_TOKEN"] as string | undefined
+)?.trim();
 
 function NotFoundComponent() {
   return (
@@ -85,13 +87,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Draft an all-time Champions League XI and simulate the whole campaign. Can you go 17-0?",
       },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "17-0" },
+      { property: "og:site_name", content: "17-0 Draft" },
       { property: "og:image", content: absUrl("/og-image.jpg") },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:type", content: "image/jpeg" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: absUrl("/og-image.jpg") },
+      {
+        property: "og:image:alt",
+        content: "17-0 Draft: 11 position cards in a 4-3-3 on a green pitch next to a 17-0 badge",
+      },
+      {
+        name: "twitter:image:alt",
+        content: "17-0 Draft: 11 position cards in a 4-3-3 on a green pitch next to a 17-0 badge",
+      },
       {
         name: "google-site-verification",
         content: "pviOn8YkPYYbzu_PP2vp8OapSTcaA2DubHk8MZymVeU",
@@ -189,47 +199,91 @@ function SiteFooter() {
           <Link to="/daily" className="inline-flex min-h-11 items-center hover:text-foreground">
             Daily challenge
           </Link>
-          <Link to="/ucl-simulator" className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/ucl-simulator"
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             Champions League simulator
           </Link>
-          <Link to="/football-draft-game" className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/football-draft-game"
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             Football draft game
           </Link>
-          <Link to="/daily-football-game" className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/daily-football-game"
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             Daily football game
           </Link>
-          <Link to="/how-it-works" className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/how-it-works"
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             How it works
           </Link>
         </nav>
         <nav aria-label="Rankings" className="flex flex-wrap gap-x-5">
-          <Link to="/best-champions-league-players" className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/best-champions-league-players"
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             Best Champions League players
           </Link>
-          <Link to="/best-xi-of-all-time" className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/best-xi-of-all-time"
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             Best XI of all time
           </Link>
-          <Link to="/best/$position" params={{ position: "strikers" }} className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/best/$position"
+            params={{ position: "strikers" }}
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             Best strikers
           </Link>
-          <Link to="/best/$position" params={{ position: "midfielders" }} className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/best/$position"
+            params={{ position: "midfielders" }}
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             Best midfielders
           </Link>
-          <Link to="/best/$position" params={{ position: "centre-backs" }} className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/best/$position"
+            params={{ position: "centre-backs" }}
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             Best centre backs
           </Link>
-          <Link to="/best/$position" params={{ position: "goalkeepers" }} className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/best/$position"
+            params={{ position: "goalkeepers" }}
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             Best goalkeepers
           </Link>
           <Link to="/legends" className="inline-flex min-h-11 items-center hover:text-foreground">
             Legends pool
           </Link>
-          <Link to="/82-0-football" className="inline-flex min-h-11 items-center hover:text-foreground">
+          <Link
+            to="/82-0-football"
+            className="inline-flex min-h-11 items-center hover:text-foreground"
+          >
             82-0 for football
           </Link>
         </nav>
-        <p className="text-xs">17-0 — draft eleven legends, win seventeen matches. Free, no account.</p>
-        <p className="text-xs">To count returning visitors, this site stores an anonymous first-visit date in your browser; there are no tracking cookies and no personal data. A small cookie only stops the daily challenge from being replayed, and Cloudflare Web Analytics counts visits without cookies.</p>
+        <p className="text-xs">
+          17-0 — draft eleven legends, win seventeen matches. Free, no account.
+        </p>
+        <p className="text-xs">
+          To count returning visitors, this site stores an anonymous first-visit date in your
+          browser; there are no tracking cookies and no personal data. A small cookie only stops the
+          daily challenge from being replayed, and Cloudflare Web Analytics counts visits without
+          cookies.
+        </p>
       </div>
     </footer>
   );
