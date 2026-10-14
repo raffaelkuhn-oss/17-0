@@ -23,6 +23,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/ucl-simulator", changefreq: "monthly", priority: "0.8" },
           { path: "/best-xi-of-all-time", changefreq: "monthly", priority: "0.8" },
           { path: "/how-it-works", changefreq: "monthly", priority: "0.7" },
+          { path: "/how-the-chances-work", changefreq: "monthly", priority: "0.6" },
           { path: "/82-0-football", changefreq: "monthly", priority: "0.8" },
           { path: "/football-draft-game", changefreq: "monthly", priority: "0.8" },
           { path: "/daily-football-game", changefreq: "monthly", priority: "0.8" },
