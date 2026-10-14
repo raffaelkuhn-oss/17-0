@@ -9,5 +9,6 @@
     { "pattern": "ucl17-0.com", "custom_domain": true },
     { "pattern": "www.ucl17-0.com", "custom_domain": true }
   ],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  "analytics_engine_datasets": [{ "binding": "RETENTION", "dataset": "ucl170_retention" }]
 }

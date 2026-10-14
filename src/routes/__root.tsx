@@ -229,6 +229,7 @@ function SiteFooter() {
           </Link>
         </nav>
         <p className="text-xs">17-0 — draft eleven legends, win seventeen matches. Free, no account.</p>
+        <p className="text-xs">To count returning visitors, this site stores an anonymous first-visit date in your browser; there are no tracking cookies and no personal data. A small cookie only stops the daily challenge from being replayed, and Cloudflare Web Analytics counts visits without cookies.</p>
       </div>
     </footer>
   );
