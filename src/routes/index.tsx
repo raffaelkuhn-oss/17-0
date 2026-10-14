@@ -102,7 +102,9 @@ function Index() {
                 Everyone in the world gets the same eleven choices. Build a streak, compare results.
               </p>
             </div>
-            <span className="btn-primary hover:btn-primary-hover shrink-0 text-sm">Play today</span>
+            <span className="btn-primary hover:btn-primary-hover min-h-0! shrink-0 flex-col gap-0! rounded-xl! border! border-[#1b3a20]! bg-[#faf7eb]! bg-none! px-4! py-2! text-center text-xs leading-tight text-[#1b3a20]! shadow-none!">
+              <span className="block">Play</span> <span className="block">today</span>
+            </span>
           </Link>
 
           <div className="mx-auto mt-6 grid max-w-3xl gap-4 sm:grid-cols-2">
