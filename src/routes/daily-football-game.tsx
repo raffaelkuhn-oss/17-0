@@ -6,19 +6,19 @@ const URL = absUrl("/daily-football-game");
 const FAQ = [
   {
     q: "What is the 17-0 daily football game?",
-    a: "Every day all players worldwide get the same randomised draft pool of Champions League legends. You draft one XI, the season is simulated once, and your result goes on the daily leaderboard under a name you choose.",
+    a: "Every day all players worldwide start from the same seeded draft: the first four choices are identical for everyone, and later choices can differ depending on who you have already picked. You draft one XI and the season is simulated once. The daily leaderboard is currently switched off.",
   },
   {
     q: "Do I need an account for the daily challenge?",
-    a: "No. Play the draft, then type any name to post your result to the leaderboard. No email, no password.",
+    a: "No. Just play the draft; no email, no password. Your result and streak are kept in your browser.",
   },
   {
     q: "When does the daily challenge reset?",
-    a: "At midnight UTC. A new pool is generated for everyone at the same moment, so the leaderboard is always a fair comparison.",
+    a: "At midnight UTC. A new draft is generated for everyone at the same moment.",
   },
   {
     q: "How is the daily leaderboard ranked?",
-    a: "By how far your XI went in the simulated season — wins, draws and the round you reached. The server re-simulates your exact draft before accepting a score, so leaderboard entries cannot be faked.",
+    a: "The daily leaderboard is currently switched off. When it is on, it ranks by how far your XI went in the simulated season — wins, draws and the round you reached — and the server re-simulates your exact draft before accepting a score.",
   },
 ];
 
@@ -31,8 +31,14 @@ export const Route = createFileRoute("/daily-football-game")({
         content:
           "A daily football game for Champions League fans: everyone gets the same legend pool, drafts one XI, and the simulation decides. Free, no account, new challenge every day.",
       },
-      { property: "og:title", content: "Daily Football Game — One Champions League Draft a Day | 17-0 Draft" },
-      { name: "twitter:title", content: "Daily Football Game — One Champions League Draft a Day | 17-0 Draft" },
+      {
+        property: "og:title",
+        content: "Daily Football Game — One Champions League Draft a Day | 17-0 Draft",
+      },
+      {
+        name: "twitter:title",
+        content: "Daily Football Game — One Champions League Draft a Day | 17-0 Draft",
+      },
       {
         property: "og:description",
         content:

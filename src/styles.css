@@ -48,7 +48,6 @@
   --color-ring: var(--ring);
   --color-pitch: var(--pitch);
   --color-gold: var(--gold);
-  --color-elite: var(--elite);
 }
 
 @utility font-display {
@@ -76,11 +75,12 @@
   --destructive: #d23c63;
   --destructive-foreground: #ffffff;
   --border: #388e3c;
-  --input: #388e3c;
+  /* Input borders, ghost-button borders, notice frames and focus rings must be ≥3:1
+     against what they sit on (WCAG 1.4.11): #EBF5EB on the page, #246828 / #1B3A20 in cards. */
+  --input: #ebf5eb;
   --ring: #ebf5eb;
   --pitch: #ebf5eb;
   --gold: #fae3ab;
-  --elite: oklch(0.7 0.2 330);
 
   --gradient-hero: transparent;
   --gradient-accent: linear-gradient(100deg, #faf7eb, #ebf5eb);
@@ -116,6 +116,11 @@
   /* Labels (small uppercase kickers, table heads, chips): Inter 600 per brand v2 */
   :is(p, span, label, th, dt, div, li, a).uppercase {
     font-weight: 600;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
   }
 
   h1,
@@ -160,9 +165,15 @@
   --color-accent: #7d6429;
   --color-accent-foreground: #faf7eb;
   --color-destructive: #b93557;
+  --input: #246828;
+  --color-input: #246828;
+  --ring: #1b3a20;
+  --color-ring: #1b3a20;
   color: #1b3a20;
   background-color: #faf7eb;
-  box-shadow: 0 0 0 6px #246828, 0 10px 18px -4px #1e5a22;
+  box-shadow:
+    0 0 0 6px #246828,
+    0 10px 18px -4px #1e5a22;
   border: 1px solid var(--color-border);
 }
 
@@ -208,7 +219,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-input);
   background-color: oklch(1 0 0 / 0.04);
   color: var(--color-foreground);
   transition:
@@ -219,7 +230,7 @@
 @utility ad-banner {
   width: 100%;
   border-radius: var(--radius-xl);
-  border: 1px dashed var(--color-border);
+  border: 1px dashed var(--color-input);
   background-color: oklch(1 0 0 / 0.02);
   padding: 0.75rem;
   text-align: center;

@@ -95,7 +95,7 @@ export function DailyLeaderboard({
             maxLength={20}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
-            className="w-full rounded-lg border border-primary/40 bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+            className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
           />
           <button
             onClick={submit}

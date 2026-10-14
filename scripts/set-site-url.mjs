@@ -6,7 +6,7 @@ const url = (process.env.VITE_SITE_URL ?? "").trim().replace(/\/+$/, "");
 if (url) {
   for (const f of ["public/robots.txt", "public/llms.txt"]) {
     const s = readFileSync(f, "utf8");
-    writeFileSync(f, s.replace(/https?:\/\/ucl-17-0\.lovable\.app|https?:\/\/[^\s/)]+(?=\/sitemap\.xml)/g, url));
+    writeFileSync(f, s.replace(/https?:\/\/[^\s/)]+(?=\/sitemap\.xml)/g, url));
   }
   console.log(`Site URL set to ${url}`);
 }

@@ -22,7 +22,7 @@ const FAQ = [
   },
   {
     q: "How is a match simulated?",
-    a: "Your eleven picks are aggregated into attack, midfield and defence ratings. Those are compared to an opponent strength that increases each round, producing an attacking and defensive edge. Goals for both teams are then drawn from a Poisson distribution, with a mentality-based clutch bonus applied in knockout rounds.",
+    a: "Your eleven picks are aggregated into attack, midfield and defence ratings. Those are compared to an opponent strength that rises through the league phase and again through the knockout rounds (the final is the hardest match), producing an attacking and defensive edge. Goals for both teams are then drawn from a Poisson distribution, with a mentality-based clutch bonus applied in knockout rounds.",
   },
   {
     q: "How many points do I need to survive the league phase?",
@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: "Is 17-0 free?",
-    a: "Yes. 17-0 is completely free, has no account requirement, and is supported by sponsorship and optional crypto donations.",
+    a: "Yes. 17-0 is completely free and has no account requirement.",
   },
 ];
 
@@ -141,9 +141,11 @@ function HowItWorks() {
             cutoff. Miss it and your run ends in the league phase.
           </li>
           <li>
-            <strong className="text-foreground">Knockout playoff, round of 16, quarter-final,
-            semi-final.</strong> Two legs each, eight matches in total. No draws: a level aggregate
-            goes to a penalty shootout weighted by your squad's Mentality.
+            <strong className="text-foreground">
+              Knockout playoff, round of 16, quarter-final, semi-final.
+            </strong>{" "}
+            Two legs each, eight matches in total. No draws: a level aggregate goes to a penalty
+            shootout weighted by your squad's Mentality.
           </li>
           <li>
             <strong className="text-foreground">The final — 1 match.</strong> Win it and the
@@ -156,11 +158,12 @@ function HowItWorks() {
         <h2 className="text-2xl">Ratings and the maths</h2>
         <p className="text-muted-foreground">
           Every one of the {PLAYERS.length} legends in the pool is rated for Attack, Defence,
-          Technique and Mentality, and is restricted to the roles they actually played — a right
-          back cannot be slotted in at centre back. Your XI is aggregated into attack, midfield and
-          defence unit ratings, compared against an opponent strength that climbs every round, and
-          goals are drawn from a Poisson distribution based on that edge. From the knockout playoff
-          onwards, a clutch bonus derived from Mentality is added.
+          Technique and Mentality, and can only be drafted into a role they actually played — a pure
+          right back cannot be slotted in at centre back. Your XI is aggregated into attack,
+          midfield and defence unit ratings, compared against an opponent strength that climbs
+          through the league phase and again through the knockout rounds, and goals are drawn from a
+          Poisson distribution based on that edge. From the knockout playoff onwards, a clutch bonus
+          derived from Mentality is added.
         </p>
       </section>
 
