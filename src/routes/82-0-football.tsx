@@ -44,6 +44,9 @@ function Page() {
         to European football: pick an all-time Champions League XI from legends like Messi, Ronaldo,
         Maldini and Zidane, then simulate the whole campaign. Lose once and the perfect run is gone.
       </p>
+      <p className="mt-3 text-sm text-muted-foreground">
+        17-0 is an independent fan project and is not affiliated with 82-0.
+      </p>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link to="/draft" className="btn-primary hover:btn-primary-hover">
           Play 17-0 now
