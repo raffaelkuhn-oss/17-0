@@ -6,20 +6,10 @@ import { ShareCard } from "@/components/ShareCard";
 import { FORMATION, PLAYERS, overall, type Player } from "@/lib/players";
 import { recordLabel } from "@/lib/record";
 import { trackEvent } from "@/lib/retention";
-import { candidatesFor, PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
+import { PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
+import { encodeChallenge, replayChallenge, slotCandidates, type Challenge } from "@/lib/challenge";
 
 export type Mode = "classic" | "legend";
-
-function rngFactory(seed: number) {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 export type DraftGameProps = {
   mode: Mode;
@@ -37,6 +27,8 @@ export type DraftGameProps = {
   allowReplay?: boolean | undefined;
   /** Flagged live-players feature only: extra current players mixed into the legends pool. */
   extraPool?: Player[] | undefined;
+  /** A friend's challenge link: same seed (pool + season), legends-only pool, never the Daily. */
+  challenge?: Challenge | undefined;
 };
 
 export function DraftGame({
@@ -49,39 +41,46 @@ export function DraftGame({
   intro,
   allowReplay = true,
   extraPool,
+  challenge,
 }: DraftGameProps) {
+  const isDaily = fixedSeed !== undefined && !challenge;
+  const theirs = useMemo(() => (challenge ? replayChallenge(challenge) : null), [challenge]);
   // Without extraPool this is the exact legends array, so seeds/candidates are unchanged.
-  const pool = useMemo(() => (extraPool?.length ? [...PLAYERS, ...extraPool] : PLAYERS), [extraPool]);
+  const pool = useMemo(() => (!challenge && extraPool?.length ? [...PLAYERS, ...extraPool] : PLAYERS), [extraPool, challenge]);
   // Fixed initial seed so SSR and hydration render identical candidate orders.
-  const [seed, setSeed] = useState(fixedSeed ?? 12345);
+  const [seed, setSeed] = useState(challenge?.seed ?? fixedSeed ?? 12345);
   const [picks, setPicks] = useState<Player[]>([]);
+  const [pickIdx, setPickIdx] = useState<number[]>([]);
   const [results, setResults] = useState<Campaign | null>(null);
+  const [inChallenge, setInChallenge] = useState(!!challenge);
 
   useEffect(() => {
-    if (fixedSeed === undefined) setSeed(Math.floor(Math.random() * 1e9));
-  }, [fixedSeed]);
+    if (fixedSeed === undefined && !challenge) setSeed(Math.floor(Math.random() * 1e9));
+  }, [fixedSeed, challenge]);
 
   const step = picks.length;
   const slot = FORMATION[step];
 
   const candidates = useMemo(() => {
     if (!slot) return [];
-    const taken = new Set(picks.map((p) => p.id));
-    return candidatesFor(slot.role, taken, 4, rngFactory(seed + step * 7919), pool);
+    return slotCandidates(seed, step, picks, pool);
   }, [slot, picks, seed, step, pool]);
 
   function reset() {
     setPicks([]);
+    setPickIdx([]);
     setResults(null);
+    setInChallenge(false);
     if (fixedSeed === undefined) setSeed(Math.floor(Math.random() * 1e9));
   }
 
   function run() {
     const campaign = simulate(picks, seed);
     setResults(campaign);
-    trackEvent("sim_complete", fixedSeed !== undefined ? "daily" : mode);
-    if (fixedSeed !== undefined) trackEvent("daily_complete", "daily");
-    onComplete?.(campaign, picks);
+    trackEvent("sim_complete", isDaily ? "daily" : mode);
+    if (isDaily) trackEvent("daily_complete", "daily");
+    // Challenge runs never report to the Daily / leaderboard handlers.
+    if (!inChallenge) onComplete?.(campaign, picks);
   }
 
   if (results) {
@@ -91,6 +90,11 @@ export function DraftGame({
         campaign={results}
         onReset={allowReplay ? reset : undefined}
         contextLabel={contextLabel}
+        challengeCode={
+          // Only plain legends-pool drafts can be shared (not the Daily, not the live preview).
+          !isDaily && fixedSeed === undefined && pool === PLAYERS ? encodeChallenge({ mode, seed, picks: pickIdx }) : undefined
+        }
+        theirs={inChallenge ? theirs?.campaign : undefined}
       />
     );
   }
@@ -105,6 +109,13 @@ export function DraftGame({
 
       {intro}
 
+      {inChallenge && theirs && (
+        <p className="surface mt-6 rounded-2xl p-4 text-sm" data-testid="challenge-banner">
+          A friend's challenge: same pool, same 17 matches. They went{" "}
+          <strong data-testid="challenge-theirs">{recordLabel(theirs.campaign)}</strong>. Can you do better?
+        </p>
+      )}
+
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div>
           {slot ? (
@@ -115,8 +126,9 @@ export function DraftGame({
                   // instead of being re-ordered (which the browser reports as layout shift).
                   key={i}
                   onClick={() => {
-                    if (step === 0) trackEvent("draft_start", fixedSeed !== undefined ? "daily" : mode);
+                    if (step === 0) trackEvent("draft_start", isDaily ? "daily" : mode);
                     setPicks((prev) => [...prev, p]);
+                    setPickIdx((prev) => [...prev, i]);
                   }}
                   aria-label={pickLabel(p, mode)}
                   className={`surface rounded-2xl p-5 text-left transition-transform hover:-translate-y-1 hover:border-primary ${CARD_MIN_H}`}
@@ -274,12 +286,28 @@ export function Results({
   campaign,
   onReset,
   contextLabel,
+  challengeCode,
+  theirs,
 }: {
   picks: Player[];
   campaign: Campaign;
   onReset?: (() => void) | undefined;
   contextLabel?: string | undefined;
+  challengeCode?: string | undefined;
+  theirs?: Campaign | undefined;
 }) {
+  const [copied, setCopied] = useState(false);
+  async function shareChallenge() {
+    if (!challengeCode) return;
+    const url = `${window.location.origin}/draft?c=${challengeCode}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      window.prompt("Copy this link", url);
+    }
+    trackEvent("share_click");
+    setCopied(true);
+  }
   const { results, won: w, drawn: d, lost: l, points, eliminatedIn, champion, perfect } = campaign;
   const r = teamRatings(picks);
 
@@ -315,7 +343,22 @@ export function Results({
             {perfect ? "PERFECT CAMPAIGN 🏆" : "EUROPEAN CHAMPIONS 🏆"}
           </p>
         )}
+        {theirs && (
+          <p className="mt-3 text-sm text-muted-foreground" data-testid="challenge-compare">
+            Your friend went {recordLabel(theirs)} with the same pool.
+          </p>
+        )}
         <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {challengeCode && (
+            <button
+              onClick={shareChallenge}
+              className="btn-ghost"
+              data-testid="challenge-button"
+              data-challenge={challengeCode}
+            >
+              Challenge a friend
+            </button>
+          )}
           {onReset && (
             <button onClick={onReset} className="btn-primary hover:btn-primary-hover">
               Draft again
@@ -325,6 +368,11 @@ export function Results({
             Home
           </Link>
         </div>
+        {copied && (
+          <p role="status" className="mt-3 text-sm text-primary">
+            Link copied. Your friend gets the same pool of legends.
+          </p>
+        )}
       </div>
 
       <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_300px]">
