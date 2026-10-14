@@ -1,5 +1,12 @@
 // Generates public/og-image.jpg (1200x630): original design, no photos/crests/third-party marks.
 // Run: node scripts/gen-og-image.mjs  (needs sharp + Anton/Barlow fonts installed for fontconfig)
+// WARNING: public/og-image.jpg is now the brand-v2 share card (brand-v2/share-card-1200x630.png,
+// JPEG q85). Running this script OVERWRITES it with the older generated design. It refuses unless
+// you pass --force.
+if (!process.argv.includes("--force")) {
+  console.error("gen-og-image: refusing to overwrite brand-v2 og-image.jpg; pass --force to regenerate the old design.");
+  process.exit(1);
+}
 import sharp from "sharp";
 import { fileURLToPath } from "node:url";
 
