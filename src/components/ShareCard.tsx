@@ -188,7 +188,7 @@ export function ShareCard({
             value={manualText}
             rows={6}
             onFocus={(e) => e.currentTarget.select()}
-            className="mt-1 w-full rounded-lg border border-border bg-secondary p-2 text-base"
+            className="mt-1 w-full rounded-lg border border-input bg-secondary p-2 text-base"
           />
         </div>
       )}

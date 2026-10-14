@@ -89,12 +89,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "17-0 Draft" },
-      { property: "og:image", content: absUrl("/og-image.jpg") },
+      { property: "og:image", content: absUrl("/og-image-v2.jpg") },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:type", content: "image/jpeg" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: absUrl("/og-image.jpg") },
+      { name: "twitter:image", content: absUrl("/og-image-v2.jpg") },
       {
         property: "og:image:alt",
         content: "17-0 Draft: 11 position cards in a 4-3-3 on a green pitch next to a 17-0 badge",
@@ -123,6 +123,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
       { rel: "icon", href: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+      { rel: "manifest", href: "/site.webmanifest" },
     ],
     scripts: [
       // Cloudflare Web Analytics: off unless VITE_CF_ANALYTICS_TOKEN is set at build time.

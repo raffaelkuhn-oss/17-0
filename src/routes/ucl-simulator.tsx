@@ -1,3 +1,4 @@
+import { STATS } from "@/lib/chances-copy";
 import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PLAYERS } from "@/lib/players";
@@ -23,11 +24,11 @@ const FAQ = [
   },
   {
     q: "How is each match simulated?",
-    a: "Your XI produces attack, midfield, defence and mentality ratings. Those are compared against a rising opponent strength curve to derive scoring rates, and goals are drawn from a Poisson distribution. Knockout rounds add a clutch modifier based on mentality, and level aggregates go to a mentality-weighted penalty shootout.",
+    a: "Your XI produces attack, midfield, defence and mentality ratings. Those are compared against an opponent strength that rises through the league phase and again through the knockout rounds to derive scoring rates, and goals are drawn from a Poisson distribution. Knockout rounds add a clutch modifier based on mentality, and level aggregates go to a mentality-weighted penalty shootout.",
   },
   {
     q: "What does a 17-0 mean?",
-    a: "Seventeen wins from seventeen matches plus the trophy. In our simulations, about 3% of good drafts and about 6% of the best possible XI achieve it, versus under 1% for random picks.",
+    a: `Seventeen wins from seventeen matches plus the trophy. In our simulations (${STATS.runs.toLocaleString("en-US")} runs per draft type), a good draft achieves it ${STATS.greedy.perfectPct}% of the time and the best possible XI ${STATS.bestXI.perfectPct}%, versus ${STATS.random.perfectPct}% for random picks.`,
   },
 ];
 
@@ -40,8 +41,14 @@ export const Route = createFileRoute("/ucl-simulator")({
         content:
           "Free UCL simulator: draft an all-time XI and simulate a full Champions League season — 8 league-phase games, 4 two-legged knockout rounds and the final. No sign-up.",
       },
-      { property: "og:title", content: "Champions League Simulator — Free UCL Season Simulator | 17-0 Draft" },
-      { name: "twitter:title", content: "Champions League Simulator — Free UCL Season Simulator | 17-0 Draft" },
+      {
+        property: "og:title",
+        content: "Champions League Simulator — Free UCL Season Simulator | 17-0 Draft",
+      },
+      {
+        name: "twitter:title",
+        content: "Champions League Simulator — Free UCL Season Simulator | 17-0 Draft",
+      },
       {
         property: "og:description",
         content:
@@ -83,10 +90,11 @@ function UclSimulator() {
         Champions League simulator — play a full UCL season in your browser
       </h1>
       <p className="mt-5 text-lg text-muted-foreground">
-        17-0 is a free Champions League simulator (UCL simulator) you play in the browser. You draft eleven all-time European
-        legends, one per position, and the engine simulates the whole campaign under the current
-        36-team format: eight league-phase matches, a knockout playoff, round of 16, quarter-final
-        and semi-final over two legs each, and the final. No sign-up, no download, no cost.
+        17-0 is a free Champions League simulator (UCL simulator) you play in the browser. You draft
+        eleven all-time European legends, one per position, and the engine simulates the whole
+        campaign under the current 36-team format: eight league-phase matches, a knockout playoff,
+        round of 16, quarter-final and semi-final over two legs each, and the final. No sign-up, no
+        download, no cost.
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">
@@ -123,7 +131,9 @@ function UclSimulator() {
             points, draws one. You need 11 points to reach the top 24 and continue.
           </li>
           <li>
-            <strong className="text-foreground">Knockout playoff, R16, QF, SF (matches 9-16).</strong>{" "}
+            <strong className="text-foreground">
+              Knockout playoff, R16, QF, SF (matches 9-16).
+            </strong>{" "}
             Two legs each, decided on aggregate. Level ties go to a penalty shootout weighted by
             your squad's mentality rating.
           </li>

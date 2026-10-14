@@ -11,17 +11,17 @@
 ## How the simulation works
 - You pick 11 players, one per position, in a 4-3-3 shape (GK, RB, CB, CB, LB, DM, CM, AM, RW, ST, LW).
 - Each player has four attributes: Attack, Defence, Technique, Mentality.
-- Team ratings are aggregated by unit (attack, midfield, defence) and compared to an opponent strength that ramps up round by round.
+- Team ratings are aggregated by unit (attack, midfield, defence) and compared to an opponent strength that rises through the league phase and again through the knockout rounds (the final is the hardest match).
 - Goals are drawn from a Poisson distribution based on the attack/defence edge.
 - League phase: 8 matches, draws possible; 11 points are needed to advance (matching the real top-24 cutoff).
-- Knockout: playoff, round of 16, quarter-final and semi-final are two legs each; level aggregate goes to a mentality-weighted penalty shootout. The final is a single match.
-- A perfect 17-0 means winning all 17 matches and lifting the trophy. In the game's own simulations (100,000 runs per draft type), random picks win the title about 30% of the time and go 17-0 about 0.7%; a good draft wins the title about 56% and goes 17-0 about 3.3%; the best possible XI wins the title about 70% and goes 17-0 about 5.9%. These are simulation results, not guarantees.
+- Knockout: playoff, round of 16, quarter-final and semi-final are two legs each; each leg always has a winner (extra time), and a level aggregate goes to a mentality-weighted penalty shootout. The final is a single match.
+- A perfect 17-0 means winning all 17 matches and lifting the trophy. In the game's own simulations (100,000 runs per draft type), random picks win the title 29.9% of the time and go 17-0 0.68%; a good draft (highest-rated card each pick) wins the title 55.9% and goes 17-0 3.34%; the best possible XI wins the title 70.3% and goes 17-0 5.89%. These are simulation results, not guarantees.
 
 ## Key pages
 - [Home / start a draft](https://ucl17-0.com/): pick a mode and begin.
 - [Draft room](https://ucl17-0.com/draft): make the 11 picks and simulate the campaign.
 - [Legends pool](https://ucl17-0.com/legends): searchable table of all 152 legends with roles, clubs, eras and ratings.
-- [Daily challenge](https://ucl17-0.com/daily): one shared draft per day — every player worldwide gets the same eleven choices, with streak tracking.
+- [Daily challenge](https://ucl17-0.com/daily): one seeded draft per day (resets at 00:00 UTC) — everyone gets the same first four choices, later choices depend on earlier picks; streak tracking in your browser. There is no leaderboard.
 - [UCL simulator explainer](https://ucl17-0.com/ucl-simulator): what the simulator covers, season structure and FAQ.
 - [Best XI of all time](https://ucl17-0.com/best-xi-of-all-time): highest-rated all-time European XI position by position, plus the top three at every role.
 - [How it works](https://ucl17-0.com/how-it-works): full explanation of the format, ratings and simulation results, plus FAQ.
@@ -40,5 +40,5 @@ Sponsoring inquiries: ucl17zero@gmail.com
 
 ## More guides
 - [Football draft game](https://ucl17-0.com/football-draft-game): how the draft modes work
-- [Daily football game](https://ucl17-0.com/daily-football-game): the daily challenge and leaderboard
+- [Daily football game](https://ucl17-0.com/daily-football-game): the daily challenge
 - [Best Champions League players of all time](https://ucl17-0.com/best-champions-league-players): top 25 ranked

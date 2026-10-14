@@ -1,3 +1,4 @@
+import { STATS } from "@/lib/chances-copy";
 import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PLAYERS } from "@/lib/players";
@@ -19,7 +20,7 @@ const FAQ = [
   },
   {
     q: "How is the draft scored?",
-    a: "Your XI produces attack, midfield, defence and mentality ratings. The engine simulates eight league-phase matches, four two-legged knockout rounds and the final. Winning all seventeen matches — a 17-0 — is rare. In the game's own simulations, about 3% of good drafts and about 6% of the best possible XI go 17-0, versus under 1% for random picks.",
+    a: `Your XI produces attack, midfield, defence and mentality ratings. The engine simulates eight league-phase matches, four two-legged knockout rounds and the final. Winning all seventeen matches — a 17-0 — is rare. In the game's own simulations, a good draft goes 17-0 ${STATS.greedy.perfectPct}% of the time and the best possible XI ${STATS.bestXI.perfectPct}%, versus ${STATS.random.perfectPct}% for random picks.`,
   },
 ];
 
@@ -32,8 +33,14 @@ export const Route = createFileRoute("/football-draft-game")({
         content:
           "Free football draft game in your browser: pick eleven Champions League legends, one per position, and simulate a full 17-match season. No sign-up, no download.",
       },
-      { property: "og:title", content: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft" },
-      { name: "twitter:title", content: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft" },
+      {
+        property: "og:title",
+        content: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft",
+      },
+      {
+        name: "twitter:title",
+        content: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft",
+      },
       {
         property: "og:description",
         content:
@@ -109,8 +116,8 @@ function FootballDraftGame() {
           </li>
           <li>
             <strong className="text-foreground">The season decides.</strong> Eight league-phase
-            matches with draws, then two-legged knockouts where only wins keep you alive. The
-            maths is on the{" "}
+            matches with draws, then two-legged knockouts where only wins keep you alive. The maths
+            is on the{" "}
             <Link to="/how-it-works" className="text-primary underline underline-offset-4">
               how it works
             </Link>{" "}

@@ -10,8 +10,18 @@ const oneIn = (n: number) => `about 1 in ${Math.round(100 / n)}`;
 
 export const CHANCE_ROWS = [
   { key: "random", label: "Random picks", hint: "you pick any card each time", s: STATS.random },
-  { key: "greedy", label: "A good draft", hint: "you take the highest-rated card each time", s: STATS.greedy },
-  { key: "bestXI", label: "The best possible XI", hint: "the top-rated legend in every slot", s: STATS.bestXI },
+  {
+    key: "greedy",
+    label: "A good draft",
+    hint: "you take the highest-rated card each time",
+    s: STATS.greedy,
+  },
+  {
+    key: "bestXI",
+    label: "The best possible XI",
+    hint: "the top-rated legend in every slot",
+    s: STATS.bestXI,
+  },
 ] as const;
 
 export const CHANCES_INTRO =
@@ -19,7 +29,7 @@ export const CHANCES_INTRO =
 
 export const CHANCES_POINTS: string[] = [
   "Your eleven picks are turned into three numbers: attack, midfield and defence. Mentality helps in the knockout rounds.",
-  "Each opponent gets a bit stronger as the season goes on, so the final is the hardest match.",
+  "Opponents get stronger through the league phase and again through the knockout rounds, so the final is the hardest match.",
   "For every match, the game compares your numbers with the opponent's and then rolls the goals. A stronger team scores more often, but upsets happen, just like real football.",
   "Nobody picks the result by hand. The same draft and the same season seed always give the same result.",
   `Even the best possible XI goes 17-0 only ${pct(STATS.bestXI.perfectPct)} of the time (${oneIn(STATS.bestXI.perfectPct)}). A perfect season is meant to be rare.`,

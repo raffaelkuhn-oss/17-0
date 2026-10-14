@@ -22,7 +22,8 @@ bun run preview    # serve the production build locally
    ```
 3. `bun run deploy` — builds and runs `wrangler deploy`. Live at `https://ucl-17-0.<your-subdomain>.workers.dev`.
 4. **Custom domain:** Cloudflare dashboard → Workers & Pages → `ucl-17-0` → Settings → Domains & Routes → Add → Custom domain (domain's DNS must be on Cloudflare). Or add to `wrangler.jsonc`: `"routes": [{ "pattern": "example.com", "custom_domain": true }]`.
-5. **Site URL:** canonicals, og:url, sitemap, JSON-LD and share links come from `src/lib/site.ts`. Set `VITE_SITE_URL=https://example.com` at build time (e.g. `VITE_SITE_URL=https://example.com bun run deploy`, or in `.env`); the build also rewrites `public/robots.txt` and `public/llms.txt`. Default is still `https://ucl-17-0.lovable.app` until a domain exists.
+5. **Site URL:** canonicals, og:url, sitemap, JSON-LD and share links come from `src/lib/site.ts`. Set `VITE_SITE_URL=https://example.com` at build time (e.g. `VITE_SITE_URL=https://example.com bun run deploy`, or in `.env`); the build also rewrites `public/robots.txt` and `public/llms.txt`. Default is `https://ucl17-0.com`.
+6. **Mandatory after every deploy:** run `scripts/post-deploy-check.sh` (optionally with a base URL, default `https://ucl17-0.com`). It curls every icon, `site.webmanifest`, the published og:image URL, the old `og-image.jpg` and the key pages, retries each for up to 60s (new static assets can take a few seconds to propagate), and exits non-zero on any failure. It also checks that `http://<host>/` and `http://www.<host>/` redirect (301/308) to an `https://` Location (a direct curl with a 5s timeout, falling back to `https://api.hackertarget.com/httpheaders/` when port 80 is unreachable, as on the agent box), and that `https://<host>/` sends `strict-transport-security` with `max-age=15552000`. Each failure prints a clear `FAIL` line. A deploy is not done until it passes.
 
 ## Optional build-time settings
 
@@ -115,4 +116,4 @@ npx wrangler secret put FOOTBALL_DATA_API_KEY         # free key: https://www.fo
 Deploy, then check `npx wrangler secret list`. Balance: `LIVE=1 bun scripts/sim-harness.ts 100000` (`LIVE_FORM=5` = every current player at +5).
 
 ## OG image
-`public/og-image.jpg` is the brand-v2 share card (1200x630, JPEG quality 85, ~65 KB), converted from `brand-v2/share-card-1200x630.png`. `scripts/gen-og-image.mjs` would overwrite it with the older generated design, so it now refuses to run without `--force`.
+`public/og-image-v2.jpg` is the brand-v2 share card used by og:image/twitter:image; `public/og-image.jpg` is an identical copy kept so existing shares keep working. Both are 1200x630, JPEG quality 85, ~65 KB, converted from `brand-v2/share-card-1200x630.png`. `scripts/gen-og-image.mjs` would overwrite it with the older generated design, so it now refuses to run without `--force`.

@@ -30,7 +30,7 @@ export const Route = createFileRoute("/daily")({
       {
         name: "description",
         content:
-          "Every player in the world gets the same eleven draft choices each day. Draft your XI, simulate the 17-match campaign, and build a streak.",
+          "Every player in the world starts from the same seeded draft each day. Draft your XI, simulate the 17-match campaign, and build a streak.",
       },
       { property: "og:title", content: "17-0 Daily Challenge — Same Draft for Everyone" },
       { name: "twitter:title", content: "17-0 Daily Challenge — Same Draft for Everyone" },
@@ -59,7 +59,10 @@ const DAILY_INTRO =
 /** Short rules blurb: static text, so it is part of the server-rendered HTML. */
 function DailyRules() {
   return (
-    <ul className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground" aria-label="Daily rules">
+    <ul
+      className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground"
+      aria-label="Daily rules"
+    >
       {[
         "Same 11-slot draft for everyone each day",
         "One attempt",
@@ -170,7 +173,7 @@ function StatsPanel({ stats, hours }: { stats: DailyStats | null; hours: number 
         ))}
       </div>
       <p className="mt-4 text-xs text-muted-foreground">
-        Everyone gets the same eleven choices today. Next draft in {hours}h.
+        Everyone starts from the same first four choices today. Next draft in {hours}h.
       </p>
     </aside>
   );
@@ -255,7 +258,6 @@ function PlayedToday({
           )}
           <DailyLeaderboard dayKey={dayKey} record={record} />
           <StatsPanel stats={stats} hours={hours} />
-
         </div>
       </div>
     </div>

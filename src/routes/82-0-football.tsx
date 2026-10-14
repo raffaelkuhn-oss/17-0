@@ -30,7 +30,7 @@ const ROWS = [
   ["Squad size", "Starting five", "Starting XI, one per position"],
   ["Season format", "82 regular-season games", "8 league-phase games + 4 two-legged knockout ties + final"],
   ["Draws", "No", "Yes, in the league phase"],
-  ["Daily challenge", "Yes", "Yes, with a global name leaderboard"],
+  ["Daily challenge", "Yes", "Yes, with a streak kept in your browser"],
   ["Price", "Free", "Free, no sign-up"],
 ];
 
