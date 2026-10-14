@@ -22,7 +22,7 @@ export function ResultCard({
   rating: number;
   contextLabel?: string | undefined;
 }) {
-  const accent = campaign.perfect ? "#fae3ab" : campaign.champion ? "#ebf5eb" : "#d23c63";
+  const accent = campaign.perfect ? "#7d6429" : campaign.champion ? "#246828" : "#b93557";
 
   return (
     <div className="surface overflow-hidden rounded-2xl">
@@ -78,12 +78,12 @@ export function ResultCard({
               style={{
                 backgroundColor:
                   m.outcome === "W"
-                    ? "#ebf5eb"
+                    ? "#246828"
                     : m.outcome === "D"
-                      ? "#ffffff28"
-                      : "#d23c63",
+                      ? "#efe9d4"
+                      : "#b93557",
                 color:
-                  m.outcome === "W" ? "#1b3a20" : "#ffffff",
+                  m.outcome === "D" ? "var(--color-foreground)" : "#ffffff",
               }}
             >
               {m.outcome}

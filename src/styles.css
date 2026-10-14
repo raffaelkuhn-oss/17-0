@@ -83,7 +83,6 @@
   --elite: oklch(0.7 0.2 330);
 
   --gradient-hero: transparent;
-  --gradient-card: linear-gradient(#246828, #246828);
   --gradient-accent: linear-gradient(100deg, #faf7eb, #ebf5eb);
   --shadow-glow: 0 10px 24px -14px rgb(0 0 0 / 0.55);
   --shadow-card: 0 6px 14px -6px #1e5a22;
@@ -114,6 +113,11 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Labels (small uppercase kickers, table heads, chips): Inter 600 per brand v2 */
+  :is(p, span, label, th, dt, div, li, a).uppercase {
+    font-weight: 600;
+  }
+
   h1,
   h2,
   h3 {
@@ -124,9 +128,41 @@
   }
 }
 
+/* Brand v2 cards: cream #FAF7EB with ink #1B3A20 text on a #246828 surface,
+   #1E5A22 shadow. Tokens are re-scoped so everything inside a card stays AA. */
 @utility surface {
-  background-image: var(--gradient-card);
-  box-shadow: var(--shadow-card);
+  --foreground: #1b3a20;
+  --card-foreground: #1b3a20;
+  --muted-foreground: #556d57;
+  --primary: #246828;
+  --primary-foreground: #faf7eb;
+  --secondary: #efe9d4;
+  --secondary-foreground: #1b3a20;
+  --muted: #efe9d4;
+  --background: #faf7eb;
+  --pitch: #246828;
+  --gold: #7d6429;
+  --accent: #7d6429;
+  --accent-foreground: #faf7eb;
+  --destructive: #b93557;
+  --gradient-accent: linear-gradient(#246828, #246828);
+  --color-foreground: #1b3a20;
+  --color-card-foreground: #1b3a20;
+  --color-muted-foreground: #556d57;
+  --color-primary: #246828;
+  --color-primary-foreground: #faf7eb;
+  --color-secondary: #efe9d4;
+  --color-secondary-foreground: #1b3a20;
+  --color-muted: #efe9d4;
+  --color-background: #faf7eb;
+  --color-pitch: #246828;
+  --color-gold: #7d6429;
+  --color-accent: #7d6429;
+  --color-accent-foreground: #faf7eb;
+  --color-destructive: #b93557;
+  color: #1b3a20;
+  background-color: #faf7eb;
+  box-shadow: 0 0 0 6px #246828, 0 10px 18px -4px #1e5a22;
   border: 1px solid var(--color-border);
 }
 
