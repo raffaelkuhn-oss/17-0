@@ -5,11 +5,18 @@ export function dailyKey(d = new Date()): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Deterministic seed derived from the date key — same player pool for everyone. */
+/**
+ * Deterministic seed derived from the date key + the pool version.
+ * DAILY_POOL_VERSION must bump when the legends pool or SIM_TUNING changes in a way that
+ * would make today's candidates or results differ. Deploy on a UTC midnight boundary so an
+ * in-progress daily never straddles two versions.
+ */
+export const DAILY_POOL_VERSION = "v2";
 export function dailySeed(key = dailyKey()): number {
+  const material = `${key}|${DAILY_POOL_VERSION}`;
   let h = 2166136261;
-  for (let i = 0; i < key.length; i++) {
-    h ^= key.charCodeAt(i);
+  for (let i = 0; i < material.length; i++) {
+    h ^= material.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
   return h >>> 0;

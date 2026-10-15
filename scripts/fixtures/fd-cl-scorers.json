@@ -1,7 +1,7 @@
 {"count":4,"filters":{"limit":100},"competition":{"id":2001,"code":"CL","type":"CUP"},
  "scorers":[
-  {"player":{"id":9001,"name":"Lautaro Martínez","position":"Offence"},"team":{"id":108,"name":"FC Internazionale Milano"},"playedMatches":3,"goals":4,"assists":1,"penalties":1},
-  {"player":{"id":9002,"name":"Lamine Yamal","position":"Offence"},"team":{"id":81,"name":"FC Barcelona"},"playedMatches":3,"goals":2,"assists":3,"penalties":null},
-  {"player":{"id":9003,"name":"Declan Rice","position":"Midfield"},"team":{"id":57,"name":"Arsenal FC"},"playedMatches":3,"goals":1,"assists":null,"penalties":null},
+  {"player":{"id":3220,"name":"Lautaro Martínez","position":"Offence"},"team":{"id":108,"name":"FC Internazionale Milano"},"playedMatches":3,"goals":4,"assists":1,"penalties":1},
+  {"player":{"id":202283,"name":"Lamine Yamal","position":"Offence"},"team":{"id":81,"name":"FC Barcelona"},"playedMatches":3,"goals":2,"assists":3,"penalties":null},
+  {"player":{"id":8215,"name":"Declan Rice","position":"Midfield"},"team":{"id":57,"name":"Arsenal FC"},"playedMatches":3,"goals":1,"assists":null,"penalties":null},
   {"player":{"id":9004,"name":"Somebody Else","position":"Offence"},"team":{"id":999,"name":"Other FC"},"playedMatches":3,"goals":5,"assists":0,"penalties":0}
  ]}
