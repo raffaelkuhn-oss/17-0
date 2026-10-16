@@ -1,9 +1,10 @@
 /**
  * Cookieless, anonymous retention measurement (see README "Retention tracking").
  *
- * Browser side keeps ONE localStorage entry: first-seen day, last-seen day and the
- * acquisition-source bucket of the first visit. No ID, no cookie, nothing personal.
- * Events carry only {event, bucket, mode, source}; the Worker turns them into aggregate
+ * Browser side keeps ONE localStorage entry: first-seen day, last-seen day, the
+ * acquisition-source bucket and creator code (c01-c10, if any) of the first visit, and a
+ * "day-7 return already counted" flag. No ID, no cookie, nothing personal.
+ * Events carry only {event, bucket, mode, source, ref}; the Worker turns them into aggregate
  * counters. Off unless VITE_RETENTION_ENABLED=1 at build time AND the Worker has the
  * RETENTION Analytics Engine binding.
  */
@@ -45,7 +46,22 @@ export const SOURCES = [
 ] as const;
 export type Source = (typeof SOURCES)[number];
 
-export type RetentionState = { firstSeen: string; lastSeen: string; source: Source };
+/** Creator codes for the creator test (closed list; anything else is ignored). */
+export const REFS = ["c01", "c02", "c03", "c04", "c05", "c06", "c07", "c08", "c09", "c10"] as const;
+export type Ref = (typeof REFS)[number];
+export type RefOrNone = Ref | "none";
+
+/** Returns the ref code if it is exactly one of REFS (case-insensitive, trimmed), else null. */
+export function parseRef(raw: string | null | undefined): Ref | null {
+  const v = (raw ?? "").trim().toLowerCase();
+  return (REFS as readonly string[]).includes(v) ? (v as Ref) : null;
+}
+
+/**
+ * ref: creator code from the FIRST visit only (never overwritten).
+ * d7: true once return_d7 has fired (or a day-7+ visit already happened), so it fires once per browser.
+ */
+export type RetentionState = { firstSeen: string; lastSeen: string; source: Source; ref?: Ref; d7?: true };
 
 export const RETENTION_KEY = "ucl170:retention";
 
@@ -98,25 +114,46 @@ export function bucketFor(daysSinceFirst: number): Bucket {
 /**
  * Pure: given the stored state (or null) and today, returns the next state plus the events
  * to send. "visit" fires at most once per UTC day per browser, so daily counts approximate
- * unique visitors; return_d1 / return_d7 fire on the first visit of day 1 / day 7.
+ * unique visitors; return_d1 fires on the first visit of day 1; return_d7 fires once per
+ * browser on the first visit on day 7 or later. ref is only taken on the first visit.
  */
 export function nextVisit(
   prev: RetentionState | null,
   now: Date,
   source: Source,
+  ref: Ref | null = null,
 ): { state: RetentionState; events: RetentionEvent[]; bucket: Bucket } {
   const today = toDay(now);
   if (!prev || !/^\d{4}-\d{2}-\d{2}$/.test(prev.firstSeen)) {
-    return { state: { firstSeen: today, lastSeen: today, source }, events: ["visit"], bucket: "d0" };
+    const state: RetentionState = { firstSeen: today, lastSeen: today, source };
+    if (ref) state.ref = ref;
+    return { state, events: ["visit"], bucket: "d0" };
   }
   const since = Math.max(0, daysBetween(prev.firstSeen, today));
   const bucket = bucketFor(since);
-  const state = { ...prev, lastSeen: today };
+  const state: RetentionState = { ...prev, lastSeen: today };
+  if (state.ref && !parseRef(state.ref)) delete state.ref;
+  // Migration: a browser that already had a visit on day 7+ (old "exactly day 7" logic) is done.
+  if (!state.d7 && /^\d{4}-\d{2}-\d{2}$/.test(prev.lastSeen) && daysBetween(prev.firstSeen, prev.lastSeen) >= 7) {
+    state.d7 = true;
+  }
   if (prev.lastSeen === today) return { state, events: [], bucket };
   const events: RetentionEvent[] = ["visit"];
   if (since === 1) events.push("return_d1");
-  if (since === 7) events.push("return_d7");
+  if (since >= 7 && !state.d7) {
+    events.push("return_d7");
+    state.d7 = true;
+  }
   return { state, events, bucket };
+}
+
+/** Events that carry the creator ref (visit is included because it is the denominator). */
+export const REF_EVENTS: readonly RetentionEvent[] = ["visit", "draft_start", "sim_complete", "share_click", "return_d7"];
+
+/** Pure: the JSON body sent to POST /e. */
+export function eventBody(event: RetentionEvent, bucket: Bucket, source: Source, mode: RetentionMode, ref: Ref | null | undefined) {
+  const r: RefOrNone = REF_EVENTS.includes(event) && ref && parseRef(ref) ? ref : "none";
+  return { event, bucket, mode, source, ref: r };
 }
 
 // ---------------- browser side ----------------
@@ -132,9 +169,9 @@ function load(): RetentionState | null {
   }
 }
 
-function send(event: RetentionEvent, bucket: Bucket, source: Source, mode: RetentionMode = "none") {
+function send(event: RetentionEvent, bucket: Bucket, source: Source, mode: RetentionMode = "none", ref?: Ref) {
   try {
-    const body = JSON.stringify({ event, bucket, mode, source });
+    const body = JSON.stringify(eventBody(event, bucket, source, mode, ref));
     const blob = new Blob([body], { type: "application/json" });
     if (!navigator.sendBeacon?.("/e", blob)) {
       void fetch("/e", { method: "POST", body, keepalive: true, credentials: "omit", headers: { "content-type": "application/json" } }).catch(() => {});
@@ -149,13 +186,13 @@ export function trackVisit() {
   if (!ENABLED || typeof window === "undefined" || typeof localStorage === "undefined") return;
   const params = new URLSearchParams(window.location.search);
   const src = sourceBucket(params.get("utm_source"), document.referrer, window.location.hostname);
-  const { state, events, bucket } = nextVisit(load(), new Date(), src);
+  const { state, events, bucket } = nextVisit(load(), new Date(), src, parseRef(params.get("ref")));
   try {
     localStorage.setItem(RETENTION_KEY, JSON.stringify(state));
   } catch {
     return;
   }
-  for (const e of events) send(e, bucket, state.source);
+  for (const e of events) send(e, bucket, state.source, "none", state.ref);
 }
 
 /** Gameplay events (draft_start, sim_complete, daily_complete, share_click). */
@@ -163,5 +200,5 @@ export function trackEvent(event: RetentionEvent, mode: RetentionMode = "none") 
   if (!ENABLED || typeof window === "undefined") return;
   const s = load();
   if (!s) return;
-  send(event, bucketFor(Math.max(0, daysBetween(s.firstSeen, toDay(new Date())))), s.source, mode);
+  send(event, bucketFor(Math.max(0, daysBetween(s.firstSeen, toDay(new Date())))), s.source, mode, s.ref);
 }
