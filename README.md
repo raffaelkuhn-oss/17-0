@@ -58,11 +58,11 @@ cookies and storage (or switching browser/device) gives a fresh attempt.
 
 ## Retention tracking (optional, off by default)
 
-Cookieless D1/D7 retention by acquisition source. No cookie banner needed: nothing personal or cross-site is stored.
+Cookieless D1/D7 retention by acquisition source and creator code. No cookie banner needed: nothing personal or cross-site is stored. Footer wording (keep in sync, `src/routes/__root.tsx`): the site stores an anonymous first-visit date and the link you arrived from (e.g. a creator code) in the browser, and counts game events like drafts, finished runs and shares in aggregate; no ID, no tracking cookies, no personal data.
 
-- **Browser:** one localStorage key `ucl170:retention` = `{ firstSeen, lastSeen, source }` (UTC days + a source bucket from a closed list: `utm_source`, else referrer host, else `direct`). No ID.
-- **Worker:** `POST /e` with `{event, bucket, mode, source}` writes one Workers Analytics Engine data point (`blobs = [event, bucket, mode, source]`, `double = 1`). No IP, user agent, cookie or identifier is read or stored. Unknown values are dropped; always answers 204.
-- **Events:** `visit` (max once per UTC day per browser), `return_d1`, `return_d7`, `draft_start`, `sim_complete`, `daily_complete`, `share_click`. Buckets: `d0`, `d1`, `d2-6`, `d7`, `d8+`.
+- **Browser:** one localStorage key `ucl170:retention` = `{ firstSeen, lastSeen, source, ref?, d7? }` (UTC days + a source bucket from a closed list: `utm_source`, else referrer host, else `direct`; `ref` = creator code from `?ref=` on the **first** visit only, accepted only if it is `c01`–`c10`, never overwritten; `d7` = "day-7 return already counted"). No ID.
+- **Worker:** `POST /e` with `{event, bucket, mode, source, ref}` writes one Workers Analytics Engine data point (`blobs = [event, bucket, mode, source, ref]`, `double = 1`; `ref` is `c01`–`c10` or `none`). No IP, user agent, cookie or identifier is read or stored. Unknown values are dropped; always answers 204.
+- **Events:** `visit` (max once per UTC day per browser), `return_d1`, `return_d7`, `draft_start`, `sim_complete`, `daily_complete`, `share_click`. Buckets: `d0`, `d1`, `d2-6`, `d7`, `d8+`. `return_d7` = first visit on day 7 **or later**, once per browser. `ref` is attached to `visit`, `draft_start`, `sim_complete`, `share_click`, `return_d7` (others send `none`).
 - **Harmless when off:** the client sends nothing unless built with `VITE_RETENTION_ENABLED=1`; the endpoint is a no-op unless the `RETENTION` binding exists.
 
 **Enable (PM):** Analytics Engine is on the Workers Free plan and the dataset is created on first write (no create command). Add to `wrangler.jsonc`, then build with `VITE_RETENTION_ENABLED=1` and deploy:
@@ -80,7 +80,9 @@ WHERE timestamp > NOW() - INTERVAL '30' DAY AND blob1 IN ('visit','return_d1','r
 GROUP BY day, source, event, bucket ORDER BY day
 ```
 
-D1 for day N = `return_d1` on day N ÷ `visit`/`d0` on day N-1 (same source). D7 = `return_d7` on day N ÷ `visit`/`d0` on day N-7. Approximate (clearing storage or switching device looks like a new visitor) but honest without accounts. Analytics Engine keeps data for 3 months.
+D1 for day N = `return_d1` on day N ÷ `visit`/`d0` on day N-1 (same source). D7+ = `return_d7` ÷ `visit`/`d0` for the same first-visit cohort (it can fire on any day ≥ 7, so read it over a window that ends at least 7 days after the cohort).
+
+**Creator test (per ref):** see `docs/creator-test-analytics.md`; quick table: `CF_ACCOUNT_ID=… CF_ANALYTICS_TOKEN=… bun scripts/creator-dashboard.ts 30`. Approximate (clearing storage or switching device looks like a new visitor) but honest without accounts. Analytics Engine keeps data for 3 months.
 
 ## Live current players (feature flag, OFF by default)
 
