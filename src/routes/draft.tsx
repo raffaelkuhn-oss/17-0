@@ -18,7 +18,7 @@ export const Route = createFileRoute("/draft")({
   loader: ({ deps }) => getLivePool({ data: { preview: deps.live } }),
   head: () => ({
     meta: [
-      { title: "Draft Room | 17-0 Draft" },
+      { title: "Draft Room — 17-0 Champions League Draft" },
       {
         name: "description",
         content:
