@@ -8,6 +8,9 @@ set -uo pipefail
 BASE="${1:-https://ucl17-0.com}"
 BASE="${BASE%/}"
 TIMEOUT=60
+# Mark every request as our own test traffic (see src/lib/traffic.ts, docs/creator-test-analytics.md).
+INTERNAL_UA="17-0-post-deploy-check ucl170-internal-check"
+curl() { command curl -A "$INTERNAL_UA" "$@"; }
 
 PATHS=(
   / /draft /daily /legends /how-it-works /how-the-chances-work

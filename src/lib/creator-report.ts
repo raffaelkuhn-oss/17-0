@@ -79,12 +79,13 @@ export function formatTable(rows: RefSummary[]): string {
   return [line(head), w.map((n) => "-".repeat(n)).join("  "), ...body.map(line)].join("\n");
 }
 
-/** SQL for the per-ref report. days is clamped to 1..90 (Analytics Engine retention). */
+/** SQL for the per-ref report. days is clamped to 1..90 (Analytics Engine retention). Internal test traffic (blob6) is excluded. */
 export function reportSql(days: number): string {
   const d = Math.min(90, Math.max(1, Math.floor(days) || 30));
   return `SELECT blob5 AS ref, blob1 AS event, blob2 AS bucket, SUM(_sample_interval) AS n
 FROM ucl170_retention
 WHERE timestamp > NOW() - INTERVAL '${d}' DAY
   AND blob1 IN ('visit','draft_start','sim_complete','share_click','return_d7')
+  AND blob6 != 'internal'
 GROUP BY ref, event, bucket`;
 }

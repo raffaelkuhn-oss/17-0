@@ -2,6 +2,7 @@
 import { bucketFor, eventBody, nextVisit, parseRef, sourceBucket } from "../src/lib/retention";
 import { formatTable, reportSql, summarize } from "../src/lib/creator-report";
 import { handleRetentionEvent } from "../src/lib/retention-server";
+import { INTERNAL_UA_TOKEN, trafficFor } from "../src/lib/traffic";
 let fails = 0;
 const t = (n: string, c: boolean) => { console.log((c ? "PASS " : "FAIL ") + n); if (!c) fails++; };
 const d = (s: string) => new Date(s + "T12:00:00Z");
@@ -89,5 +90,15 @@ t("report order c01,c02,none", sum.map((s) => s.ref).join() === "c01,c02,none");
 t("report rates", sum[0]!.firstVisits === 10 && sum[0]!.shareRate === 0.25 && sum[0]!.returnRate === 0.3 && sum[1]!.shareRate === null);
 t("report table renders", formatTable(sum).split("\n").length === 5);
 t("sql clamps days", reportSql(500).includes("'90' DAY") && reportSql(0).includes("'30' DAY") && reportSql(-3).includes("'1' DAY"));
+// ---- internal traffic marker ----
+t("traffic: token/headless -> internal, normal UA/none -> public",
+  trafficFor(`Mozilla/5.0 ${INTERNAL_UA_TOKEN}`) === "internal" && trafficFor("Mozilla/5.0 HeadlessChrome/120") === "internal" &&
+  trafficFor("Mozilla/5.0 (iPhone) Safari") === "public" && trafficFor(null) === "public");
+writes.length = 0;
+await handleRetentionEvent(new Request("https://x/e", { method: "POST", body: JSON.stringify({ event: "visit", bucket: "d0", source: "x" }), headers: { "user-agent": `curl/8 ${INTERNAL_UA_TOKEN}` } }), env);
+await handleRetentionEvent(req({ event: "visit", bucket: "d0", source: "x" }), env);
+t("server: blob6 = internal/public, UA itself not stored",
+  writes.map((w) => (w as { blobs: string[] }).blobs[5]).join() === "internal,public" && !JSON.stringify(writes).includes("curl"));
+t("sql excludes internal", reportSql(7).includes("blob6 != 'internal'"));
 t("GET -> 405", (await handleRetentionEvent(new Request("https://x/e"), env)).status === 405);
 process.exit(fails ? 1 : 0);

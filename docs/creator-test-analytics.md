@@ -2,7 +2,7 @@
 
 Links: `https://ucl17-0.com/?ref=c01&utm_source=tiktok&utm_medium=creator&utm_campaign=creator-test` (c01–c10).
 Data: Workers Analytics Engine dataset `ucl170_retention`, aggregate counts only (no IP, cookie or ID).
-Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source · `blob5` ref (`c01`–`c10`/`none`; empty for rows written before this change).
+Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source · `blob5` ref (`c01`–`c10`/`none`; empty for rows written before this change) · `blob6` traffic (`internal`/`public`; empty for rows written before 18 Oct 2026).
 
 ## Dashboard (terminal)
 
@@ -38,6 +38,31 @@ FROM ucl170_retention
 WHERE timestamp > NOW() - INTERVAL '60' DAY AND blob1 = 'return_d7'
 GROUP BY day, ref ORDER BY day, ref
 ```
+
+## Internal test traffic
+
+Our own scripted checks (post-deploy-check, Playwright/headless runs) send the fixed user-agent token
+`ucl170-internal-check`. The Worker maps it, and the default `HeadlessChrome` UA, to `blob6 = 'internal'`;
+the UA itself is never stored. `creator-dashboard.ts` already excludes it. In your own queries add:
+
+```sql
+  AND blob6 != 'internal'   -- keeps 'public' and pre-marker rows (blob6 = '')
+```
+
+Internal-only view: `WHERE blob6 = 'internal'`.
+
+Any new script that loads the site must send the token:
+- curl: `-A "my-check ucl170-internal-check"`
+- Playwright: `browser.newContext({ userAgent: navigator.userAgent + " ucl170-internal-check" })`
+
+Rows written before the marker (e.g. the scripted runs on Wed 14 Oct) can't be re-tagged; treat that day as noisy
+or subtract the known test counts by hand.
+
+**Cloudflare Web Analytics** has no user-agent or IP filter for its JS beacon, so tagged visits can't be excluded
+there after the fact. The served HTML currently contains no `cloudflareinsights` beacon (checked 16 Oct). If Web
+Analytics is turned on, block the beacon in scripted runs instead: Playwright
+`context.route("**/static.cloudflareinsights.com/**", r => r.abort())` (curl never runs the beacon). In the zone's
+HTTP traffic analytics you can filter out `User Agent contains ucl170-internal-check`.
 
 ## Caveats
 - First visit wins: people who visited before keep no ref.

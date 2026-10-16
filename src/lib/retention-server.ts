@@ -1,3 +1,4 @@
+import { trafficFor } from "./traffic";
 import { BUCKETS, MODES, REFS, RETENTION_EVENTS, SOURCES } from "./retention";
 
 /** Minimal Workers Analytics Engine binding shape (avoids depending on generated types). */
@@ -8,8 +9,9 @@ export type AnalyticsEngineLike = {
 const has = (list: readonly string[], v: unknown): v is string => typeof v === "string" && list.includes(v);
 
 /**
- * POST /e handler. Writes one aggregate data point: blobs [event, bucket, mode, source, ref],
- * double 1. Never reads or stores IP, user agent, cookies or any identifier.
+ * POST /e handler. Writes one aggregate data point: blobs [event, bucket, mode, source, ref, traffic],
+ * double 1. traffic is "internal" when the user agent carries our fixed test marker (see traffic.ts),
+ * else "public". Never stores IP, user agent, cookies or any identifier.
  * Returns 204 in every case (including when the RETENTION binding is missing).
  */
 export async function handleRetentionEvent(request: Request, env: unknown): Promise<Response> {
@@ -30,7 +32,7 @@ export async function handleRetentionEvent(request: Request, env: unknown): Prom
   const m = has(MODES, mode) ? mode : "none";
   const r = has(REFS, ref) ? ref : "none";
   try {
-    ds.writeDataPoint({ blobs: [event, bucket, m, source, r], doubles: [1], indexes: [event] });
+    ds.writeDataPoint({ blobs: [event, bucket, m, source, r, trafficFor(request.headers.get("user-agent"))], doubles: [1], indexes: [event] });
   } catch (e) {
     console.error("retention write failed", e);
   }
