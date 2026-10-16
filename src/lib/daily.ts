@@ -32,6 +32,12 @@ export function dailyLabel(key = dailyKey()): string {
   });
 }
 
+/** Daily number for share text: #1 = 2026-10-11 (launch day), +1 per UTC day. */
+export const DAILY_EPOCH = "2026-10-11";
+export function dailyNumber(key = dailyKey()): number {
+  return Math.round((Date.parse(key + "T00:00:00Z") - Date.parse(DAILY_EPOCH + "T00:00:00Z")) / 86_400_000) + 1;
+}
+
 /** Hours until the next puzzle drops (00:00 UTC). */
 export function hoursUntilNext(now = new Date()): number {
   const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);

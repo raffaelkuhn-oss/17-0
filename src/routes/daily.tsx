@@ -10,6 +10,7 @@ import { ResultCard } from "@/components/ResultCard";
 import {
   dailyKey,
   dailyLabel,
+  dailyNumber,
   dailySeed,
   hoursUntilNext,
   loadDailyResult,
@@ -18,7 +19,7 @@ import {
   type DailyRecord,
   type DailyStats,
 } from "@/lib/daily";
-import { ShareCard } from "@/components/ShareCard";
+import { ShareButton, ShareCard } from "@/components/ShareCard";
 import { recordLabel } from "@/lib/record";
 import { overall, PLAYERS, type Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
@@ -140,6 +141,7 @@ function DailyPage() {
           fixedSeed={dailySeed(key)}
           contextLabel={label}
           kicker={label}
+          dailyNumber={dailyNumber(key)}
           intro={<DailyRules />}
           allowReplay={false}
           onComplete={onComplete}
@@ -221,6 +223,11 @@ function PlayedToday({
           // Fallback for old saved records without a full campaign: no ResultCard, so show the record here.
           <p className="mt-4 font-display text-5xl text-gradient">{recordLabel(record)}</p>
         )}
+        {record?.campaign && (
+          <div className="mx-auto mt-5 max-w-sm">
+            <ShareButton campaign={record.campaign} dailyNumber={dailyNumber(dayKey)} trackMode="daily" />
+          </div>
+        )}
       </header>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -254,6 +261,8 @@ function PlayedToday({
               campaign={record.campaign}
               rating={record.rating ?? 0}
               contextLabel={label}
+              dailyNumber={dailyNumber(dayKey)}
+              trackMode="daily"
             />
           )}
           <DailyLeaderboard dayKey={dayKey} record={record} />

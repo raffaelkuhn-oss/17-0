@@ -2,7 +2,7 @@
 
 Links: `https://ucl17-0.com/?ref=c01&utm_source=tiktok&utm_medium=creator&utm_campaign=creator-test` (c01–c10).
 Data: Workers Analytics Engine dataset `ucl170_retention`, aggregate counts only (no IP, cookie or ID).
-Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source · `blob5` ref (`c01`–`c10`/`none`; empty for rows written before this change) · `blob6` traffic (`internal`/`public`; empty for rows written before 18 Oct 2026).
+Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source · `blob5` ref (`c01`–`c10`/`none`; empty for rows written before this change) · `blob6` traffic (`internal`/`public`; empty for rows written before 18 Oct 2026) · `blob7` share path on `share_click` (`native`/`copy`/`x`/`whatsapp`/`download`/`challenge`; `none` otherwise, empty before the share PR).
 
 ## Dashboard (terminal)
 
@@ -37,6 +37,14 @@ SELECT toDate(timestamp) AS day, blob5 AS ref, SUM(_sample_interval) AS returns_
 FROM ucl170_retention
 WHERE timestamp > NOW() - INTERVAL '60' DAY AND blob1 = 'return_d7'
 GROUP BY day, ref ORDER BY day, ref
+```
+
+Shares per path (share rate per finished run = shares ÷ sim_complete):
+```sql
+SELECT blob7 AS via, SUM(_sample_interval) AS shares
+FROM ucl170_retention
+WHERE timestamp > NOW() - INTERVAL '14' DAY AND blob1 = 'share_click' AND blob6 != 'internal'
+GROUP BY via ORDER BY shares DESC
 ```
 
 ## Internal test traffic

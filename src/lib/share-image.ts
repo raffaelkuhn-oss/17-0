@@ -158,5 +158,5 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
   const url = SITE_HOST;
   ctx.fillText(url, W - 64 - ctx.measureText(url).width, H - 42);
 
-  return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
+  return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/jpeg", 0.85));
 }
