@@ -43,13 +43,13 @@ export type ShareTextInput = {
   campaign: Campaign;
   /** Daily number (#1 = 11 Oct 2026); set only for Daily Challenge runs. */
   dailyNumber?: number | undefined;
-  /** v2 challenge code for this exact run; links to /draft?c=<code>. */
+  /** v2 challenge code for this exact run; links to the run page /r/<code>. */
   challengeCode?: string | undefined;
   origin?: string;
 };
 
 export function runLink({ dailyNumber, challengeCode, origin = SITE_URL }: Omit<ShareTextInput, "campaign">): string {
-  if (challengeCode) return `${origin}/draft?c=${challengeCode}`;
+  if (challengeCode) return `${origin}/r/${challengeCode}`;
   if (dailyNumber !== undefined) return `${origin}/daily`;
   return `${origin}/draft`;
 }

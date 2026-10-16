@@ -1,0 +1,36 @@
+import { readFileSync } from "node:fs";
+import ATLAS from "../src/assets/og/atlas.json";
+import { encodeChallenge, CHALLENGE_VERSION_LEGACY } from "../src/lib/challenge";
+import { PLAYERS } from "../src/lib/players";
+import { PLAYERS_V1 } from "../src/lib/legacy/players-v1";
+import { OG_VERSION, RUN_OG_PATH, runFromCode, runOgPath, runTitle } from "../src/lib/og/run-page";
+import { renderRunPng } from "../src/lib/og/run-image";
+import { shareText } from "../src/lib/share-text";
+let fails = 0;
+const t = (n: string, c: boolean) => { console.log((c ? "PASS " : "FAIL ") + n); if (!c) fails++; };
+const atlas = new Uint8Array(readFileSync(new URL("../src/assets/og/atlas.bin", import.meta.url)));
+const code = encodeChallenge({ mode: "classic", seed: 1000, picks: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2] });
+const run = runFromCode(code);
+t("valid v2 code rebuilds XI + campaign", !!run && run.picks.length === 11 && run.campaign.results.length >= 8 && !run.legacy);
+t("rebuild is deterministic", JSON.stringify(runFromCode(code)?.campaign) === JSON.stringify(run?.campaign));
+t("invalid codes -> null", [ "", "garbage", "%3Cscript%3E", code.slice(0, -2), "x".repeat(90)].every((c) => runFromCode(c) === null));
+const v1 = encodeChallenge({ mode: "classic", seed: 1000, picks: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2], version: CHALLENGE_VERSION_LEGACY });
+t("v1 code replays on the frozen pool", runFromCode(v1)?.legacy === true);
+t("og path round-trip", RUN_OG_PATH.exec(runOgPath(code))?.[1] === code && runOgPath(code).endsWith(`og-v${OG_VERSION}.png`));
+t("title has no betting words", !/odds|bet/i.test(runTitle(run!.campaign)));
+t("share link points at /r/<code>", shareText({ campaign: run!.campaign, challengeCode: code, origin: "https://ucl17-0.com" }).url === `https://ucl17-0.com/r/${code}`);
+const glyphs = (ATLAS.styles as unknown as Record<string, { glyphs: Record<string, unknown> }>).name!.glyphs;
+const missing = new Set([...PLAYERS, ...PLAYERS_V1].flatMap((p) => [...p.name]).filter((ch) => !glyphs[ch]));
+t(`atlas covers every player-name character (missing: ${[...missing].join("") || "none"})`, missing.size === 0);
+let maxSize = 0, ok = true;
+for (let i = 0; i < 20; i++) {
+  const r = runFromCode(encodeChallenge({ mode: i % 2 ? "legend" : "classic", seed: 5000 + i * 9973, picks: Array.from({ length: 11 }, (_, k) => (k + i) % 4) }));
+  if (!r) continue;
+  const png = await renderRunPng(r.picks, r.campaign, atlas);
+  const dv = new DataView(png.buffer, png.byteOffset);
+  ok &&= png[1] === 0x50 && png[2] === 0x4e && png[3] === 0x47 && dv.getUint32(16) === 1200 && dv.getUint32(20) === 630;
+  maxSize = Math.max(maxSize, png.length);
+}
+t("renders valid 1200x630 PNGs", ok);
+t(`PNG under 100 KB (max ${maxSize} B)`, maxSize > 5000 && maxSize < 100_000);
+process.exit(fails ? 1 : 0);
