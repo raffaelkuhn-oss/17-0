@@ -83,7 +83,9 @@ fi
 # Only a missing title or description counts as a failure.
 SITEMAP_URLS=$(curl -fsS --max-time 15 "$BASE/sitemap.xml" | grep -oE '<loc>[^<]+</loc>' | sed -E 's#</?loc>##g')
 if [ -z "$SITEMAP_URLS" ]; then echo "warn no URLs found in $BASE/sitemap.xml; skipping length check"; fi
+len_pages=0; len_warns=0; len_fails=0
 for u in $SITEMAP_URLS; do
+  len_pages=$((len_pages + 1))
   [[ "$BASE" != https://ucl17-0.com ]] && u="$BASE/${u#https://*/}"
   res=$(curl -fsS --max-time 15 "$u" | python3 -c '
 import sys, re, html
@@ -95,11 +97,14 @@ t = html.unescape(t.group(1)).strip() if t else ""
 d = html.unescape(d.group(1)).strip() if d else ""
 print(len(t), len(d))')
   read -r tl dl <<<"$res"
-  if [ "${tl:-0}" -eq 0 ]; then echo "FAIL title missing: $u"; fails=$((fails + 1));
-  elif [ "$tl" -lt 30 ] || [ "$tl" -gt 60 ]; then echo "warn title $tl chars (want 30-60): $u"; fi
-  if [ "${dl:-0}" -eq 0 ]; then echo "FAIL meta description missing: $u"; fails=$((fails + 1));
-  elif [ "$dl" -lt 70 ] || [ "$dl" -gt 160 ]; then echo "warn description $dl chars (want 70-160): $u"; fi
+  if [ "${tl:-0}" -eq 0 ]; then echo "FAIL title missing: $u"; fails=$((fails + 1)); len_fails=$((len_fails + 1));
+  elif [ "$tl" -lt 30 ] || [ "$tl" -gt 60 ]; then echo "warn title $tl chars (want 30-60): $u"; len_warns=$((len_warns + 1)); fi
+  if [ "${dl:-0}" -eq 0 ]; then echo "FAIL meta description missing: $u"; fails=$((fails + 1)); len_fails=$((len_fails + 1));
+  elif [ "$dl" -lt 70 ] || [ "$dl" -gt 160 ]; then echo "warn description $dl chars (want 70-160): $u"; len_warns=$((len_warns + 1)); fi
 done
+# Always print a summary so a silent pass is distinguishable from a check that never ran.
+echo "length check: $len_pages pages, $len_warns warnings, $len_fails failures"
+if [ "$len_pages" -eq 0 ]; then echo "FAIL length check ran on 0 pages"; fails=$((fails + 1)); fi
 
 if [ "$fails" -gt 0 ]; then echo "post-deploy-check: $fails failure(s)"; exit 1; fi
 echo "post-deploy-check: all good"
