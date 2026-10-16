@@ -53,7 +53,7 @@ export const Route = createFileRoute("/how-it-works")({
       {
         name: "description",
         content:
-          "How 17-0 works: draft an all-time Champions League XI, simulate 8 league-phase games and four two-legged knockout rounds, and see how often a perfect 17-0 happens in our simulations.",
+          "How 17-0 works: draft an all-time Champions League XI, simulate 8 league-phase games and four two-legged knockout rounds, and see how often 17-0 happens.",
       },
       { property: "og:title", content: "How the 17-0 Champions League Simulator Works" },
       { name: "twitter:title", content: "How the 17-0 Champions League Simulator Works" },

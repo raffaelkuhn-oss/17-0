@@ -8,14 +8,14 @@ const URL = absUrl("/best-champions-league-players");
 export const Route = createFileRoute("/best-champions-league-players")({
   head: () => ({
     meta: [
-      { title: "Best Champions League Players of All Time (Top 25 Ranked) | 17-0 Draft" },
+      { title: "Best Champions League Players of All Time: Top 25 Ranked" },
       {
         name: "description",
         content:
-          "The 25 best Champions League players of all time, ranked by attack, defence, technique and big-game mentality — from a pool of 150+ European legends you can draft in the free 17-0 game.",
+          "The 25 best Champions League players of all time, ranked by attack, defence, technique and big-game mentality. Draft them in the free 17-0 game.",
       },
-      { property: "og:title", content: "Best Champions League Players of All Time (Top 25 Ranked) | 17-0 Draft" },
-      { name: "twitter:title", content: "Best Champions League Players of All Time (Top 25 Ranked) | 17-0 Draft" },
+      { property: "og:title", content: "Best Champions League Players of All Time: Top 25 Ranked" },
+      { name: "twitter:title", content: "Best Champions League Players of All Time: Top 25 Ranked" },
       {
         property: "og:description",
         content:

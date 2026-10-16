@@ -135,7 +135,7 @@ export function DraftGame({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="line-clamp-2 text-2xl leading-tight">{p.name}</h3>
+                      <h2 className="line-clamp-2 text-2xl leading-tight">{p.name}</h2>
                       <p className="text-sm text-muted-foreground">
                         {p.club} · {p.era}
                       </p>
@@ -170,7 +170,7 @@ export function DraftGame({
             </div>
           ) : (
             <div className={`surface flex flex-col items-center justify-center rounded-2xl p-8 text-center ${READY_MIN_H}`}>
-              <h3 className="text-3xl">Ready for Europe</h3>
+              <h2 className="text-3xl">Ready for Europe</h2>
               <p className="mt-2 text-muted-foreground">
                 Seventeen matches between you and an unbeaten campaign.
               </p>
