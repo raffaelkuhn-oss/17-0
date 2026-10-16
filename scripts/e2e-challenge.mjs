@@ -18,7 +18,9 @@ async function draft(page, picks) {
 let fails = 0; const ok = (n, c) => { console.log((c ? "PASS " : "FAIL ") + n); if (!c) fails++; };
 for (const [name, bt] of [["chromium", chromium], ["webkit", webkit]]) {
   const browser = await bt.launch();
-  const opts = { viewport: { width: 390, height: 844 }, isMobile: name === "chromium", hasTouch: true };
+  // Mark as internal test traffic (ucl170-internal-check) so it stays out of the stats.
+  const ua = (await (await browser.newPage()).evaluate(() => navigator.userAgent)) + " ucl170-internal-check";
+  const opts = { viewport: { width: 390, height: 844 }, isMobile: name === "chromium", hasTouch: true, userAgent: ua };
   const a = await (await browser.newContext(opts)).newPage();
   await a.goto(BASE + "/draft", { waitUntil: "networkidle" }); await a.waitForTimeout(800);
   const A = await draft(a, PICKS);
