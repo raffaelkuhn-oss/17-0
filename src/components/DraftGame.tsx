@@ -2,10 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AdBanner } from "@/components/AdBanner";
 import { Celebration } from "@/components/Celebration";
-import { ShareCard } from "@/components/ShareCard";
+import { ShareButton, ShareCard } from "@/components/ShareCard";
 import { FORMATION, PLAYERS, overall, type Player } from "@/lib/players";
 import { recordLabel } from "@/lib/record";
-import { trackEvent } from "@/lib/retention";
+import { trackEvent, type RetentionMode } from "@/lib/retention";
 import { PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
 import { encodeChallenge, replayChallenge, slotCandidates, type Challenge } from "@/lib/challenge";
 
@@ -29,6 +29,8 @@ export type DraftGameProps = {
   extraPool?: Player[] | undefined;
   /** A friend's challenge link: same seed (pool + season), legends-only pool, never the Daily. */
   challenge?: Challenge | undefined;
+  /** Daily number for the share text (#1 = 11 Oct 2026); Daily only. */
+  dailyNumber?: number | undefined;
 };
 
 export function DraftGame({
@@ -42,6 +44,7 @@ export function DraftGame({
   allowReplay = true,
   extraPool,
   challenge,
+  dailyNumber,
 }: DraftGameProps) {
   const isDaily = fixedSeed !== undefined && !challenge;
   const theirs = useMemo(() => (challenge ? replayChallenge(challenge) : null), [challenge]);
@@ -95,6 +98,8 @@ export function DraftGame({
           !isDaily && fixedSeed === undefined && pool === PLAYERS ? encodeChallenge({ mode, seed, picks: pickIdx }) : undefined
         }
         theirs={inChallenge ? theirs?.campaign : undefined}
+        dailyNumber={isDaily ? dailyNumber : undefined}
+        trackMode={isDaily ? "daily" : mode}
       />
     );
   }
@@ -288,6 +293,8 @@ export function Results({
   contextLabel,
   challengeCode,
   theirs,
+  dailyNumber,
+  trackMode = "none",
 }: {
   picks: Player[];
   campaign: Campaign;
@@ -295,6 +302,8 @@ export function Results({
   contextLabel?: string | undefined;
   challengeCode?: string | undefined;
   theirs?: Campaign | undefined;
+  dailyNumber?: number | undefined;
+  trackMode?: RetentionMode;
 }) {
   const [copied, setCopied] = useState(false);
   async function shareChallenge() {
@@ -305,7 +314,7 @@ export function Results({
     } catch {
       window.prompt("Copy this link", url);
     }
-    trackEvent("share_click");
+    trackEvent("share_click", trackMode, "challenge");
     setCopied(true);
   }
   const { results, won: w, drawn: d, lost: l, points, eliminatedIn, champion, perfect } = campaign;
@@ -348,7 +357,15 @@ export function Results({
             Your friend went {recordLabel(theirs)} with the same pool.
           </p>
         )}
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <div className="mx-auto mt-5 max-w-sm">
+          <ShareButton
+            campaign={campaign}
+            challengeCode={challengeCode}
+            dailyNumber={dailyNumber}
+            trackMode={trackMode}
+          />
+        </div>
+        <div className="mt-3 flex flex-wrap justify-center gap-3">
           {challengeCode && (
             <button
               onClick={shareChallenge}
@@ -360,7 +377,7 @@ export function Results({
             </button>
           )}
           {onReset && (
-            <button onClick={onReset} className="btn-primary hover:btn-primary-hover">
+            <button onClick={onReset} className="btn-ghost">
               Draft again
             </button>
           )}
@@ -426,6 +443,9 @@ export function Results({
             campaign={campaign}
             rating={r.rating}
             contextLabel={contextLabel}
+            challengeCode={challengeCode}
+            dailyNumber={dailyNumber}
+            trackMode={trackMode}
           />
           <aside className="surface h-fit rounded-2xl p-5">
             <h2 className="text-xl">Final XI</h2>

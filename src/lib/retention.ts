@@ -4,7 +4,7 @@
  * Browser side keeps ONE localStorage entry: first-seen day, last-seen day, the
  * acquisition-source bucket and creator code (c01-c10, if any) of the first visit, and a
  * "day-7 return already counted" flag. No ID, no cookie, nothing personal.
- * Events carry only {event, bucket, mode, source, ref}; the Worker turns them into aggregate
+ * Events carry only {event, bucket, mode, source, ref, via}; the Worker turns them into aggregate
  * counters. Off unless VITE_RETENTION_ENABLED=1 at build time AND the Worker has the
  * RETENTION Analytics Engine binding.
  */
@@ -45,6 +45,10 @@ export const SOURCES = [
   "other",
 ] as const;
 export type Source = (typeof SOURCES)[number];
+
+/** Which share path was used (share_click only; closed list). */
+export const SHARE_VIAS = ["native", "copy", "x", "whatsapp", "download", "challenge"] as const;
+export type ShareVia = (typeof SHARE_VIAS)[number];
 
 /** Creator codes for the creator test (closed list; anything else is ignored). */
 export const REFS = ["c01", "c02", "c03", "c04", "c05", "c06", "c07", "c08", "c09", "c10"] as const;
@@ -151,9 +155,17 @@ export function nextVisit(
 export const REF_EVENTS: readonly RetentionEvent[] = ["visit", "draft_start", "sim_complete", "share_click", "return_d7"];
 
 /** Pure: the JSON body sent to POST /e. */
-export function eventBody(event: RetentionEvent, bucket: Bucket, source: Source, mode: RetentionMode, ref: Ref | null | undefined) {
+export function eventBody(
+  event: RetentionEvent,
+  bucket: Bucket,
+  source: Source,
+  mode: RetentionMode,
+  ref: Ref | null | undefined,
+  via?: ShareVia,
+) {
   const r: RefOrNone = REF_EVENTS.includes(event) && ref && parseRef(ref) ? ref : "none";
-  return { event, bucket, mode, source, ref: r };
+  const v: ShareVia | "none" = event === "share_click" && via && (SHARE_VIAS as readonly string[]).includes(via) ? via : "none";
+  return { event, bucket, mode, source, ref: r, via: v };
 }
 
 // ---------------- browser side ----------------
@@ -169,9 +181,9 @@ function load(): RetentionState | null {
   }
 }
 
-function send(event: RetentionEvent, bucket: Bucket, source: Source, mode: RetentionMode = "none", ref?: Ref) {
+function send(event: RetentionEvent, bucket: Bucket, source: Source, mode: RetentionMode = "none", ref?: Ref, via?: ShareVia) {
   try {
-    const body = JSON.stringify(eventBody(event, bucket, source, mode, ref));
+    const body = JSON.stringify(eventBody(event, bucket, source, mode, ref, via));
     const blob = new Blob([body], { type: "application/json" });
     if (!navigator.sendBeacon?.("/e", blob)) {
       void fetch("/e", { method: "POST", body, keepalive: true, credentials: "omit", headers: { "content-type": "application/json" } }).catch(() => {});
@@ -195,10 +207,10 @@ export function trackVisit() {
   for (const e of events) send(e, bucket, state.source, "none", state.ref);
 }
 
-/** Gameplay events (draft_start, sim_complete, daily_complete, share_click). */
-export function trackEvent(event: RetentionEvent, mode: RetentionMode = "none") {
+/** Gameplay events (draft_start, sim_complete, daily_complete, share_click + via). */
+export function trackEvent(event: RetentionEvent, mode: RetentionMode = "none", via?: ShareVia) {
   if (!ENABLED || typeof window === "undefined") return;
   const s = load();
   if (!s) return;
-  send(event, bucketFor(Math.max(0, daysBetween(s.firstSeen, toDay(new Date())))), s.source, mode, s.ref);
+  send(event, bucketFor(Math.max(0, daysBetween(s.firstSeen, toDay(new Date())))), s.source, mode, s.ref, via);
 }

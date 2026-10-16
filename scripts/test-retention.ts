@@ -56,7 +56,9 @@ t("ref attached to draft_start/sim_complete/share_click/return_d7/visit",
 t("ref not attached to return_d1/daily_complete",
   ["return_d1", "daily_complete"].every((e) => eventBody(e as never, "d1", "x", "none", "c04").ref === "none"));
 t("no ref -> none", eventBody("draft_start", "d0", "x", "classic", undefined).ref === "none");
-t("body has only 5 fields", Object.keys(eventBody("visit", "d0", "x", "none", "c01")).sort().join() === "bucket,event,mode,ref,source");
+t("body has only 6 fields", Object.keys(eventBody("visit", "d0", "x", "none", "c01")).sort().join() === "bucket,event,mode,ref,source,via");
+t("via only on share_click, allow-listed", eventBody("share_click", "d0", "x", "classic", null, "whatsapp").via === "whatsapp" &&
+  eventBody("visit", "d0", "x", "none", null, "x").via === "none" && eventBody("share_click", "d0", "x", "none", null, "evil" as never).via === "none");
 
 const writes: unknown[] = [];
 const env = { RETENTION: { writeDataPoint: (p: unknown) => writes.push(p) } };
@@ -99,6 +101,11 @@ await handleRetentionEvent(new Request("https://x/e", { method: "POST", body: JS
 await handleRetentionEvent(req({ event: "visit", bucket: "d0", source: "x" }), env);
 t("server: blob6 = internal/public, UA itself not stored",
   writes.map((w) => (w as { blobs: string[] }).blobs[5]).join() === "internal,public" && !JSON.stringify(writes).includes("curl"));
+writes.length = 0;
+await handleRetentionEvent(req({ event: "share_click", bucket: "d0", source: "x", via: "native" }), env);
+await handleRetentionEvent(req({ event: "share_click", bucket: "d0", source: "x", via: "me@x.com" }), env);
+await handleRetentionEvent(req({ event: "visit", bucket: "d0", source: "x", via: "copy" }), env);
+t("server: via is blob7, allow-listed, share_click only", writes.map((w) => (w as { blobs: string[] }).blobs[6]).join() === "native,none,none");
 t("sql excludes internal", reportSql(7).includes("blob6 != 'internal'"));
 t("GET -> 405", (await handleRetentionEvent(new Request("https://x/e"), env)).status === 405);
 process.exit(fails ? 1 : 0);
