@@ -9,7 +9,7 @@ import { recordLong } from "@/lib/record";
 
 export type ShareProps = {
   campaign: Campaign;
-  /** v2 challenge code of this run (links to /draft?c=<code>). */
+  /** v2 challenge code of this run (links to the run page /r/<code>). */
   challengeCode?: string | undefined;
   /** Daily number; set only for Daily Challenge runs. */
   dailyNumber?: number | undefined;

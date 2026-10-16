@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { handleRetentionEvent } from "./lib/retention-server";
+import { handleRunOg } from "./lib/og/handler";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -53,7 +54,12 @@ export default {
     }
     const noindex = url.hostname.endsWith(".workers.dev");
     // Anonymous retention counters (no-op without the RETENTION Analytics Engine binding).
-    const res = url.pathname === "/e" ? await handleRetentionEvent(request, env) : await handle(request, env, ctx);
+    const res =
+      url.pathname === "/e"
+        ? await handleRetentionEvent(request, env)
+        : url.pathname.startsWith("/r/") && url.pathname.endsWith(".png")
+          ? await handleRunOg(request, ctx as Parameters<typeof handleRunOg>[1])
+          : await handle(request, env, ctx);
     if (!noindex) return res;
     const out = new Response(res.body, res);
     out.headers.set("X-Robots-Tag", "noindex, nofollow");

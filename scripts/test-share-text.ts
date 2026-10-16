@@ -20,7 +20,7 @@ const Cb = shareText({ campaign: bad, challengeCode: "abc", origin: O });
 const D = shareText({ campaign: mid, dailyNumber: 6, origin: O });
 for (const [k, v] of Object.entries({ A, B, C, Cb, D })) console.log(`--- ${k} (X length ${xLength(v.full)})\n${v.full}`);
 t("rarity from sim-stats greedy 0.39% -> 1 in 250", perfectOneIn() === 250 && perfectOneIn(1.23) === 100 && perfectOneIn(0.03) === 3350);
-t("A verbatim", A.full === `I went 17-0 in 17-0 Draft 🏆\n${"✅".repeat(17)}\nIn our sims only about 1 in 250 runs do that. Think you can?\n${O}/draft?c=abc`);
+t("A verbatim", A.full === `I went 17-0 in 17-0 Draft 🏆\n${"✅".repeat(17)}\nIn our sims only about 1 in 250 runs do that. Think you can?\n${O}/r/abc`);
 t("B verbatim", B.body === `16-0-1 in 17-0 Draft. One game off perfect 😩\n${"✅".repeat(16)}❌\nThink you can go 17-0?`);
 t("C verbatim", C.body === "8-1-3 in 17-0 Draft, out in the QF\n✅✅🟨✅❌✅✅✅✅✅❌❌\nThink you can go 17-0?");
 t("C bad run", Cb.body.startsWith("2-1-5 in 17-0 Draft, out in the league phase\n❌✅❌🟨❌❌✅❌\n"));
