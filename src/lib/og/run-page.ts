@@ -7,6 +7,9 @@ import { exitPhrase } from "../share-text";
 
 /** Bump when the preview layout changes: it is part of the image URL, so old edge caches are bypassed. */
 export const OG_VERSION = 1;
+/** sha256 prefix of src/lib/og/run-image.ts at this OG_VERSION. scripts/test-run-pages.ts fails when the
+ * layout file changes without updating this, as a reminder to bump OG_VERSION (and then this hash). */
+export const OG_LAYOUT_SHA = "46357e22e2db268f";
 export const RUN_OG_PATH = /^\/r\/([A-Za-z0-9_-]{1,80})\/og-v(\d+)\.png$/;
 export const runOgPath = (code: string) => `/r/${code}/og-v${OG_VERSION}.png`;
 

@@ -1,4 +1,5 @@
 import { absUrl } from "@/lib/site";
+import { STATS } from "@/lib/chances-copy";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 const URL = absUrl("/82-0-football");
@@ -85,7 +86,8 @@ function Page() {
         <p className="mt-4 text-sm text-muted-foreground">
           Where 82-0 wins: a longer season and the NBA crowd. Where 17-0 differs: knockout ties can
           end your run in one bad night, so even the best possible XI goes a perfect 17-0 only about
-          1.2% of the time in our simulations (a good draft: about 0.4%).
+          {STATS.bestXI.perfectPct.toFixed(1)}% of the time in our simulations (a good draft: about{" "}
+          {STATS.greedy.perfectPct.toFixed(1)}%).
         </p>
       </section>
 

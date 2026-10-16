@@ -93,7 +93,7 @@ export const Route = createFileRoute("/how-it-works")({
           name: "17-0 — Champions League Draft Simulator",
           url: SITE_URL,
           description:
-            "Free browser game: draft an all-time Champions League XI from 152 legends and simulate a 17-match European campaign.",
+            `Free browser game: draft an all-time Champions League XI from ${PLAYERS.length} legends and simulate a 17-match European campaign.`,
           genre: ["Sports", "Simulation", "Football"],
           gamePlatform: "Web browser",
           applicationCategory: "GameApplication",

@@ -2,6 +2,7 @@ import { STATS } from "@/lib/chances-copy";
 import { absUrl } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PLAYERS } from "@/lib/players";
+import { PLAYOFF_CUTOFF } from "@/lib/sim";
 
 const URL = absUrl("/ucl-simulator");
 
@@ -20,7 +21,7 @@ const FAQ = [
   },
   {
     q: "Can you lose in the group stage?",
-    a: "Yes. Draws are possible in the league phase and you need 11 points to finish inside the top 24 and reach the knockout playoff. Fall short and your campaign ends there.",
+    a: `Yes. Draws are possible in the league phase and you need ${PLAYOFF_CUTOFF} points to finish inside the top 24 and reach the knockout playoff. Fall short and your campaign ends there.`,
   },
   {
     q: "How is each match simulated?",

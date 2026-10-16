@@ -109,5 +109,8 @@ done
 echo "length check: $len_pages pages, $len_warns warnings, $len_fails failures"
 if [ "$len_pages" -eq 0 ]; then echo "FAIL length check ran on 0 pages"; fails=$((fails + 1)); fi
 
+# --- football-data.org upstream (1 request; info only, live players are flag-gated) ---
+bash "$(dirname "$0")/live-upstream-check.sh" || echo "warn football-data upstream not ok (live form keeps last KV data / base ratings)"
+
 if [ "$fails" -gt 0 ]; then echo "post-deploy-check: $fails failure(s)"; exit 1; fi
 echo "post-deploy-check: all good"
