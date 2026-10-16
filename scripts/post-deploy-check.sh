@@ -2,7 +2,8 @@
 # Post-deploy check: every icon, the manifest, the og:image URL and the key pages must return 200.
 # Retries each URL for up to 60s (new static assets can take a few seconds to propagate).
 # Usage: scripts/post-deploy-check.sh [base-url]   (default https://ucl17-0.com)
-# Exits non-zero if anything is still failing after 60s.
+# Exits non-zero if anything is still failing after 60s, or a sitemap page has no title/description.
+# Title (30-60) and meta description (70-160) lengths outside range only warn.
 set -uo pipefail
 BASE="${1:-https://ucl17-0.com}"
 BASE="${BASE%/}"
@@ -76,6 +77,29 @@ else
     fails=$((fails + 1))
   fi
 fi
+
+# --- title / meta description length (sitemap URLs) ---
+# Warn if a title is outside 30-60 chars or a description outside 70-160 chars.
+# Only a missing title or description counts as a failure.
+SITEMAP_URLS=$(curl -fsS --max-time 15 "$BASE/sitemap.xml" | grep -oE '<loc>[^<]+</loc>' | sed -E 's#</?loc>##g')
+if [ -z "$SITEMAP_URLS" ]; then echo "warn no URLs found in $BASE/sitemap.xml; skipping length check"; fi
+for u in $SITEMAP_URLS; do
+  [[ "$BASE" != https://ucl17-0.com ]] && u="$BASE/${u#https://*/}"
+  res=$(curl -fsS --max-time 15 "$u" | python3 -c '
+import sys, re, html
+s = sys.stdin.read()
+t = re.search(r"<title[^>]*>(.*?)</title>", s, re.S | re.I)
+d = re.search(r"<meta\s+[^>]*name=\"description\"[^>]*>", s, re.I)
+d = re.search(r"content=\"([^\"]*)\"", d.group(0)) if d else None
+t = html.unescape(t.group(1)).strip() if t else ""
+d = html.unescape(d.group(1)).strip() if d else ""
+print(len(t), len(d))')
+  read -r tl dl <<<"$res"
+  if [ "${tl:-0}" -eq 0 ]; then echo "FAIL title missing: $u"; fails=$((fails + 1));
+  elif [ "$tl" -lt 30 ] || [ "$tl" -gt 60 ]; then echo "warn title $tl chars (want 30-60): $u"; fi
+  if [ "${dl:-0}" -eq 0 ]; then echo "FAIL meta description missing: $u"; fails=$((fails + 1));
+  elif [ "$dl" -lt 70 ] || [ "$dl" -gt 160 ]; then echo "warn description $dl chars (want 70-160): $u"; fi
+done
 
 if [ "$fails" -gt 0 ]; then echo "post-deploy-check: $fails failure(s)"; exit 1; fi
 echo "post-deploy-check: all good"
