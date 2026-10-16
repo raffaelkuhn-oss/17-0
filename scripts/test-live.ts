@@ -13,7 +13,7 @@ import {
   type FormState,
 } from "../src/lib/live/form";
 import { CURRENT_PLAYERS } from "../src/lib/live/current-players";
-import { KV_CURRENT, KV_PREVIOUS, runWeeklyUpdate } from "../src/lib/live/update";
+import { KV_CURRENT, KV_PREVIOUS, classifyUpstream, runWeeklyUpdate } from "../src/lib/live/update";
 import { FORMATION, PLAYERS, overall } from "../src/lib/players";
 import { candidatesFor, simulate } from "../src/lib/sim";
 import { dailySeed } from "../src/lib/daily";
@@ -187,6 +187,25 @@ const failFetch = (async () =>
   new Response("rate limited", { status: 429 })) as unknown as typeof fetch;
 const rf = await runWeeklyUpdate({ FOOTBALL_DATA_API_KEY: "k", LIVE_FORM: kv }, failFetch, now);
 t("HTTP 429 -> keeps last ratings", !rf.ok && store.get(KV_CURRENT) === before);
+t("HTTP 429 -> classified blocked", rf.upstream === "blocked");
+t(
+  "status classes: 403/429 blocked, 404 not_found, 5xx/400 error, 200 ok",
+  classifyUpstream(403) === "blocked" && classifyUpstream(429) === "blocked" && classifyUpstream(404) === "not_found" &&
+    classifyUpstream(500) === "error" && classifyUpstream(400) === "error" && classifyUpstream(200) === "ok",
+);
+const statusFetch = (sc: number, mc: number) =>
+  (async (u: string) =>
+    new Response(u.includes("scorers") ? "{}" : "{}", { status: u.includes("scorers") ? sc : mc })) as unknown as typeof fetch;
+for (const [sc, mc, want] of [[403, 200, "blocked"], [200, 404, "not_found"], [503, 200, "error"], [404, 429, "blocked"]] as const) {
+  const r = await runWeeklyUpdate({ FOOTBALL_DATA_API_KEY: "k", LIVE_FORM: kv }, statusFetch(sc, mc), now);
+  t(`HTTP ${sc}/${mc} -> ${want}, ratings kept`, !r.ok && r.upstream === want && store.get(KV_CURRENT) === before);
+}
+let sentKey = "";
+await runWeeklyUpdate({ FOOTBALL_DATA_API_KEY: "  abc\n", LIVE_FORM: kv }, (async (_u: string, i?: RequestInit) => {
+  sentKey = (i?.headers as Record<string, string>)["X-Auth-Token"] ?? "";
+  return new Response("", { status: 429 });
+}) as unknown as typeof fetch, now);
+t("API key is trimmed before use", sentKey === "abc");
 const throwFetch = (async () => {
   throw new Error("network");
 }) as unknown as typeof fetch;

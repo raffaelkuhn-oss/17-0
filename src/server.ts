@@ -71,7 +71,7 @@ export default {
     const { runWeeklyUpdate } = await import("./lib/live/update");
     ctx.waitUntil(
       runWeeklyUpdate(env as Parameters<typeof runWeeklyUpdate>[0]).then((r) =>
-        console.log("live form update", r.ok ? "ok" : r.reason),
+        console.log("live form update", r.ok ? "ok" : `${r.upstream ?? "config"}: ${r.reason}`),
       ),
     );
   },

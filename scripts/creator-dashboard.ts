@@ -3,8 +3,8 @@
 // Token needs only "Account Analytics: Read". It is read from the env and never printed.
 import { formatTable, reportSql, summarize, type ReportRow } from "../src/lib/creator-report";
 
-const account = process.env.CF_ACCOUNT_ID;
-const token = process.env.CF_ANALYTICS_TOKEN;
+const account = process.env.CF_ACCOUNT_ID?.trim();
+const token = process.env.CF_ANALYTICS_TOKEN?.trim();
 if (!account || !token) {
   console.error("Set CF_ACCOUNT_ID and CF_ANALYTICS_TOKEN (Account Analytics: Read).");
   process.exit(2);

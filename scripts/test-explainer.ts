@@ -25,6 +25,12 @@ t(
   "numbers appear in copy",
   copy.includes("2.6%") && copy.includes("0.03%") && copy.includes("1.23%"),
 );
+// Chance numbers in FAQ / how-it-works / landing copy must come from sim-stats.json (STATS), never typed in.
+for (const f of ["how-it-works", "how-the-chances-work", "index", "ucl-simulator", "football-draft-game", "daily-football-game", "82-0-football"]) {
+  const src = readFileSync(new URL(`../src/routes/${f}.tsx`, import.meta.url), "utf8");
+  t(`${f}: no hard-coded % figures`, !/\b\d+(\.\d+)?%/.test(src));
+  t(`${f}: no betting words`, !BANNED.test(src.replace(/import[^\n]*\n/g, "")));
+}
 const sitemap = readFileSync(new URL("../src/routes/sitemap[.]xml.ts", import.meta.url), "utf8");
 t("explainer in sitemap", sitemap.includes('"/how-the-chances-work"'));
 if (fails) {
