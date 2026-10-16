@@ -27,7 +27,7 @@ const FAQ = [
 export const Route = createFileRoute("/football-draft-game")({
   head: () => ({
     meta: [
-      { title: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft" },
+      { title: "Football Draft Game — Draft All-Time Legends | 17-0 Draft" },
       {
         name: "description",
         content:
@@ -35,11 +35,11 @@ export const Route = createFileRoute("/football-draft-game")({
       },
       {
         property: "og:title",
-        content: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft",
+        content: "Football Draft Game — Draft All-Time Legends | 17-0 Draft",
       },
       {
         name: "twitter:title",
-        content: "Football Draft Game — Draft All-Time Legends Free | 17-0 Draft",
+        content: "Football Draft Game — Draft All-Time Legends | 17-0 Draft",
       },
       {
         property: "og:description",
