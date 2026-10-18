@@ -8,6 +8,7 @@ TanStack Start (React 19, Tailwind v4) running on **Cloudflare Workers** (static
 bun install
 bun run dev        # local dev server
 bun run typecheck
+bun run test       # runs every scripts/test-*.ts (scripts/run-tests.ts); a new test file is picked up automatically
 bun run build      # outputs dist/client + dist/server
 bun run preview    # serve the production build locally
 ```
