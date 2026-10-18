@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { absUrl } from "@/lib/site";
 import { overall } from "@/lib/players";
-import { recordLabel } from "@/lib/record";
+import { pointsLine, recordHeadline, recordWDL, recordWords } from "@/lib/record";
 import { exitPhrase } from "@/lib/share-text";
 import { runFromCode, runOgPath, runTitle } from "@/lib/og/run-page";
 
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/r/$code")({
   loader: ({ params }) => {
     const run = runFromCode(params.code);
     return run
-      ? { ok: true as const, title: runTitle(run.campaign), record: recordLabel(run.campaign), exit: exitPhrase(run.campaign) }
+      ? { ok: true as const, title: runTitle(run.campaign), record: recordWDL(run.campaign), headline: recordHeadline(run.campaign), perfect: run.campaign.perfect, exit: exitPhrase(run.campaign) }
       : { ok: false as const };
   },
   head: ({ loaderData, params }) => {
@@ -21,7 +21,8 @@ export const Route = createFileRoute("/r/$code")({
     if (!loaderData?.ok) {
       return { meta: [{ title: "Run not found — 17-0 Draft" }, robots] };
     }
-    const title = `${loaderData.record} in 17-0 Draft — can your XI beat it?`;
+    // og:title per copy-final.md #3; a perfect run keeps the brand label "17-0".
+    const title = `${loaderData.perfect ? loaderData.headline : loaderData.record} in 17-0 Draft. Can your XI beat it?`;
     const desc = `An all-time Champions League XI went ${loaderData.record} (${loaderData.exit}). Draft your own and see if you can go 17-0.`;
     const img = absUrl(runOgPath(params.code));
     const alt = `17-0 Draft run: ${loaderData.title}, with the XI and every match result`;
@@ -74,13 +75,18 @@ function RunPage() {
       <div className="text-center">
         <p className="text-xs tracking-[0.45em] text-primary uppercase">Shared run</p>
         <h1 className="mt-4 text-5xl sm:text-6xl">
-          <span className="text-gradient">{recordLabel(c)}</span>
+          <span className="text-gradient">{recordHeadline(c)}</span>
         </h1>
-        <p className="mt-2 text-sm tracking-[0.3em] text-muted-foreground uppercase">
-          {c.won} won · {c.drawn} drawn · {c.lost} lost · {c.points} league pts
+        <p className="mt-2 text-sm text-muted-foreground" data-testid="record-words">
+          {recordWords(c)}
         </p>
+        {pointsLine(c) && (
+          <p className="text-sm text-muted-foreground" data-testid="record-points">
+            {pointsLine(c)}
+          </p>
+        )}
         <p className="mt-3 text-lg text-muted-foreground">
-          {c.perfect ? "Seventeen matches, seventeen wins. Can you match it?" : `This XI went ${recordLabel(c)}, ${exitPhrase(c)}. Think you can go 17-0?`}
+          {c.perfect ? "Seventeen matches, seventeen wins. Can you match it?" : `This XI went ${recordWDL(c)}, ${exitPhrase(c)}. Think you can go 17-0?`}
         </p>
         <div className="mx-auto mt-6 flex max-w-sm flex-col gap-3">
           <Link to="/draft" className="btn-primary hover:btn-primary-hover w-full" data-testid="run-build">
