@@ -20,7 +20,7 @@ import {
   type DailyStats,
 } from "@/lib/daily";
 import { ShareButton, ShareCard } from "@/components/ShareCard";
-import { recordLabel } from "@/lib/record";
+import { recordHeadline } from "@/lib/record";
 import { overall, PLAYERS, type Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
 
@@ -221,7 +221,7 @@ function PlayedToday({
         )}
         {record && !hasCard && (
           // Fallback for old saved records without a full campaign: no ResultCard, so show the record here.
-          <p className="mt-4 font-display text-5xl text-gradient">{recordLabel(record)}</p>
+          <p className="mt-4 font-display text-5xl text-gradient">{recordHeadline(record)}</p>
         )}
         {record?.campaign && (
           <div className="mx-auto mt-5 max-w-sm">
