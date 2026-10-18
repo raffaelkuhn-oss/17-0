@@ -2,7 +2,7 @@
 import { decodeChallenge, replayChallenge, CHALLENGE_VERSION_LEGACY, type Challenge } from "../challenge";
 import type { Player } from "../players";
 import type { Campaign } from "../sim";
-import { recordLabel } from "../record";
+import { recordWDL } from "../record";
 import { exitPhrase } from "../share-text";
 
 /** Bump when the preview layout changes: it is part of the image URL, so old edge caches are bypassed. */
@@ -26,5 +26,5 @@ export function runFromCode(code: string): RunView | null {
 
 export function runTitle(c: Campaign): string {
   if (c.perfect) return "A perfect 17-0 run";
-  return `${recordLabel(c)}, ${exitPhrase(c)}`;
+  return `${recordWDL(c)}, ${exitPhrase(c)}`;
 }

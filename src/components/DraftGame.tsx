@@ -4,7 +4,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { Celebration } from "@/components/Celebration";
 import { ShareButton, ShareCard } from "@/components/ShareCard";
 import { FORMATION, PLAYERS, overall, type Player } from "@/lib/players";
-import { recordLabel } from "@/lib/record";
+import { pointsLine, recordHeadline, recordWords } from "@/lib/record";
 import { trackEvent, type RetentionMode } from "@/lib/retention";
 import { PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
 import { encodeChallenge, replayChallenge, slotCandidates, type Challenge } from "@/lib/challenge";
@@ -117,7 +117,7 @@ export function DraftGame({
       {inChallenge && theirs && (
         <p className="surface mt-6 rounded-2xl p-4 text-sm" data-testid="challenge-banner">
           A friend's challenge: same pool, same 17 matches. They went{" "}
-          <strong data-testid="challenge-theirs">{recordLabel(theirs.campaign)}</strong>. Can you do better?
+          <strong data-testid="challenge-theirs">{recordHeadline(theirs.campaign)}</strong>. Can you do better?
         </p>
       )}
 
@@ -338,13 +338,16 @@ export function Results({
           {contextLabel ?? (champion ? "Champions of Europe" : "Campaign over")}
         </p>
         <h1 className={`mt-4 text-5xl sm:text-6xl ${champion ? "animate-scale-in" : ""}`}>
-          <span className="text-gradient">
-            {recordLabel(campaign)}
-          </span>
+          <span className="text-gradient">{recordHeadline(campaign)}</span>
         </h1>
-        <p className="mt-2 text-sm tracking-[0.3em] text-muted-foreground uppercase">
-          {w} won · {d} drawn · {l} lost · {points} league pts
+        <p className="mt-2 text-sm text-muted-foreground" data-testid="record-words">
+          {recordWords(campaign)}
         </p>
+        {pointsLine(campaign) && (
+          <p className="text-sm text-muted-foreground" data-testid="record-points">
+            {pointsLine(campaign)}
+          </p>
+        )}
 
         <p className="mt-3 text-lg text-muted-foreground">{verdict}</p>
         {champion && (
@@ -354,7 +357,7 @@ export function Results({
         )}
         {theirs && (
           <p className="mt-3 text-sm text-muted-foreground" data-testid="challenge-compare">
-            Your friend went {recordLabel(theirs)} with the same pool.
+            Your friend went {recordHeadline(theirs)} with the same pool.
           </p>
         )}
         <div className="mx-auto mt-5 max-w-sm">
