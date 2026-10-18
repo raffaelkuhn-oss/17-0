@@ -3,6 +3,7 @@ import { FORMATION, type Player } from "./players";
 import type { Campaign } from "./sim";
 import { recordHeadline } from "@/lib/record";
 import type { XiStamp } from "./xi-chance";
+import { shortName } from "./short-name";
 
 export type ShareCardData = {
   picks: Player[];
@@ -31,7 +32,11 @@ const GREEN_T = "#388e3c";
 const GOLD = "#fae3ab";
 const RED = "#d23c63";
 const DRAW = "#7fa882";
-const FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+/** Pitch card width and name size (names shrink only if a display name is wider than CARD_W - 12). */
+export const CARD_W = 136;
+export const NAME_PX = 17;
+const NAME_MIN_PX = 12;
+export const FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
 
 /** Card positions on a horizontal pitch (goal on the left), in FORMATION order (GK, RB, CB, CB, LB, DM, CM, AM, RW, ST, LW). */
 const SPOTS: [number, number][] = [
@@ -101,7 +106,8 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
   picks.forEach((p, i) => {
     const [fx, fy] = SPOTS[i] ?? [0.5, 0.5];
     const cx = PANEL_W + 20 + fx * pw, cy = 20 + fy * ph;
-    const cw = 124, ch = 56;
+    const cw = CARD_W, ch = 56;
+    const name = shortName(p); // mock A short forms; full name where the short one is ambiguous
     ctx.fillStyle = SHADOW;
     roundRect(ctx, cx - cw / 2 + 3, cy - ch / 2 + 4, cw, ch, 10);
     ctx.fill();
@@ -113,8 +119,8 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
     ctx.font = `700 13px ${FONT}`;
     ctx.fillText(FORMATION[i]?.role ?? "", cx, cy - 7);
     ctx.fillStyle = INK;
-    fit(ctx, p.name, 800, 17, 11, cw - 12);
-    ctx.fillText(p.name, cx, cy + 16, cw - 10);
+    fit(ctx, name, 800, NAME_PX, NAME_MIN_PX, cw - 12);
+    ctx.fillText(name, cx, cy + 16, cw - 10);
   });
   ctx.textAlign = "left";
 

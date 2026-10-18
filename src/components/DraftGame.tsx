@@ -351,7 +351,6 @@ export function Results({
         </h1>
         <p className="mt-2 text-sm text-muted-foreground" data-testid="record-words">
           {recordWords(campaign)}
-          {stamp && <span data-testid="record-tier"> · {stamp.tier}</span>}
         </p>
         {pointsLine(campaign) && (
           <p className="text-sm text-muted-foreground" data-testid="record-points">

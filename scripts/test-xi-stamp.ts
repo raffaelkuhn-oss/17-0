@@ -29,7 +29,7 @@ t("rounding <100 nearest 5", roundOneIn(81.2) === 80 && roundOneIn(97.6) === 100
 t("rounding 100-1000 nearest 50", roundOneIn(254) === 250 && roundOneIn(389) === 400 && roundOneIn(1000) === 1000);
 t("rounding >1000 nearest 100 + comma", roundOneIn(3412) === 3400 && formatCount(3400) === "3,400" && formatCount(1433900) === "1,433,900" && formatCount(250) === "250");
 const tierOf = (n: number) => XI_TIERS.find((x) => n <= x.maxN)!.name;
-t("tier cut-offs", tierOf(100) === "Immortals" && tierOf(101) === "Contenders" && tierOf(400) === "Contenders" && tierOf(1500) === "Dark horses" && tierOf(5000) === "Underdogs" && tierOf(5100) === "Sunday League");
+t("tier cut-offs v2", tierOf(200) === "Immortals" && tierOf(250) === "Contenders" && tierOf(450) === "Contenders" && tierOf(500) === "Dark horses" && tierOf(900) === "Dark horses" && tierOf(1000) === "Underdogs" && tierOf(2500) === "Underdogs" && tierOf(2600) === "Sunday League");
 t("tier words verbatim", XI_TIERS.map((x) => x.name).join("|") === "Immortals|Contenders|Dark horses|Underdogs|Sunday League");
 const weak = stampFromRatings({ attack: 81, midfield: 79, defence: 82, mentality: 87 });
 t(`weakest ratings box corner still has a real N (1 in ${weak.n}, ${weak.tier})`, Number.isFinite(weak.oneIn) && weak.tier === "Sunday League");

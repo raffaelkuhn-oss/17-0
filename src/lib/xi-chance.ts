@@ -102,13 +102,14 @@ export function xiChances(r: Ratings): { perfect: number; title: number } {
 
 /**
  * Tier cut-offs by the XI's rounded N (17-0 about 1 in N; lower N = stronger XI). The ONE place to
- * move them; the words are Marketing's final copy and stay. Anything above the last cut-off is Sunday League.
+ * move them (copy-stamp.md v2, 18 Oct: ≤200 / 201–450 / 451–900 / 901–2,500 / over 2,500); the words stay.
+ * N is exact, so there is no "never 17-0" state: every XI has a real N.
  */
 export const XI_TIERS = [
-  { maxN: 100, name: "Immortals", flavour: "This XI was built for nights like these" },
-  { maxN: 400, name: "Contenders", flavour: "Good enough to win it all. Perfect is another story" },
-  { maxN: 1500, name: "Dark horses", flavour: "Nobody fears you. That's the fun part" },
-  { maxN: 5000, name: "Underdogs", flavour: "You'll need a miracle in Istanbul" },
+  { maxN: 200, name: "Immortals", flavour: "This XI was built for nights like these" },
+  { maxN: 450, name: "Contenders", flavour: "Good enough to win it all. Perfect is another story" },
+  { maxN: 900, name: "Dark horses", flavour: "Nobody fears you. That's the fun part" },
+  { maxN: 2500, name: "Underdogs", flavour: "You'll need a miracle in Istanbul" },
   { maxN: Infinity, name: "Sunday League", flavour: "Great lads, questionable XI" },
 ] as const;
 
