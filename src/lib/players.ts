@@ -43,7 +43,7 @@ export type Player = {
   /** big-game mentality */
   men: number;
   /** Present only for flagged current players (live form feature). Legends never set it. */
-  live?: { form: number; base: number };
+  live?: { form: number; base: number; /** Share-card short name, computed on the server with the legends. */ short?: string };
 };
 
 export const PLAYERS: Player[] = [

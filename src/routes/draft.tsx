@@ -2,7 +2,8 @@ import { absUrl } from "@/lib/site";
 import { createFileRoute } from "@tanstack/react-router";
 import { DraftGame, type Mode } from "@/components/DraftGame";
 import { getLivePool } from "@/lib/live/live.functions";
-import { decodeChallenge } from "@/lib/challenge";
+import { decodeChallenge, isExpiredChallenge } from "@/lib/challenge";
+import { ExpiredChallenge, EXPIRED_CHALLENGE_TITLE } from "@/components/ExpiredChallenge";
 import { useMemo } from "react";
 
 export const Route = createFileRoute("/draft")({
@@ -16,9 +17,9 @@ export const Route = createFileRoute("/draft")({
   }),
   loaderDeps: ({ search }) => ({ live: search.live === 1 }),
   loader: ({ deps }) => getLivePool({ data: { preview: deps.live } }),
-  head: () => ({
+  head: ({ match }) => ({
     meta: [
-      { title: "Draft Room — 17-0 Champions League Draft" },
+      { title: match.search.c && isExpiredChallenge(match.search.c) ? EXPIRED_CHALLENGE_TITLE : "Draft Room — 17-0 Champions League Draft" },
       {
         name: "description",
         content:
@@ -48,7 +49,16 @@ function DraftPage() {
   const live = Route.useLoaderData();
   // Untrusted: anything invalid falls back to a normal draft with a neutral note.
   const challenge = useMemo(() => (c ? decodeChallenge(c) : null), [c]);
+  const expired = !!c && !challenge && isExpiredChallenge(c);
   const mode = challenge?.mode ?? urlMode;
+  if (expired) {
+    // Retired v1 link (pre-15 Oct): friendly note + fresh draft, no replay of the old XI.
+    return (
+      <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
+        <ExpiredChallenge />
+      </main>
+    );
+  }
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
       {c && !challenge && (

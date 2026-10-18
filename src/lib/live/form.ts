@@ -1,5 +1,7 @@
 import { FORMATION, PLAYERS, ROLE_GROUP, overall, type Player, type Role } from "../players";
 import { CURRENT_PLAYERS, type CurrentPlayerDef } from "./current-players";
+import { buildShortNames } from "../short-name";
+import { ALL_SHORT_NAME_OVERRIDES } from "./short-overrides";
 
 /**
  * Weekly form formula (Notion spec "Live current players" §4), deterministic and pure.
@@ -196,6 +198,8 @@ export function buildLivePlayers(
   state: FormState | null,
   defs: CurrentPlayerDef[] = CURRENT_PLAYERS,
 ): Player[] {
+  // Short names over legends + live together, so live and legend cards never clash (server-side only).
+  const short = buildShortNames([...PLAYERS.map((p) => p.name), ...defs.map((d) => d.name)], ALL_SHORT_NAME_OVERRIDES);
   return defs.map((d) => {
     const form = clamp(Math.round(state?.players[d.id]?.form ?? 0), -FORM_MAX, FORM_MAX);
     const raw: Player = {
@@ -225,7 +229,7 @@ export function buildLivePlayers(
       def: eff(d.def, form, cap.def),
       tec: eff(d.tec, form, cap.tec),
       men: eff(d.men, form, cap.men),
-      live: { form, base: overall(base) },
+      live: { form, base: overall(base), short: short.get(d.name) ?? d.name },
     };
   });
 }

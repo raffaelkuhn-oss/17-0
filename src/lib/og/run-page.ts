@@ -1,5 +1,5 @@
 /** Shared helpers for /r/<code> run pages (pure; used by the route, the og handler and tests). */
-import { decodeChallenge, replayChallenge, CHALLENGE_VERSION_LEGACY, type Challenge } from "../challenge";
+import { decodeChallenge, isExpiredChallenge, replayChallenge, type Challenge } from "../challenge";
 import type { Player } from "../players";
 import type { Campaign } from "../sim";
 import { recordWDL } from "../record";
@@ -24,16 +24,19 @@ export function upgradedOgPath(pathname: string): string | null {
   return v >= 1 && v < OG_VERSION ? runOgPath(m[1]!) : null;
 }
 
-export type RunView = { challenge: Challenge; picks: Player[]; campaign: Campaign; legacy: boolean };
+export type RunView = { challenge: Challenge; picks: Player[]; campaign: Campaign };
 
-/** Rebuilds a run from its v2 (or frozen-pool v1) challenge code. Null for anything invalid. */
+/** Rebuilds a run from its v2 challenge code. Null for anything invalid or retired (v1). */
 export function runFromCode(code: string): RunView | null {
   const challenge = decodeChallenge(code);
   if (!challenge) return null;
   const run = replayChallenge(challenge);
   if (!run) return null;
-  return { challenge, ...run, legacy: challenge.version === CHALLENGE_VERSION_LEGACY };
+  return { challenge, ...run };
 }
+
+/** A retired v1 code: the run page shows the expired note (the og handler already serves the default image). */
+export const isExpiredRunCode = (code: string) => isExpiredChallenge(code);
 
 /** The run's XI stamp, recomputed from the code (never read from the URL). */
 export function runStamp(run: RunView): XiStamp {

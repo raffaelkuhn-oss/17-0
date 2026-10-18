@@ -11,9 +11,12 @@
  * Requests: 1 (GET /v4/competitions/CL/teams, squads included); if squads come back empty, one
  * GET /v4/teams/{id} per team, spaced 6.5 s apart to stay under the free tier's 10 requests/minute.
  * Skips (exit 0) when the key is unset. The key is never printed.
+ * HARD FAIL (exit 1, offline, before any request, key or not): a name in the live pool
+ * (src/lib/live/current-players.ts) that also appears in the legend pool (src/lib/players.ts).
  */
 import { PLAYERS, type Player } from "../src/lib/players";
 import { PLAYERS_V1 } from "../src/lib/legacy/players-v1";
+import { CURRENT_PLAYERS } from "../src/lib/live/current-players";
 
 const API = "https://api.football-data.org/v4";
 const MIN_GAP_MS = 6_500; // 10 requests/minute on the free tier
@@ -43,6 +46,13 @@ export function looseKey(name: string): string | null {
   return last.length >= 4 ? `${(parts[0] ?? "")[0]} ${last}` : null;
 }
 
+/** Live-pool names that also appear in the legend pool (normalised, incl. "Jr" variants). Must be empty:
+ * a current player is never a legend. */
+export function liveLegendOverlap(legends: readonly { name: string }[] = PLAYERS, live: readonly { name: string }[] = CURRENT_PLAYERS): string[] {
+  const legendKeys = new Set(legends.flatMap((p) => variants(p.name)));
+  return live.filter((p) => variants(p.name).some((v) => legendKeys.has(v))).map((p) => p.name);
+}
+
 let last = 0;
 async function get<T>(path: string): Promise<{ status: number; body: T | null }> {
   const wait = last + MIN_GAP_MS - Date.now();
@@ -62,6 +72,12 @@ async function get<T>(path: string): Promise<{ status: number; body: T | null }>
 }
 
 async function main() {
+  const overlap = liveLegendOverlap();
+  if (overlap.length) {
+    console.log(`FAIL ${overlap.length} live-pool name(s) also in the legend pool (players.ts): ${overlap.join(", ")}`);
+    return 1;
+  }
+  console.log(`ok: no live-pool name (${CURRENT_PLAYERS.length}) is in the legend pool (${PLAYERS.length})`);
   if (!key) {
     console.log("skip legend CL check: FOOTBALL_DATA_API_KEY not set");
     return 0;

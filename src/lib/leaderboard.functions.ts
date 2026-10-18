@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dailyKey } from "@/lib/daily";
 import { overall } from "@/lib/players";
-import { resolveDailyDraft } from "@/lib/daily-draft";
 import { readDailyCookie, writeDailyCookie } from "@/lib/daily-cookie.functions";
 import { readDailyLeaderboard, type LeaderboardEntry } from "@/lib/leaderboard-read";
 
@@ -28,6 +27,8 @@ export const submitDailyResult = createServerFn({ method: "POST" })
     // Authoritative result: recompute from seed + pool. During the post-deploy
     // grace window, drafts started on the old client (v1 pool + pre-version seed)
     // still resolve; new dailies always use the current pool.
+    // Server-only module (keeps the frozen v1 pool out of the client bundle).
+    const { resolveDailyDraft } = await import("@/lib/daily-draft.server");
     const resolved = resolveDailyDraft(data.picks, data.dayKey);
     if (!resolved) {
       return { ok: false as const, error: "That squad is not a valid draft for today." };

@@ -18,3 +18,5 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
+      # No legacy v1 or flag-gated live player names in the shipped client bundle.
+      - run: bun run test:bundle
