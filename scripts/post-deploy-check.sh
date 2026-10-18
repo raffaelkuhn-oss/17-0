@@ -112,5 +112,8 @@ if [ "$len_pages" -eq 0 ]; then echo "FAIL length check ran on 0 pages"; fails=$
 # --- football-data.org upstream (1 request; info only, live players are flag-gated) ---
 bash "$(dirname "$0")/live-upstream-check.sh" || echo "warn football-data upstream not ok (live form keeps last KV data / base ratings)"
 
+# --- legend rule: no pool legend in a current CL squad (docs/legend-rule.md; 1 request; warning only) ---
+( cd "$(dirname "$0")/.." && bun scripts/legend-cl-check.ts ) || echo "warn legend CL check did not run"
+
 if [ "$fails" -gt 0 ]; then echo "post-deploy-check: $fails failure(s)"; exit 1; fi
 echo "post-deploy-check: all good"

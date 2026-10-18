@@ -117,5 +117,9 @@ npx wrangler secret put FOOTBALL_DATA_API_KEY         # free key: https://www.fo
 ```
 Deploy, then check `npx wrangler secret list`. Balance: `LIVE=1 bun scripts/sim-harness.ts 100000` (`LIVE_FORM=5` = every current player at +5).
 
+## Legend rule
+
+A pool legend must not be in this season's Champions League squad. Salah stays by name. Rule, decisions and the warning-only check (`bun run legend-cl-check`): [docs/legend-rule.md](docs/legend-rule.md).
+
 ## OG image
 `public/og-image-v2.jpg` is the brand-v2 share card used by og:image/twitter:image; `public/og-image.jpg` is an identical copy kept so existing shares keep working. Both are 1200x630, JPEG quality 85, ~65 KB, converted from `brand-v2/share-card-1200x630.png`. `scripts/gen-og-image.mjs` would overwrite it with the older generated design, so it now refuses to run without `--force`.
