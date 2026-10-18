@@ -1,0 +1,10 @@
+# Cloudflare Workers static-assets header rules. Vite copies this file from public/ into
+# dist/client/, where Workers Assets reads it (it is never served itself).
+# Only /assets/* is content-hashed by Vite (a new build = new file names), so it can be cached
+# for a year and never revalidated. Everything else keeps the Workers default
+# (public, max-age=0, must-revalidate): /og-image-v2.jpg, icons, robots.txt, llms.txt, the
+# manifest and /social/*. HTML and /r/<code>/og-v<N>.png come from the Worker, so these rules
+# never apply to them (the Worker sets its own headers, see src/lib/og/handler.ts).
+# Docs: https://developers.cloudflare.com/workers/static-assets/headers/
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

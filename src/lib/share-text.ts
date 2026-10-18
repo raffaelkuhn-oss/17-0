@@ -4,6 +4,7 @@
  */
 import STATS from "./sim-stats.json";
 import { SITE_URL } from "./site";
+import { recordWDL } from "./record";
 import type { Campaign } from "./sim";
 
 /**
@@ -57,7 +58,7 @@ export function runLink({ dailyNumber, challengeCode, origin = SITE_URL }: Omit<
 /** Returns the message body (without the link) and the link, plus the full text for copying. */
 export function shareText(input: ShareTextInput): { body: string; url: string; full: string } {
   const c = input.campaign;
-  const wdl = `${c.won}-${c.drawn}-${c.lost}`;
+  const wdl = recordWDL(c); // "11W 0D 1L" (copy-final.md #3)
   const grid = resultGrid(c);
   let lines: string[];
   if (input.dailyNumber !== undefined) {

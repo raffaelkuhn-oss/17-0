@@ -1,7 +1,7 @@
 import { SITE_HOST } from "@/lib/site";
 import { FORMATION, overall, type Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
-import { recordLabel } from "@/lib/record";
+import { pointsLine, recordHeadline, recordWords } from "@/lib/record";
 
 function headline(campaign: Campaign) {
   if (campaign.perfect) return "PERFECT 17-0";
@@ -37,7 +37,7 @@ export function ResultCard({
 
         <div className="mt-4 flex flex-wrap items-end gap-4">
           <h2 className="font-display text-6xl leading-none sm:text-7xl text-gradient">
-            {recordLabel(campaign)}
+            {recordHeadline(campaign)}
           </h2>
           <div className="mb-1.5">
             {contextLabel && (
@@ -45,9 +45,8 @@ export function ResultCard({
                 {contextLabel}
               </p>
             )}
-            <p className="text-sm tracking-widest text-muted-foreground uppercase">
-              {campaign.won}W · {campaign.drawn}D · {campaign.lost}L · {campaign.points} league pts
-            </p>
+            <p className="text-sm text-muted-foreground">{recordWords(campaign)}</p>
+            {pointsLine(campaign) && <p className="text-sm text-muted-foreground">{pointsLine(campaign)}</p>}
           </div>
         </div>
 
