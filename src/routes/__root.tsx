@@ -312,7 +312,10 @@ function SiteFooter() {
           browser and the link you arrived from (e.g. a creator code), and counts game events like
           drafts, finished runs and shares in aggregate; no ID, no tracking cookies, no personal
           data. A small cookie only stops the daily challenge from being replayed, and Cloudflare
-          Web Analytics counts visits without cookies.
+          Web Analytics counts visits without cookies.{" "}
+          <span data-testid="footer-daily-privacy">
+            Your Daily results, streak and stats stay in your browser only and are never sent to us.
+          </span>
         </p>
         <p className="text-xs" data-testid="footer-legal">
           <span className="whitespace-nowrap">

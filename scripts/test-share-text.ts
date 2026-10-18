@@ -43,7 +43,7 @@ t("points line hidden before the league phase ends", lp(9, 7) === null);
 const xl = [A, B, C, Cb, D].map((x) => xLength(x.full));
 const worstB = shareText({ campaign: mk("W".repeat(16) + "L", { eliminatedIn: "Final" }), challengeCode: "x".repeat(80), origin: O });
 const worstC = shareText({ campaign: mk("WWWWWWWWWWWWWWDDL".slice(0, 16) + "L", { eliminatedIn: "Final" }), challengeCode: "x".repeat(80), origin: O });
-const worstD = shareText({ campaign: mk("WDWDWDWDWDWDWDWDL", { eliminatedIn: "Final" }), dailyNumber: 9999, origin: O });
+const worstD = shareText({ campaign: mk("WDWDWDWDWDWDWDWDL", { eliminatedIn: "Final" }), dailyNumber: 9999, dailyStreak: 9999, origin: O });
 const maxLen = Math.max(...xl, ...[worstB, worstC, worstD].map((x) => xLength(x.full)));
 console.log(`X length: samples ${xl.join("/")}, worst case ${maxLen} of 280 (margin ${280 - maxLen})`);
 t(`every share text <= 160 X chars (max ${maxLen}, margin ${280 - maxLen} to 280)`, maxLen <= 160);

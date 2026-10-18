@@ -172,6 +172,15 @@ export function eventBody(
 
 const ENABLED = (import.meta.env?.["VITE_RETENTION_ENABLED"] as string | undefined) === "1";
 
+/** `typeof localStorage` itself throws when storage is blocked (some private modes), so probe safely. */
+function hasStorage(): boolean {
+  try {
+    return typeof window !== "undefined" && typeof window.localStorage !== "undefined" && window.localStorage !== null;
+  } catch {
+    return false;
+  }
+}
+
 function load(): RetentionState | null {
   try {
     const raw = localStorage.getItem(RETENTION_KEY);
@@ -195,7 +204,7 @@ function send(event: RetentionEvent, bucket: Bucket, source: Source, mode: Reten
 
 /** Call once on app load (client only). No-op unless enabled at build time. */
 export function trackVisit() {
-  if (!ENABLED || typeof window === "undefined" || typeof localStorage === "undefined") return;
+  if (!ENABLED || typeof window === "undefined" || !hasStorage()) return;
   const params = new URLSearchParams(window.location.search);
   const src = sourceBucket(params.get("utm_source"), document.referrer, window.location.hostname);
   const { state, events, bucket } = nextVisit(load(), new Date(), src, parseRef(params.get("ref")));

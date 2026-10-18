@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { browserStorage } from "@/lib/daily";
 import { useServerFn } from "@tanstack/react-start";
 import { getDailyLeaderboard, submitDailyResult, type LeaderboardEntry as Entry } from "@/lib/leaderboard.functions";
 import type { DailyRecord } from "@/lib/daily";
@@ -38,9 +39,10 @@ export function DailyLeaderboard({
   }, [dayKey, fetchBoard]);
 
   useEffect(() => {
-    if (typeof localStorage !== "undefined") {
-      setName(localStorage.getItem(NAME_KEY) ?? "");
-      setSubmitted(localStorage.getItem(SUBMIT_PREFIX + dayKey) === "1");
+    const store = browserStorage(); // null when storage is blocked (private mode): never throw
+    if (store) {
+      setName(store.getItem(NAME_KEY) ?? "");
+      setSubmitted(store.getItem(SUBMIT_PREFIX + dayKey) === "1");
     }
     void load();
   }, [dayKey, load]);
@@ -67,8 +69,12 @@ export function DailyLeaderboard({
       setError(res.error ?? "Could not submit your result. Try again.");
       return;
     }
-    localStorage.setItem(NAME_KEY, clean);
-    localStorage.setItem(SUBMIT_PREFIX + dayKey, "1");
+    try {
+      browserStorage()?.setItem(NAME_KEY, clean);
+      browserStorage()?.setItem(SUBMIT_PREFIX + dayKey, "1");
+    } catch {
+      /* quota / blocked: the submit itself still succeeded */
+    }
     setSubmitted(true);
     void load();
   }
