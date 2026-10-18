@@ -21,7 +21,7 @@ export function HomeLeaderboard() {
   if (!enabled) return null;
 
   return (
-    <div>
+    <section id="ranking" className="mx-auto max-w-2xl px-6 py-12">
       <h2 className="text-2xl">Today's ranking</h2>
       <p className="mt-2 mb-4 text-sm text-muted-foreground">
         Global leaderboard for today's Daily Challenge.{" "}
@@ -37,6 +37,6 @@ export function HomeLeaderboard() {
           Loading today's ranking…
         </div>
       )}
-    </div>
+    </section>
   );
 }
