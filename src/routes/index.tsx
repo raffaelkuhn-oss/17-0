@@ -117,9 +117,8 @@ function Index() {
         </div>
       </section>
 
-      <section id="ranking" className="mx-auto max-w-2xl px-6 py-12">
-        <HomeLeaderboard />
-      </section>
+      {/* Renders its own section, or nothing when the leaderboard is not configured. */}
+      <HomeLeaderboard />
 
       <section className="mx-auto max-w-4xl px-6 py-12">
         <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-3">

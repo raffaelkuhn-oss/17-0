@@ -4,6 +4,9 @@ import { dailyKey } from "@/lib/daily";
 import { overall } from "@/lib/players";
 import { resolveDailyDraft } from "@/lib/daily-draft";
 import { readDailyCookie, writeDailyCookie } from "@/lib/daily-cookie.functions";
+import { readDailyLeaderboard, type LeaderboardEntry } from "@/lib/leaderboard-read";
+
+export type { LeaderboardEntry };
 
 const inputSchema = z.object({
   dayKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -73,19 +76,6 @@ export const submitDailyResult = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-export type LeaderboardEntry = {
-  id: string;
-  name: string;
-  won: number;
-  drawn: number;
-  lost: number;
-  points: number;
-  rating: number;
-  champion: boolean;
-  perfect: boolean;
-  eliminated_in: string | null;
-};
-
 /** Returns { enabled: false } when Supabase is not configured. */
 export const getDailyLeaderboard = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) =>
@@ -93,20 +83,5 @@ export const getDailyLeaderboard = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => {
     const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const db = getSupabaseAdmin();
-    if (!db) return { enabled: false as const, entries: [] as LeaderboardEntry[] };
-    const { data: rows, error } = await db
-      .from("daily_leaderboard")
-      .select("id,name,won,drawn,lost,points,rating,champion,perfect,eliminated_in")
-      .eq("day_key", data.dayKey)
-      .order("champion", { ascending: false })
-      .order("won", { ascending: false })
-      .order("points", { ascending: false })
-      .order("created_at", { ascending: true })
-      .limit(100);
-    if (error) {
-      console.error("daily leaderboard read failed", error.message);
-      return { enabled: false as const, entries: [] as LeaderboardEntry[] };
-    }
-    return { enabled: true as const, entries: (rows ?? []) as LeaderboardEntry[] };
+    return readDailyLeaderboard(getSupabaseAdmin(), data.dayKey);
   });

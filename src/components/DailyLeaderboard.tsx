@@ -26,7 +26,9 @@ export function DailyLeaderboard({
   const [error, setError] = useState<string | null>(null);
   const submitResult = useServerFn(submitDailyResult);
   const fetchBoard = useServerFn(getDailyLeaderboard);
-  const [enabled, setEnabled] = useState(true);
+  // null = not known yet. The card renders only once the server confirms the board is configured,
+  // so an unconfigured board never flashes, leaves a gap or shows a placeholder line.
+  const [enabled, setEnabled] = useState<boolean | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -79,14 +81,8 @@ export function DailyLeaderboard({
     void load();
   }
 
-  if (!enabled) {
-    return (
-      <aside className="surface h-fit rounded-2xl p-5">
-        <p className="text-xs tracking-[0.35em] text-primary uppercase">Leaderboard</p>
-        <p className="mt-3 text-sm text-muted-foreground">The leaderboard is not available.</p>
-      </aside>
-    );
-  }
+  // Not configured (no Supabase env), read failed, or not known yet: render nothing at all.
+  if (enabled !== true) return null;
 
   return (
     <aside className="surface h-fit rounded-2xl p-5">
