@@ -1,10 +1,11 @@
+import { recordHeadline } from "../src/lib/record";
 import { readFileSync } from "node:fs";
 import ATLAS from "../src/assets/og/atlas.json";
 import { encodeChallenge, CHALLENGE_VERSION_LEGACY } from "../src/lib/challenge";
 import { PLAYERS } from "../src/lib/players";
 import { PLAYERS_V1 } from "../src/lib/legacy/players-v1";
 import { createHash } from "node:crypto";
-import { OG_LAYOUT_SHA, OG_VERSION, RUN_OG_PATH, runFromCode, runOgPath, runTitle } from "../src/lib/og/run-page";
+import { OG_LAYOUT_SHA, OG_VERSION, RUN_OG_PATH, runFromCode, runOgPath, runTitle, upgradedOgPath } from "../src/lib/og/run-page";
 import { renderRunPng } from "../src/lib/og/run-image";
 import { shareText } from "../src/lib/share-text";
 let fails = 0;
@@ -18,6 +19,8 @@ t("invalid codes -> null", [ "", "garbage", "%3Cscript%3E", code.slice(0, -2), "
 const v1 = encodeChallenge({ mode: "classic", seed: 1000, picks: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2], version: CHALLENGE_VERSION_LEGACY });
 t("v1 code replays on the frozen pool", runFromCode(v1)?.legacy === true);
 t("og path round-trip", RUN_OG_PATH.exec(runOgPath(code))?.[1] === code && runOgPath(code).endsWith(`og-v${OG_VERSION}.png`));
+t("old og-v1 path upgrades to the current version", upgradedOgPath(`/r/${code}/og-v1.png`) === runOgPath(code) && OG_VERSION > 1);
+t("current/future/bad og paths are not upgraded", upgradedOgPath(runOgPath(code)) === null && upgradedOgPath(`/r/${code}/og-v${OG_VERSION + 1}.png`) === null && upgradedOgPath("/r/x/og.png") === null);
 const layoutSha = createHash("sha256").update(readFileSync(new URL("../src/lib/og/run-image.ts", import.meta.url))).digest("hex").slice(0, 16);
 t(`og layout unchanged at v${OG_VERSION} (else bump OG_VERSION and set OG_LAYOUT_SHA=${layoutSha})`, layoutSha === OG_LAYOUT_SHA);
 t("title has no betting words", !/odds|bet/i.test(runTitle(run!.campaign)));
@@ -25,6 +28,11 @@ t("share link points at /r/<code>", shareText({ campaign: run!.campaign, challen
 const glyphs = (ATLAS.styles as unknown as Record<string, { glyphs: Record<string, unknown> }>).name!.glyphs;
 const missing = new Set([...PLAYERS, ...PLAYERS_V1].flatMap((p) => [...p.name]).filter((ch) => !glyphs[ch]));
 t(`atlas covers every player-name character (missing: ${[...missing].join("") || "none"})`, missing.size === 0);
+// The big record is drawn from the "record" atlas style: every character the label can produce must be baked.
+const recGlyphs = (ATLAS.styles as unknown as Record<string, { glyphs: Record<string, unknown> }>).record!.glyphs;
+const recSamples = [{ won: 17, drawn: 0, lost: 0 }, { won: 11, drawn: 0, lost: 1 }, { won: 4, drawn: 10, lost: 3 }].map(recordHeadline);
+const recMissing = new Set(recSamples.flatMap((s) => [...s]).filter((ch) => !recGlyphs[ch]));
+t(`record atlas covers "${recSamples.join('", "')}" (missing: ${[...recMissing].join("") || "none"})`, recMissing.size === 0);
 let maxSize = 0, ok = true;
 for (let i = 0; i < 20; i++) {
   const r = runFromCode(encodeChallenge({ mode: i % 2 ? "legend" : "classic", seed: 5000 + i * 9973, picks: Array.from({ length: 11 }, (_, k) => (k + i) % 4) }));

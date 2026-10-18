@@ -6,12 +6,21 @@ import { recordWDL } from "../record";
 import { exitPhrase } from "../share-text";
 
 /** Bump when the preview layout changes: it is part of the image URL, so old edge caches are bypassed. */
-export const OG_VERSION = 1;
+export const OG_VERSION = 2; // v2 (18 Oct 2026): record as "11W 0D 1L" instead of "11-0-1"
 /** sha256 prefix of src/lib/og/run-image.ts at this OG_VERSION. scripts/test-run-pages.ts fails when the
  * layout file changes without updating this, as a reminder to bump OG_VERSION (and then this hash). */
-export const OG_LAYOUT_SHA = "46357e22e2db268f";
+export const OG_LAYOUT_SHA = "821646955e1daadd";
 export const RUN_OG_PATH = /^\/r\/([A-Za-z0-9_-]{1,80})\/og-v(\d+)\.png$/;
 export const runOgPath = (code: string) => `/r/${code}/og-v${OG_VERSION}.png`;
+/** For an older-version image path (e.g. og-v1.png in a link preview scraped before a layout bump), the
+ * current-version path to redirect to; null for the current version, future versions or bad paths. Old
+ * URLs then show the run (new layout) instead of the generic fallback, and never reuse the old image. */
+export function upgradedOgPath(pathname: string): string | null {
+  const m = RUN_OG_PATH.exec(pathname);
+  if (!m) return null;
+  const v = Number(m[2]);
+  return v >= 1 && v < OG_VERSION ? runOgPath(m[1]!) : null;
+}
 
 export type RunView = { challenge: Challenge; picks: Player[]; campaign: Campaign; legacy: boolean };
 
