@@ -66,7 +66,7 @@ function Index() {
           <p className="text-xs tracking-[0.45em] text-primary uppercase">
             Free Champions League draft game
           </p>
-          <h1 className="mt-5 text-5xl leading-[0.9] sm:text-7xl">
+          <h1 className="mt-5 text-[clamp(1.875rem,8.4vw,3rem)] leading-[0.95] sm:text-7xl">
             Draft 11 legends.{" "}
             <span className="whitespace-nowrap">
               Win all <span className="text-gradient">17</span>.
@@ -88,7 +88,7 @@ function Index() {
           {/* "every day", not "at midnight": the Daily resets at 00:00 UTC (src/lib/daily.ts),
               not at the visitor's local midnight, and no local-time countdown is shown yet. */}
           <p className="mt-3 text-sm text-muted-foreground">
-            <span className="whitespace-nowrap">Same legends for everyone today</span>{" "}
+            <span className="whitespace-nowrap">Same first picks for everyone today</span>{" "}
             <span className="whitespace-nowrap">· new Daily every day</span>
           </p>
 

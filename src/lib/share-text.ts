@@ -62,7 +62,7 @@ export function shareText(input: ShareTextInput): { body: string; url: string; f
   const grid = resultGrid(c);
   let lines: string[];
   if (input.dailyNumber !== undefined) {
-    lines = [`17-0 Daily #${input.dailyNumber}: ${wdl}`, grid, "Same legends for everyone today. Can you beat it?"];
+    lines = [`17-0 Daily #${input.dailyNumber}: ${wdl}`, grid, "Same first picks for everyone today. Can you beat it?"];
   } else if (c.perfect) {
     lines = ["I went 17-0 in 17-0 Draft 🏆", grid, `In our sims only about 1 in ${perfectOneIn()} runs do that. Think you can?`];
   } else if (c.won === 16) {
