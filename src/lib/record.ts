@@ -2,8 +2,8 @@
  * Record labels (copy-final.md #3, Marketing 18 Oct 2026).
  * - recordWDL: always "{W}W {D}D {L}L", no zeros dropped, e.g. "11W 0D 1L" (share text, titles).
  * - recordHeadline: the big record on result screens; a perfect run keeps the brand label "17-0".
- * - recordLabel: compact "7-2-3" / "17-0". Kept ONLY for the Worker-rendered og PNG (its glyph atlas
- *   has digits and "-" only, see src/assets/og/atlas.json "record") and the compact Daily board.
+ * - recordLabel: compact "7-2-3" / "17-0". Kept ONLY for the compact Daily board. The og PNG and the
+ *   canvas share image use recordHeadline (og atlas "record" style has digits, "-", W, D, L and space).
  */
 type WDL = { won: number; drawn: number; lost: number };
 

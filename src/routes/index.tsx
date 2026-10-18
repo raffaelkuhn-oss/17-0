@@ -87,9 +87,13 @@ function Index() {
           </Link>
           {/* "every day", not "at midnight": the Daily resets at 00:00 UTC (src/lib/daily.ts),
               not at the visitor's local midnight, and no local-time countdown is shown yet. */}
-          <p className="mt-3 text-sm text-muted-foreground">
-            <span className="whitespace-nowrap">Same first picks for everyone today</span>{" "}
-            <span className="whitespace-nowrap">· new Daily every day</span>
+          {/* Two lines with no dot when the full line doesn't fit (so "·" never dangles at a wrap, like the
+              result screen); one line with the dot when it does. Container query in em (the <p>'s own
+              font size), so it follows the real text width: 28em = 392 px at 14 px vs ~384 px of text. */}
+          <p className="@container mt-3 text-sm text-muted-foreground" data-testid="hero-subline">
+            <span className="block @min-[28em]:inline">Same first picks for everyone today</span>
+            <span className="hidden @min-[28em]:inline"> · </span>
+            <span className="block @min-[28em]:inline">new Daily every day</span>
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-1 text-sm">

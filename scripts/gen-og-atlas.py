@@ -14,7 +14,7 @@ FONTS = {"bold": "scripts/og-fonts/NotoSans-Bold.ttf", "regular": "scripts/og-fo
 FULL = "".join(chr(c) for c in list(range(0x20, 0x7F)) + list(range(0xA0, 0x180))) + "·…–—’"
 # style name -> (font, px size, charset). Sizes match src/lib/og/run-image.ts.
 STYLES = {
-    "record": ("bold", 132, "0123456789-"),
+    "record": ("bold", 132, "0123456789-WDL "),  # "-" for "17-0"; W, D, L and space for "11W 0D 1L"
     "kicker": ("bold", 26, FULL),
     "stats": ("regular", 26, FULL),
     "square": ("bold", 22, "WDL"),
