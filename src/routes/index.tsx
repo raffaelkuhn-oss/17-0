@@ -56,21 +56,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const MODES = [
-  {
-    id: "classic",
-    kicker: "Full stats",
-    title: "Classic",
-    body: "Every attribute on the table. Build the best XI with all the numbers in front of you.",
-  },
-  {
-    id: "legend",
-    kicker: "Stats hidden",
-    title: "Legend IQ",
-    body: "No ratings, no help. Draft on memory alone and prove you actually watched the football.",
-  },
-] as const;
-
 function Index() {
   return (
     <main className="min-h-screen">
@@ -79,60 +64,53 @@ function Index() {
 
         <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-16 text-center sm:pt-32">
           <p className="text-xs tracking-[0.45em] text-primary uppercase">
-            All-time European draft
+            Free Champions League draft game
           </p>
-          <h1 className="mt-5 text-5xl leading-[0.9] sm:text-7xl">
-            <span className="text-gradient">17-0</span> — Champions League Draft Simulator
+          <h1 className="mt-5 text-[clamp(1.875rem,8.4vw,3rem)] leading-[0.95] sm:text-7xl">
+            Draft 11 legends.{" "}
+            <span className="whitespace-nowrap">
+              Win all <span className="text-gradient">17</span>.
+            </span>
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground">
-            Draft an all-time XI from the Champions League legends pool, then simulate the full
-            campaign: eight league-phase nights, four knockout ties and one final in May. Can your
-            XI survive the whole thing unbeaten and go 17-0?
+            Build your all-time Champions League XI and sim a full season. Free,{" "}
+            <span className="whitespace-nowrap">no sign-up.</span> Can you go 17-0?
           </p>
 
+          {/* The only filled, high-contrast button on the page (copy-final.md #1). */}
           <Link
             to="/daily"
-            className="surface mx-auto mt-9 flex max-w-3xl items-center justify-between gap-4 rounded-2xl border-primary/40 p-5 text-left transition-transform hover:-translate-y-1"
+            className="btn-primary hover:btn-primary-hover mx-auto mt-9 w-full max-w-sm"
+            data-testid="hero-daily-cta"
           >
-            <div>
-              <p className="text-[0.65rem] tracking-[0.35em] text-primary uppercase">
-                New · one draft a day
-              </p>
-              <h2 className="mt-1 text-2xl">Daily Challenge</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Everyone in the world starts from the same first four choices. Build a streak,
-                compare results.
-              </p>
-            </div>
-            <span className="btn-primary hover:btn-primary-hover min-h-0! shrink-0 flex-col gap-0! rounded-xl! px-4! py-2! text-center text-xs leading-tight">
-              <span className="block">Play</span> <span className="block">today</span>
-            </span>
+            Play today's Daily
           </Link>
+          {/* "every day", not "at midnight": the Daily resets at 00:00 UTC (src/lib/daily.ts),
+              not at the visitor's local midnight, and no local-time countdown is shown yet. */}
+          <p className="mt-3 text-sm text-muted-foreground">
+            <span className="whitespace-nowrap">Same first picks for everyone today</span>{" "}
+            <span className="whitespace-nowrap">· new Daily every day</span>
+          </p>
 
-          <div className="mx-auto mt-6 grid max-w-3xl gap-4 sm:grid-cols-2">
-            {MODES.map((m) => (
-              <Link
-                key={m.id}
-                to="/draft"
-                search={m.id === "legend" ? { mode: "legend" } : {}}
-                className="surface group rounded-2xl p-6 text-left transition-transform hover:-translate-y-1"
-              >
-                <p className="text-[0.65rem] tracking-[0.35em] text-primary uppercase">
-                  {m.kicker}
-                </p>
-                <h2 className="mt-2 text-3xl">{m.title}</h2>
-                <p className="mt-2 text-sm text-muted-foreground">{m.body}</p>
-                <span className="btn-primary hover:btn-primary-hover mt-5 w-full text-sm">
-                  Start draft
-                </span>
-              </Link>
-            ))}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-1 text-sm">
+            <Link
+              to="/draft"
+              className="inline-flex min-h-11 items-center px-3 text-primary underline-offset-4 hover:underline"
+            >
+              Classic draft
+            </Link>
+            <span aria-hidden="true" className="text-muted-foreground">
+              ·
+            </span>
+            <Link
+              to="/draft"
+              search={{ mode: "legend" }}
+              className="inline-flex min-h-11 items-center px-3 text-primary underline-offset-4 hover:underline"
+            >
+              Legend IQ
+            </Link>
           </div>
         </div>
-      </section>
-
-      <section className="mx-auto max-w-4xl px-6">
-        <AdBanner className="mx-auto max-w-3xl" />
       </section>
 
       <section id="ranking" className="mx-auto max-w-2xl px-6 py-12">
@@ -190,6 +168,10 @@ function Index() {
             </Link>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-6 pb-12">
+        <AdBanner className="mx-auto max-w-3xl" />
       </section>
 
       <section className="mx-auto max-w-3xl px-6 pb-4">

@@ -314,7 +314,18 @@ function SiteFooter() {
           data. A small cookie only stops the daily challenge from being replayed, and Cloudflare
           Web Analytics counts visits without cookies.
         </p>
-        <p className="text-xs">Fan-made, not affiliated with UEFA.</p>
+        <p className="text-xs" data-testid="footer-legal">
+          <span className="whitespace-nowrap">
+            Sponsor or partner?{" "}
+            <a
+              href="mailto:ucl17zero@gmail.com"
+              className="inline-flex min-h-11 items-center text-primary hover:underline"
+            >
+              ucl17zero@gmail.com
+            </a>
+          </span>{" "}
+          <span className="whitespace-nowrap">· Fan-made, not affiliated with UEFA</span>
+        </p>
       </div>
     </footer>
   );
