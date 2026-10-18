@@ -53,7 +53,9 @@ Re-tune with `bun scripts/sim-harness.ts 100000` (random, greedy best-of-4, best
 ## Daily replay deterrent (optional env)
 
 `DAILY_COOKIE_SECRET` (Worker secret, e.g. `wrangler secret put DAILY_COOKIE_SECRET`) enables a signed,
-httpOnly, SameSite=Lax cookie set when the daily is completed / submitted to the leaderboard. If unset the
+httpOnly, Secure, SameSite=Strict cookie set when the daily is completed / submitted to the leaderboard.
+It holds no ID: only `v2.<date>.<c|b>.<HMAC>`, so everyone in the same state on the same Daily gets the
+same value (old v1 cookies with a random id are honoured until 21 Oct 2026, then ignored). If unset the
 daily falls back to localStorage only. Without accounts this is a deterrent, not a guarantee: clearing
 cookies and storage (or switching browser/device) gives a fresh attempt.
 
