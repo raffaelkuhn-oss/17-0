@@ -25,7 +25,7 @@ t("A verbatim", A.full === `I went 17-0 in 17-0 Draft 🏆\n${"✅".repeat(17)}\
 t("B verbatim", B.body === `16W 0D 1L in 17-0 Draft. One game off perfect 😩\n${"✅".repeat(16)}❌\nThink you can go 17-0?`);
 t("C verbatim", C.body === "8W 1D 3L in 17-0 Draft, out in the QF\n✅✅🟨✅❌✅✅✅✅✅❌❌\nThink you can go 17-0?");
 t("C bad run", Cb.body.startsWith("2W 1D 5L in 17-0 Draft, out in the league phase\n❌✅❌🟨❌❌✅❌\n"));
-t("D verbatim + daily link", D.full === `17-0 Daily #6: 8W 1D 3L\n✅✅🟨✅❌✅✅✅✅✅❌❌\nSame legends for everyone today. Can you beat it?\n${O}/daily`);
+t("D verbatim + daily link", D.full === `17-0 Daily #6: 8W 1D 3L\n✅✅🟨✅❌✅✅✅✅✅❌❌\nSame first picks for everyone today. Can you beat it?\n${O}/daily`);
 t("rarity only on A", ![B, C, Cb, D].some((x) => x.full.includes("in our sims")));
 t("no hashtags, no 'odds'", ![A, B, C, Cb, D].some((x) => /#[A-Za-z]|\bodds\b/i.test(x.full)));
 t("all well under 280 X chars (longest = A, 148)", [A, B, C, Cb, D].every((x) => xLength(x.full) <= 160));
