@@ -4,6 +4,7 @@
  * Unpaid "Friends of 17-0" link to the original basketball drafting game at 82-0.com.
  * Label by relationship: friend -> "Friends of 17-0" + rel noopener; use "Sponsored" and
  * rel="sponsored" only when money or a link swap is involved.
+ * The sponsor/partner contact email lives in the site footer (src/routes/__root.tsx), not here.
  */
 export function AdBanner({
   label = "Friends of 17-0",
@@ -27,12 +28,6 @@ export function AdBanner({
         </span>
         <span className="mt-1 text-xs text-primary group-hover:underline">Play 82-0.com →</span>
       </a>
-      <p className="mt-2 text-center text-xs text-muted-foreground">
-        for sponsoring inquiries write an email to:{" "}
-        <a href="mailto:ucl17zero@gmail.com" className="inline-flex min-h-11 items-center px-2 text-primary hover:underline">
-          ucl17zero@gmail.com
-        </a>
-      </p>
     </div>
   );
 }

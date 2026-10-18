@@ -13,7 +13,7 @@
     "deploy": "bun run build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "typecheck": "tsc --noEmit",
-    "test": "bun scripts/test-daily-cookie.ts && bun scripts/test-retention.ts && bun scripts/test-live.ts && bun scripts/test-explainer.ts && bun scripts/test-daily-grace.ts && bun scripts/test-challenge.ts && bun scripts/test-share-text.ts && bun scripts/test-run-pages.ts"
+    "test": "bun scripts/test-daily-cookie.ts && bun scripts/test-retention.ts && bun scripts/test-live.ts && bun scripts/test-explainer.ts && bun scripts/test-daily-grace.ts && bun scripts/test-challenge.ts && bun scripts/test-share-text.ts && bun scripts/test-run-pages.ts && bun scripts/test-footer.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
