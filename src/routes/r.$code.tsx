@@ -3,7 +3,8 @@ import { absUrl } from "@/lib/site";
 import { overall } from "@/lib/players";
 import { pointsLine, recordHeadline, recordWDL, recordWords } from "@/lib/record";
 import { exitPhrase } from "@/lib/share-text";
-import { runFromCode, runOgPath, runOgTitle, runStamp, runTitle } from "@/lib/og/run-page";
+import { isExpiredRunCode, runFromCode, runOgPath, runOgTitle, runStamp, runTitle } from "@/lib/og/run-page";
+import { ExpiredChallenge, EXPIRED_CHALLENGE_COPY, EXPIRED_CHALLENGE_TITLE } from "@/components/ExpiredChallenge";
 
 /**
  * /r/<code>: a shared run, rebuilt from the challenge code alone (nothing stored server-side).
@@ -14,11 +15,15 @@ export const Route = createFileRoute("/r/$code")({
     const run = runFromCode(params.code);
     return run
       ? { ok: true as const, title: runTitle(run.campaign), ogTitle: runOgTitle(run.campaign, runStamp(run)), record: recordWDL(run.campaign), headline: recordHeadline(run.campaign), perfect: run.campaign.perfect, exit: exitPhrase(run.campaign) }
-      : { ok: false as const };
+      : { ok: false as const, expired: isExpiredRunCode(params.code) };
   },
   head: ({ loaderData, params }) => {
     const robots = { name: "robots", content: "noindex, follow" };
     if (!loaderData?.ok) {
+      // Retired v1 run: 200 with the expired note; og/twitter image stay the site default (from __root).
+      if (loaderData?.expired) {
+        return { meta: [{ title: EXPIRED_CHALLENGE_TITLE }, { name: "description", content: EXPIRED_CHALLENGE_COPY }, robots, { property: "og:title", content: "17-0 Draft: draft your own XI" }, { property: "og:description", content: EXPIRED_CHALLENGE_COPY }] };
+      }
       return { meta: [{ title: "Run not found — 17-0 Draft" }, robots] };
     }
     // og:title per copy-stamp.md §4; a perfect run keeps the brand label "17-0" (copy-final.md #3).
@@ -53,6 +58,14 @@ export const Route = createFileRoute("/r/$code")({
 function RunPage() {
   const { code } = Route.useParams();
   const run = runFromCode(code);
+
+  if (!run && isExpiredRunCode(code)) {
+    return (
+      <main className="mx-auto min-h-screen max-w-2xl px-6 py-10" data-testid="run-expired">
+        <ExpiredChallenge />
+      </main>
+    );
+  }
 
   if (!run) {
     return (
@@ -100,9 +113,6 @@ function RunPage() {
             Play this challenge
           </Link>
         </div>
-        {run.legacy && (
-          <p className="mt-3 text-xs text-muted-foreground">From an earlier version of the game, replayed with that version's ratings.</p>
-        )}
       </div>
 
       <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_300px]">

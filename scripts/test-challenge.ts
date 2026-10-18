@@ -1,9 +1,9 @@
 // Run: bun scripts/test-challenge.ts
 import { readFileSync } from "node:fs";
-import { PLAYERS_V1 } from "../src/lib/legacy/players-v1";
 import {
   decodeChallenge,
   encodeChallenge,
+  isExpiredChallenge,
   replayChallenge,
   rngFactory,
   type Challenge,
@@ -75,13 +75,10 @@ t("valid link still decodes", decodeChallenge(good) !== null);
     picks: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     version: "v1",
   });
-  const d = decodeChallenge(legacy);
-  t("legacy v1 link still decodes", !!d && d.version === "v1");
-  const r = d && replayChallenge(d);
-  t(
-    "legacy v1 replays against the frozen pool",
-    !!r && r.picks.every((p) => PLAYERS_V1.some((x) => x.id === p.id)),
-  );
+  // Retired 19 Oct: v1 links never replay (the frozen pool is not in the client); they show the expired note.
+  t("legacy v1 link no longer decodes", decodeChallenge(legacy) === null);
+  t("legacy v1 link is recognised as expired", isExpiredChallenge(legacy));
+  t("legacy v1 does not replay", replayChallenge({ mode: "classic", seed: 1000, picks: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2], version: "v1" }) === null);
 }
 const daily = readFileSync(new URL("../src/routes/daily.tsx", import.meta.url), "utf8");
 t("daily route does not use challenge links", !daily.includes("lib/challenge"));

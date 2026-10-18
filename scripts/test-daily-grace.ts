@@ -9,8 +9,8 @@ import {
   dailySeedLegacy,
   isDailyGraceActive,
   resolveDailyDraft,
-  verifyDraft,
-} from "../src/lib/daily-draft";
+} from "../src/lib/daily-draft.server";
+import { verifyDraft } from "../src/lib/daily-draft";
 
 let fails = 0;
 const t = (n: string, c: boolean) => {

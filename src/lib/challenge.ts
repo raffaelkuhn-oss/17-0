@@ -4,11 +4,12 @@
 // challenger's XI (and result) is rebuilt from seed + indexes, never trusted from the URL.
 // Always the legends-only pool (never the live-players pool), never the Daily.
 import { FORMATION, PLAYERS, type Player } from "./players";
-import { candidatesFor, simulate, SIM_TUNING, type Campaign } from "./sim";
-import { PLAYERS_V1, SIM_TUNING_V1 } from "./legacy/players-v1";
+import { candidatesFor, simulate, type Campaign } from "./sim";
 
 export const CHALLENGE_VERSION = "v2";
-/** Pre-rebalance links keep resolving against the frozen v1 pool + tuning. */
+/** Pre-rebalance (before 15 Oct 2026) links. Retired 19 Oct: they no longer replay (the frozen v1 pool
+ * held current CL players and is not shipped to the client); isExpiredChallenge() spots them so the
+ * page can show a friendly "expired" note instead. */
 export const CHALLENGE_VERSION_LEGACY = "v1";
 export const CANDIDATES_PER_PICK = 4;
 export type ChallengeMode = "classic" | "legend";
@@ -57,8 +58,10 @@ export function encodeChallenge(c: Challenge): string {
   );
 }
 
-/** Returns null for anything malformed or tampered; callers fall back to a normal draft. */
-export function decodeChallenge(raw: unknown): Challenge | null {
+type RawParts = { v: string; m: string; s: string; p: string };
+
+/** Splits a code into its four fields if it is well-formed (any version); null otherwise. */
+function parseRaw(raw: unknown): RawParts | null {
   if (
     typeof raw !== "string" ||
     raw.length === 0 ||
@@ -75,46 +78,43 @@ export function decodeChallenge(raw: unknown): Challenge | null {
   const parts = text.split("|");
   if (parts.length !== 4) return null;
   const [v, m, s, p] = parts as [string, string, string, string];
-  if ((v !== CHALLENGE_VERSION && v !== CHALLENGE_VERSION_LEGACY) || (m !== "c" && m !== "l"))
-    return null;
+  if (m !== "c" && m !== "l") return null;
   if (!/^[0-9a-z]{1,7}$/.test(s)) return null;
   const seed = parseInt(s, 36);
   if (!Number.isSafeInteger(seed) || seed < 0 || seed >= 1e9) return null;
   if (!new RegExp(`^[0-${CANDIDATES_PER_PICK - 1}]{${FORMATION.length}}$`).test(p)) return null;
+  return { v, m, s, p };
+}
+
+/** True for a well-formed link from the retired v1 version (shown as "expired", never replayed). */
+export function isExpiredChallenge(raw: unknown): boolean {
+  return parseRaw(raw)?.v === CHALLENGE_VERSION_LEGACY;
+}
+
+/** Returns null for anything malformed, tampered or retired (v1); callers fall back to a normal draft
+ * or, for v1 (see isExpiredChallenge), to the expired note. */
+export function decodeChallenge(raw: unknown): Challenge | null {
+  const r = parseRaw(raw);
+  if (!r || r.v !== CHALLENGE_VERSION) return null;
   const c: Challenge = {
-    mode: m === "l" ? "legend" : "classic",
-    seed,
-    picks: [...p].map(Number),
-    version: v,
+    mode: r.m === "l" ? "legend" : "classic",
+    seed: parseInt(r.s, 36),
+    picks: [...r.p].map(Number),
+    version: r.v,
   };
   return replayChallenge(c) ? c : null;
 }
 
-function withTuning<T>(tune: Record<string, number>, fn: () => T): T {
-  const prev = { ...SIM_TUNING };
-  Object.assign(SIM_TUNING, tune);
-  try {
-    return fn();
-  } finally {
-    Object.assign(SIM_TUNING, prev);
-  }
-}
-
-/** Rebuilds the challenger's XI and result from seed + indexes. Null if an index is not a real card. */
+/** Rebuilds the challenger's XI and result from seed + indexes. Null if an index is not a real card,
+ * or for a retired version (v1). */
 export function replayChallenge(c: Challenge): { picks: Player[]; campaign: Campaign } | null {
-  const version = c.version ?? CHALLENGE_VERSION;
-  const pool = version === CHALLENGE_VERSION_LEGACY ? PLAYERS_V1 : PLAYERS;
-  const run = () => {
-    const picks: Player[] = [];
-    for (let step = 0; step < FORMATION.length; step++) {
-      const p = slotCandidates(c.seed, step, picks, pool)[c.picks[step]!];
-      if (!p) return null;
-      picks.push(p);
-    }
-    if (new Set(picks.map((p) => p.id)).size !== FORMATION.length) return null;
-    return { picks, campaign: simulate(picks, c.seed) };
-  };
-  return version === CHALLENGE_VERSION_LEGACY
-    ? withTuning({ ...SIM_TUNING_V1, FINAL_BONUS: 0 }, run)
-    : run();
+  if ((c.version ?? CHALLENGE_VERSION) !== CHALLENGE_VERSION) return null;
+  const picks: Player[] = [];
+  for (let step = 0; step < FORMATION.length; step++) {
+    const p = slotCandidates(c.seed, step, picks, PLAYERS)[c.picks[step]!];
+    if (!p) return null;
+    picks.push(p);
+  }
+  if (new Set(picks.map((p) => p.id)).size !== FORMATION.length) return null;
+  return { picks, campaign: simulate(picks, c.seed) };
 }
