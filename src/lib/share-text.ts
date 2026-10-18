@@ -44,12 +44,14 @@ export type ShareTextInput = {
   campaign: Campaign;
   /** Daily number (#1 = 11 Oct 2026); set only for Daily Challenge runs. */
   dailyNumber?: number | undefined;
+  /** Current Daily streak (localStorage only); shown in the Daily text from 2 days up. */
+  dailyStreak?: number | undefined;
   /** v2 challenge code for this exact run; links to the run page /r/<code>. */
   challengeCode?: string | undefined;
   origin?: string;
 };
 
-export function runLink({ dailyNumber, challengeCode, origin = SITE_URL }: Omit<ShareTextInput, "campaign">): string {
+export function runLink({ dailyNumber, challengeCode, origin = SITE_URL }: Omit<ShareTextInput, "campaign" | "dailyStreak">): string {
   if (challengeCode) return `${origin}/r/${challengeCode}`;
   if (dailyNumber !== undefined) return `${origin}/daily`;
   return `${origin}/draft`;
@@ -62,7 +64,9 @@ export function shareText(input: ShareTextInput): { body: string; url: string; f
   const grid = resultGrid(c);
   let lines: string[];
   if (input.dailyNumber !== undefined) {
-    lines = [`17-0 Daily #${input.dailyNumber}: ${wdl}`, grid, "Same first picks for everyone today. Can you beat it?"];
+    const streak = input.dailyStreak ?? 0;
+    const head = `17-0 Daily #${input.dailyNumber}: ${wdl}`;
+    lines = [streak >= 2 ? `${head} · 🔥 ${streak}-day streak` : head, grid, "Same first picks for everyone today. Can you beat it?"];
   } else if (c.perfect) {
     lines = ["I went 17-0 in 17-0 Draft 🏆", grid, `In our sims only about 1 in ${perfectOneIn()} runs do that. Think you can?`];
   } else if (c.won === 16) {

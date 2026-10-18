@@ -13,6 +13,8 @@ export type ShareProps = {
   challengeCode?: string | undefined;
   /** Daily number; set only for Daily Challenge runs. */
   dailyNumber?: number | undefined;
+  /** Current Daily streak (from localStorage), shown in the Daily share text from 2 days up. */
+  dailyStreak?: number | undefined;
   /** Mode recorded on share_click. */
   trackMode?: RetentionMode;
 };
@@ -69,9 +71,9 @@ function ManualCopy({ text }: { text: string }) {
  * Elsewhere: copies text + link and shows "Copied!". share_click is sent in the same tick as the
  * share/copy call, so a cancelled share sheet is still counted (intent, not completion).
  */
-export function ShareButton({ campaign, challengeCode, dailyNumber, trackMode, className }: ShareProps & { className?: string }) {
+export function ShareButton({ campaign, challengeCode, dailyNumber, dailyStreak, trackMode, className }: ShareProps & { className?: string }) {
   const { copied, manualText, setManualText, copy } = useCopy();
-  const t = shareText({ campaign, challengeCode, dailyNumber });
+  const t = shareText({ campaign, challengeCode, dailyNumber, dailyStreak });
 
   function onClick() {
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
@@ -111,6 +113,7 @@ export function ShareCard({
   contextLabel,
   challengeCode,
   dailyNumber,
+  dailyStreak,
   trackMode,
 }: ShareProps & {
   picks: Player[];
@@ -119,7 +122,7 @@ export function ShareCard({
 }) {
   const [preview, setPreview] = useState<string | null>(null);
   const { copied, manualText, copy } = useCopy();
-  const t = shareText({ campaign, challengeCode, dailyNumber });
+  const t = shareText({ campaign, challengeCode, dailyNumber, dailyStreak });
 
   useEffect(() => {
     let url: string | null = null;

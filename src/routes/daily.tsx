@@ -6,13 +6,14 @@ import { getDailyPlayedStatus, markDailyCompleted } from "@/lib/daily-cookie.fun
 import { DraftGame } from "@/components/DraftGame";
 import { DailyLeaderboard } from "@/components/DailyLeaderboard";
 import { ResultCard } from "@/components/ResultCard";
+import { NextDaily, StatsPanel } from "@/components/DailyStats";
 
 import {
+  currentStreak,
   dailyKey,
   dailyLabel,
   dailyNumber,
   dailySeed,
-  hoursUntilNext,
   loadDailyResult,
   loadDailyStats,
   saveDailyResult,
@@ -82,7 +83,6 @@ function DailyPage() {
   const [key, setKey] = useState<string | null>(null);
   const [record, setRecord] = useState<DailyRecord | null>(null);
   const [stats, setStats] = useState<DailyStats | null>(null);
-  const [hours, setHours] = useState(0);
   // Signed cookie says played, even if localStorage was cleared.
   const [cookiePlayed, setCookiePlayed] = useState(false);
   const fetchStatus = useServerFn(getDailyPlayedStatus);
@@ -94,7 +94,6 @@ function DailyPage() {
     setKey(k);
     setRecord(loadDailyResult(k));
     setStats(loadDailyStats());
-    setHours(hoursUntilNext());
     fetchStatus({ data: { dayKey: k } })
       .then((r) => setCookiePlayed(r.played))
       .catch(() => {});
@@ -134,7 +133,7 @@ function DailyPage() {
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-10">
       {alreadyPlayed ? (
-        <PlayedToday record={record} stats={stats} hours={hours} label={label} dayKey={key} />
+        <PlayedToday record={record} stats={stats} label={label} dayKey={key} />
       ) : (
         <DraftGame
           mode="classic"
@@ -142,12 +141,13 @@ function DailyPage() {
           contextLabel={label}
           kicker={label}
           dailyNumber={dailyNumber(key)}
+          dailyStreak={currentStreak(stats, key)}
           intro={<DailyRules />}
           allowReplay={false}
           onComplete={onComplete}
           sidebar={
             <>
-              <StatsPanel stats={stats} hours={hours} />
+              <StatsPanel stats={stats} today={key} />
               <DailyLeaderboard dayKey={key} record={null} />
             </>
           }
@@ -157,40 +157,14 @@ function DailyPage() {
   );
 }
 
-function StatsPanel({ stats, hours }: { stats: DailyStats | null; hours: number }) {
-  return (
-    <aside className="surface h-fit rounded-2xl p-5">
-      <p className="text-xs tracking-[0.35em] text-primary uppercase">Your streak</p>
-      <div className="mt-4 grid grid-cols-2 gap-2 text-center">
-        {[
-          ["Streak", stats?.streak ?? 0],
-          ["Best", stats?.bestStreak ?? 0],
-          ["Played", stats?.played ?? 0],
-          ["Titles", stats?.titles ?? 0],
-        ].map(([k, v]) => (
-          <div key={k as string} className="rounded-lg border border-border py-3">
-            <p className="text-[0.6rem] tracking-widest text-muted-foreground uppercase">{k}</p>
-            <p className="font-display text-2xl">{v}</p>
-          </div>
-        ))}
-      </div>
-      <p className="mt-4 text-xs text-muted-foreground">
-        Everyone starts from the same first four choices today. Next draft in {hours}h.
-      </p>
-    </aside>
-  );
-}
-
 function PlayedToday({
   record,
   stats,
-  hours,
   label,
   dayKey,
 }: {
   record: DailyRecord | null;
   stats: DailyStats | null;
-  hours: number;
   label: string;
   dayKey: string;
 }) {
@@ -215,17 +189,22 @@ function PlayedToday({
               ? "A perfect 17-0. Nothing left to prove until tomorrow."
               : record.champion
                 ? "Champions of Europe — but not unbeaten."
-                : `Out in the ${record.eliminatedIn}.`}{" "}
-            The next daily draft unlocks in {hours}h.
+                : `Out in the ${record.eliminatedIn}.`}
           </p>
         )}
+        <NextDaily className="mt-2 text-muted-foreground" />
         {record && !hasCard && (
           // Fallback for old saved records without a full campaign: no ResultCard, so show the record here.
           <p className="mt-4 font-display text-5xl text-gradient">{recordHeadline(record)}</p>
         )}
         {record?.campaign && (
           <div className="mx-auto mt-5 max-w-sm">
-            <ShareButton campaign={record.campaign} dailyNumber={dailyNumber(dayKey)} trackMode="daily" />
+            <ShareButton
+              campaign={record.campaign}
+              dailyNumber={dailyNumber(dayKey)}
+              dailyStreak={currentStreak(stats, dayKey)}
+              trackMode="daily"
+            />
           </div>
         )}
       </header>
@@ -250,7 +229,7 @@ function PlayedToday({
               </Link>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              Come back after 00:00 UTC for a new shared draft.
+              A new shared draft drops every day at 00:00 UTC.
             </p>
           </div>
         </div>
@@ -262,11 +241,12 @@ function PlayedToday({
               rating={record.rating ?? 0}
               contextLabel={label}
               dailyNumber={dailyNumber(dayKey)}
+              dailyStreak={currentStreak(stats, dayKey)}
               trackMode="daily"
             />
           )}
+          <StatsPanel stats={stats} today={dayKey} record={record} />
           <DailyLeaderboard dayKey={dayKey} record={record} />
-          <StatsPanel stats={stats} hours={hours} />
         </div>
       </div>
     </div>

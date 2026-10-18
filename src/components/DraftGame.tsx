@@ -31,6 +31,8 @@ export type DraftGameProps = {
   challenge?: Challenge | undefined;
   /** Daily number for the share text (#1 = 11 Oct 2026); Daily only. */
   dailyNumber?: number | undefined;
+  /** Current Daily streak for the share text (localStorage only); Daily only. */
+  dailyStreak?: number | undefined;
 };
 
 export function DraftGame({
@@ -45,6 +47,7 @@ export function DraftGame({
   extraPool,
   challenge,
   dailyNumber,
+  dailyStreak,
 }: DraftGameProps) {
   const isDaily = fixedSeed !== undefined && !challenge;
   const theirs = useMemo(() => (challenge ? replayChallenge(challenge) : null), [challenge]);
@@ -99,6 +102,7 @@ export function DraftGame({
         }
         theirs={inChallenge ? theirs?.campaign : undefined}
         dailyNumber={isDaily ? dailyNumber : undefined}
+        dailyStreak={isDaily ? dailyStreak : undefined}
         trackMode={isDaily ? "daily" : mode}
       />
     );
@@ -294,6 +298,7 @@ export function Results({
   challengeCode,
   theirs,
   dailyNumber,
+  dailyStreak,
   trackMode = "none",
 }: {
   picks: Player[];
@@ -303,6 +308,7 @@ export function Results({
   challengeCode?: string | undefined;
   theirs?: Campaign | undefined;
   dailyNumber?: number | undefined;
+  dailyStreak?: number | undefined;
   trackMode?: RetentionMode;
 }) {
   const [copied, setCopied] = useState(false);
@@ -365,6 +371,7 @@ export function Results({
             campaign={campaign}
             challengeCode={challengeCode}
             dailyNumber={dailyNumber}
+            dailyStreak={dailyStreak}
             trackMode={trackMode}
           />
         </div>
@@ -448,6 +455,7 @@ export function Results({
             contextLabel={contextLabel}
             challengeCode={challengeCode}
             dailyNumber={dailyNumber}
+            dailyStreak={dailyStreak}
             trackMode={trackMode}
           />
           <aside className="surface h-fit rounded-2xl p-5">
