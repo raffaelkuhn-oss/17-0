@@ -7,7 +7,7 @@
 import ATLAS from "../../assets/og/atlas.json";
 import { FORMATION, overall, type Player } from "../players";
 import type { Campaign } from "../sim";
-import { recordLabel } from "../record";
+import { recordHeadline } from "../record";
 import { encodeIndexedPng } from "./png";
 
 export const OG_W = 1200;
@@ -127,7 +127,8 @@ export async function renderRunPng(picks: Player[], c: Campaign, atlas: Uint8Arr
   const accent = c.perfect ? GOLD : c.champion ? CREAM : RED;
   s.rect(0, 0, OG_W, 10, accent);
   s.text("kicker", runHeadline(c), 64, 84, accent, "start", 5);
-  s.text("record", recordLabel(c), 60, 200, INK);
+  // "11W 0D 1L" (copy-final.md #3); a perfect run keeps "17-0". Atlas "record" has digits, "-", W, D, L, space.
+  s.text("record", recordHeadline(c), 60, 200, INK);
   s.text("stats", `${c.won} won · ${c.drawn} drawn · ${c.lost} lost · ${c.points} league pts`, 66, 248, MUTED);
   const box = 46, gap = 8, y0 = 282;
   c.results.forEach((m, i) => {

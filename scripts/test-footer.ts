@@ -4,7 +4,8 @@
  * - SiteFooter contains the exact line, not hidden (no hidden / sr-only / invisible class);
  * - RootComponent renders <SiteFooter /> unconditionally, after <Outlet />;
  * - no route file opts out by rendering its own <footer> or a "notFoundComponent" without the root;
- * - the sponsor contact lives in the footer (copy-final.md #1), not in the hero or AdBanner.
+ * - the sponsor contact lives in the footer (copy-final.md #1), not in the hero or AdBanner;
+ * - the hero sub-line never starts a wrapped line with "·".
  */
 import { readFileSync, readdirSync } from "node:fs";
 let fails = 0;
@@ -34,4 +35,12 @@ for (const f of readdirSync(routesDir).filter((f) => f.endsWith(".tsx") && f !==
 }
 const ad = readFileSync(new URL("../src/components/AdBanner.tsx", import.meta.url), "utf8");
 t("AdBanner no longer carries the sponsor email", !ad.includes("ucl17zero@gmail.com"));
+// Hero sub-line: the "·" must never start a wrapped line. Each part is its own block line by default
+// (narrow screens), and the dot only appears inline when the container is wide enough for one line.
+const home = readFileSync(new URL("../src/routes/index.tsx", import.meta.url), "utf8");
+const sub = home.slice(home.lastIndexOf("<p", home.indexOf('data-testid="hero-subline"')), home.indexOf("</p>", home.indexOf('data-testid="hero-subline"')));
+const spans = [...sub.matchAll(/<span className="([^"]+)">([^<]*)<\/span>/g)].map((m) => ({ cls: m[1]!, text: m[2]! }));
+t("hero sub-line copy unchanged", spans.map((x) => x.text.trim()).join("|") === "Same first picks for everyone today|·|new Daily every day");
+t("hero sub-line parts are separate lines by default", spans[0]!.cls.startsWith("block ") && spans[2]!.cls.startsWith("block "));
+t("hero sub-line dot hidden unless the line fits", spans[1]!.cls.startsWith("hidden ") && /@min-\[\d+(\.\d+)?em\]:inline/.test(spans[1]!.cls) && sub.includes("@container"));
 process.exit(fails ? 1 : 0);

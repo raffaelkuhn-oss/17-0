@@ -1,7 +1,7 @@
 import { SITE_HOST } from "@/lib/site";
 import { FORMATION, overall, type Player } from "./players";
 import type { Campaign } from "./sim";
-import { recordLabel } from "@/lib/record";
+import { recordHeadline, recordWords } from "@/lib/record";
 
 export type ShareCardData = {
   picks: Player[];
@@ -84,19 +84,28 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
   ctx.fillText(headline(campaign), 64, 92);
   ctx.letterSpacing = "0px";
 
-  // Score
-  ctx.fillStyle = INK;
+  // Score: "11W 0D 1L" (copy-final.md #3); a perfect run keeps "17-0". The side text uses the same words
+  // as the Worker og image. The score shrinks only if score + side text would run past the right margin.
+  const score = recordHeadline(campaign);
+  const side = `${recordWords(campaign)} · ${campaign.points} league pts`;
+  ctx.font = "500 22px system-ui, sans-serif";
+  let sideWidth = ctx.measureText(side).width;
+  if (context) {
+    ctx.font = "600 20px system-ui, sans-serif";
+    sideWidth = Math.max(sideWidth, ctx.measureText(context).width);
+  }
   ctx.font = "800 132px system-ui, sans-serif";
-  ctx.fillText(recordLabel(campaign), 60, 218);
+  const room = W - 64 - 68 - 24 - sideWidth;
+  const natural = ctx.measureText(score).width;
+  const scorePx = natural > room ? Math.max(84, Math.floor((132 * room) / natural)) : 132;
+  ctx.font = `800 ${scorePx}px system-ui, sans-serif`;
+  ctx.fillStyle = INK;
+  ctx.fillText(score, 60, 218);
 
-  const scoreWidth = ctx.measureText(recordLabel(campaign)).width;
+  const scoreWidth = ctx.measureText(score).width;
   ctx.fillStyle = MUTED;
   ctx.font = "500 22px system-ui, sans-serif";
-  ctx.fillText(
-    `${campaign.won} W · ${campaign.drawn} D · ${campaign.lost} L · ${campaign.points} league pts`,
-    68 + scoreWidth + 24,
-    206,
-  );
+  ctx.fillText(side, 68 + scoreWidth + 24, 206);
 
   if (context) {
     ctx.fillStyle = accent;
