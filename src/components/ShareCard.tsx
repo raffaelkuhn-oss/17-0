@@ -4,6 +4,7 @@ import { shareImageFor } from "@/lib/share-image";
 import { pickShareMethod, runShare } from "@/lib/share-file";
 import { shareText } from "@/lib/share-text";
 import { xiStamp } from "@/lib/xi-chance";
+import { XiDareLine } from "@/components/XiStamp";
 import { trackEvent, type RetentionMode, type ShareVia } from "@/lib/retention";
 import type { Player } from "@/lib/players";
 import type { Campaign } from "@/lib/sim";
@@ -127,6 +128,7 @@ export function ShareButton({ campaign, challengeCode, dailyNumber, dailyStreak,
 
   return (
     <div className="w-full">
+      {stamp && <XiDareLine stamp={stamp} />}
       <button
         onClick={onClick}
         data-testid="share-primary"

@@ -9,6 +9,7 @@ import { FORMATION, overall, type Player } from "../players";
 import type { Campaign } from "../sim";
 import { recordHeadline } from "../record";
 import { encodeIndexedPng } from "./png";
+import { xiDare } from "../xi-chance";
 
 export const OG_W = 1200;
 export const OG_H = 630;
@@ -153,7 +154,7 @@ export async function renderRunPng(picks: Player[], c: Campaign, atlas: Uint8Arr
     s.text("name", name, x + 62, y + 33, INK);
     s.text("rating", String(overall(p)), x + colW - 16, y + 33, GOLD, "end");
   });
-  s.text("cta", stamp ? `Can your XI beat 1 in ${stamp.n}?` : "Can your XI beat it?", OG_W - 64, 560, MUTED, "end");
+  s.text("cta", stamp ? xiDare(stamp) : "Can your XI beat it?", OG_W - 64, 560, MUTED, "end");
   s.text("url", "ucl17-0.com", OG_W - 64, 598, INK, "end");
   return encodeIndexedPng(OG_W, OG_H, s.px, s.palette);
 }

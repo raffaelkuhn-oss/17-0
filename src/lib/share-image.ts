@@ -2,7 +2,7 @@ import { SITE_HOST } from "@/lib/site";
 import { FORMATION, type Player } from "./players";
 import type { Campaign } from "./sim";
 import { recordHeadline } from "@/lib/record";
-import type { XiStamp } from "./xi-chance";
+import { xiDare, type XiStamp } from "./xi-chance";
 import { shortName } from "./short-name";
 
 export type ShareCardData = {
@@ -188,7 +188,7 @@ export async function renderShareImage(data: ShareCardData): Promise<Blob | null
   ctx.textAlign = "left";
 
   ctx.fillStyle = WHITE;
-  const dare = `Can your XI beat 1 in ${stamp.n}?`;
+  const dare = xiDare(stamp);
   fit(ctx, dare, 800, 26, 16, 386);
   ctx.fillText(dare, 44, 520);
   ctx.font = `700 28px ${FONT}`;

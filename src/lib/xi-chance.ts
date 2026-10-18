@@ -151,3 +151,9 @@ export function stampFromRatings(r: Ratings): XiStamp {
 export function xiStamp(squad: Squad): XiStamp {
   return stampFromRatings(teamRatings(squad));
 }
+
+/** The dare line (copy-stamp.md §3), same N as the stamp. The one source for the result screen,
+ * share text, share image and og image. */
+export function xiDare(stamp: Pick<XiStamp, "n">): string {
+  return `Can your XI beat 1 in ${stamp.n}?`;
+}

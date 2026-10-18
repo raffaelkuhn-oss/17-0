@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { OG_LAYOUT_SHA, OG_VERSION, RUN_OG_PATH, runFromCode, runOgPath, runTitle, upgradedOgPath } from "../src/lib/og/run-page";
 import { renderRunPng } from "../src/lib/og/run-image";
 import { shareText } from "../src/lib/share-text";
+import { xiDare } from "../src/lib/xi-chance";
 let fails = 0;
 const t = (n: string, c: boolean) => { console.log((c ? "PASS " : "FAIL ") + n); if (!c) fails++; };
 const atlas = new Uint8Array(readFileSync(new URL("../src/assets/og/atlas.bin", import.meta.url)));
@@ -21,7 +22,9 @@ t("v1 code replays on the frozen pool", runFromCode(v1)?.legacy === true);
 t("og path round-trip", RUN_OG_PATH.exec(runOgPath(code))?.[1] === code && runOgPath(code).endsWith(`og-v${OG_VERSION}.png`));
 t("old og-v1 path upgrades to the current version", upgradedOgPath(`/r/${code}/og-v1.png`) === runOgPath(code) && OG_VERSION > 1);
 t("current/future/bad og paths are not upgraded", upgradedOgPath(runOgPath(code)) === null && upgradedOgPath(`/r/${code}/og-v${OG_VERSION + 1}.png`) === null && upgradedOgPath("/r/x/og.png") === null);
-const layoutSha = createHash("sha256").update(readFileSync(new URL("../src/lib/og/run-image.ts", import.meta.url))).digest("hex").slice(0, 16);
+// The og CTA copy comes from xiDare() (xi-chance.ts), so its output is part of the layout hash too:
+// changing the dare copy must bump OG_VERSION like any other og layout change (og PNGs are cached immutable).
+const layoutSha = createHash("sha256").update(readFileSync(new URL("../src/lib/og/run-image.ts", import.meta.url))).update(xiDare({ n: "N" })).digest("hex").slice(0, 16);
 t(`og layout unchanged at v${OG_VERSION} (else bump OG_VERSION and set OG_LAYOUT_SHA=${layoutSha})`, layoutSha === OG_LAYOUT_SHA);
 t("title has no betting words", !/odds|bet/i.test(runTitle(run!.campaign)));
 t("share link points at /r/<code>", shareText({ campaign: run!.campaign, challengeCode: code, origin: "https://ucl17-0.com" }).url === `https://ucl17-0.com/r/${code}`);
