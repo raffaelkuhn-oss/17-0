@@ -201,6 +201,8 @@ function PlayedToday({
           <div className="mx-auto mt-5 max-w-sm">
             <ShareButton
               campaign={record.campaign}
+              picks={picks.length === 11 ? picks : undefined}
+              contextLabel={label}
               dailyNumber={dailyNumber(dayKey)}
               dailyStreak={currentStreak(stats, dayKey)}
               trackMode="daily"

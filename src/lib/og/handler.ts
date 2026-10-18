@@ -6,6 +6,7 @@
 import atlasBin from "../../assets/og/atlas.bin";
 import { OG_VERSION, RUN_OG_PATH, runFromCode, upgradedOgPath } from "./run-page";
 import { renderRunPng, warmRenderer } from "./run-image";
+import { xiStamp } from "../xi-chance";
 
 const atlas = new Uint8Array(atlasBin);
 // Warm the drawing loops at startup (global scope, sync) so the first request's CPU stays low.
@@ -38,7 +39,9 @@ export async function handleRunOg(request: Request, ctx: Ctx): Promise<Response>
   if (!run) return fallback(url, "invalid");
   let png: Uint8Array;
   try {
-    png = await renderRunPng(run.picks, run.campaign, atlas);
+    // The XI's chance is recomputed from the code (closed form, ~35 µs): nothing taken from the URL.
+    // Daily runs have no code, so they never reach this path.
+    png = await renderRunPng(run.picks, run.campaign, atlas, xiStamp(run.picks));
   } catch (e) {
     console.error("og render failed", e);
     return fallback(url, "render");

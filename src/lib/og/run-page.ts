@@ -4,12 +4,13 @@ import type { Player } from "../players";
 import type { Campaign } from "../sim";
 import { recordWDL } from "../record";
 import { exitPhrase } from "../share-text";
+import { xiStamp, type XiStamp } from "../xi-chance";
 
 /** Bump when the preview layout changes: it is part of the image URL, so old edge caches are bypassed. */
-export const OG_VERSION = 2; // v2 (18 Oct 2026): record as "11W 0D 1L" instead of "11-0-1"
+export const OG_VERSION = 3; // v3 (18 Oct 2026): XI stamp line (tier + "1 in N") and "Can your XI beat 1 in N?"; v2: record as "11W 0D 1L"
 /** sha256 prefix of src/lib/og/run-image.ts at this OG_VERSION. scripts/test-run-pages.ts fails when the
  * layout file changes without updating this, as a reminder to bump OG_VERSION (and then this hash). */
-export const OG_LAYOUT_SHA = "821646955e1daadd";
+export const OG_LAYOUT_SHA = "255e360807904788";
 export const RUN_OG_PATH = /^\/r\/([A-Za-z0-9_-]{1,80})\/og-v(\d+)\.png$/;
 export const runOgPath = (code: string) => `/r/${code}/og-v${OG_VERSION}.png`;
 /** For an older-version image path (e.g. og-v1.png in a link preview scraped before a layout bump), the
@@ -31,6 +32,16 @@ export function runFromCode(code: string): RunView | null {
   const run = replayChallenge(challenge);
   if (!run) return null;
   return { challenge, ...run, legacy: challenge.version === CHALLENGE_VERSION_LEGACY };
+}
+
+/** The run's XI stamp, recomputed from the code (never read from the URL). */
+export function runStamp(run: RunView): XiStamp {
+  return xiStamp(run.picks);
+}
+
+/** og:title per copy-stamp.md §4 (a perfect run keeps the brand label "17-0"). */
+export function runOgTitle(c: Campaign, stamp: XiStamp): string {
+  return `${c.perfect ? "17-0" : recordWDL(c)} in 17-0 Draft. This XI goes 17-0 about 1 in ${stamp.n}`;
 }
 
 export function runTitle(c: Campaign): string {

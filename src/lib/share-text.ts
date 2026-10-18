@@ -6,6 +6,7 @@ import STATS from "./sim-stats.json";
 import { SITE_URL } from "./site";
 import { recordWDL } from "./record";
 import type { Campaign } from "./sim";
+import type { XiStamp } from "./xi-chance";
 
 /**
  * Rarity for a perfect run, from the real sims only.
@@ -49,7 +50,12 @@ export type ShareTextInput = {
   /** v2 challenge code for this exact run; links to the run page /r/<code>. */
   challengeCode?: string | undefined;
   origin?: string;
+  /** The XI's "1 in N" stamp (xi-chance.ts). Computed on the device; only the text the player shares carries it. */
+  stamp?: XiStamp | undefined;
 };
+
+/** X's limit; the "My XI: …" line is dropped first if a text would run over (copy-stamp.md §3). */
+export const X_LIMIT = 280;
 
 export function runLink({ dailyNumber, challengeCode, origin = SITE_URL }: Omit<ShareTextInput, "campaign" | "dailyStreak">): string {
   if (challengeCode) return `${origin}/r/${challengeCode}`;
@@ -62,28 +68,64 @@ export function shareText(input: ShareTextInput): { body: string; url: string; f
   const c = input.campaign;
   const wdl = recordWDL(c); // "11W 0D 1L" (copy-final.md #3)
   const grid = resultGrid(c);
-  let lines: string[];
+  const st = input.stamp;
+  // Stamp lines: /workspace/aha/copy-stamp.md §3 (final copy, verbatim).
+  const myXi = st ? `My XI: ${st.tier} · goes 17-0 about 1 in ${st.n}` : null;
+  const dare = st ? `Can your XI beat 1 in ${st.n}?` : "Think you can go 17-0?";
+  let lines: (string | null)[];
   if (input.dailyNumber !== undefined) {
     const streak = input.dailyStreak ?? 0;
     const head = `17-0 Daily #${input.dailyNumber}: ${wdl}`;
-    lines = [streak >= 2 ? `${head} · 🔥 ${streak}-day streak` : head, grid, "Same first picks for everyone today. Can you beat it?"];
+    lines = [
+      streak >= 2 ? `${head} · 🔥 ${streak}-day streak` : head,
+      grid,
+      myXi,
+      st ? "Same legends for everyone today. Can you beat it?" : "Same first picks for everyone today. Can you beat it?",
+    ];
   } else if (c.perfect) {
-    lines = ["I went 17-0 in 17-0 Draft 🏆", grid, `In our sims only about 1 in ${perfectOneIn()} runs do that. Think you can?`];
+    lines = [
+      "I went 17-0 in 17-0 Draft 🏆",
+      grid,
+      st ? `My XI does that about 1 in ${st.n} seasons. Think you can?` : `In our sims only about 1 in ${perfectOneIn()} runs do that. Think you can?`,
+    ];
   } else if (c.won === 16) {
-    lines = [`${wdl} in 17-0 Draft. One game off perfect 😩`, grid, "Think you can go 17-0?"];
+    lines = [`${wdl} in 17-0 Draft. One game off perfect 😩`, grid, myXi, dare];
   } else {
-    lines = [`${wdl} in 17-0 Draft, ${exitPhrase(c)}`, grid, "Think you can go 17-0?"];
+    lines = [`${wdl} in 17-0 Draft, ${exitPhrase(c)}`, grid, myXi, dare];
   }
   const url = runLink(input);
-  const body = lines.join("\n");
-  return { body, url, full: `${body}\n${url}` };
+  const build = (ls: (string | null)[]) => {
+    const body = ls.filter((l): l is string => !!l).join("\n");
+    return { body, url, full: `${body}\n${url}` };
+  };
+  const out = build(lines);
+  return xLength(out.full) > X_LIMIT && myXi ? build(lines.filter((l) => l !== myXi)) : out;
 }
 
-/** Length as X counts it: emoji = 2, any URL = 23. */
+/**
+ * Length as X counts it (twitter-text v3 weighting): any URL = 23; code points in U+0000–10FF,
+ * U+2000–200D, U+2010–201F and U+2032–2037 weigh 1; everything else (emoji, CJK, "…") weighs 2.
+ * An emoji with a variation selector (U+FE0F) or ZWJ sequence counts once (2).
+ */
 export function xLength(full: string): number {
-  const noUrl = full.replace(/https?:\/\/\S+/g, "");
-  const urls = (full.match(/https?:\/\/\S+/g) ?? []).length;
+  const urlRe = /https?:\/\/\S+/g;
+  const urls = (full.match(urlRe) ?? []).length;
+  const rest = full.replace(urlRe, "");
   let n = 0;
-  for (const ch of noUrl) n += /\p{Extended_Pictographic}/u.test(ch) ? 2 : ch === "\uFE0F" ? 0 : 1;
+  let joinNext = false;
+  for (const ch of rest) {
+    const cp = ch.codePointAt(0)!;
+    if (cp === 0xfe0f) continue;
+    if (cp === 0x200d) {
+      joinNext = true;
+      continue;
+    }
+    if (joinNext) {
+      joinNext = false;
+      continue;
+    }
+    const light = cp <= 0x10ff || (cp >= 0x2000 && cp <= 0x200d) || (cp >= 0x2010 && cp <= 0x201f) || (cp >= 0x2032 && cp <= 0x2037);
+    n += light ? 1 : 2;
+  }
   return n + urls * 23;
 }

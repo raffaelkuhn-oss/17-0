@@ -119,8 +119,11 @@ class Surface {
   }
 }
 
+/** The XI stamp shown on the preview: tier word + display N (xi-chance.ts, recomputed from the code). */
+export type OgStamp = { tier: string; n: string };
+
 /** Renders the run preview. atlas = bytes of src/assets/og/atlas.bin. */
-export async function renderRunPng(picks: Player[], c: Campaign, atlas: Uint8Array): Promise<Uint8Array> {
+export async function renderRunPng(picks: Player[], c: Campaign, atlas: Uint8Array, stamp?: OgStamp): Promise<Uint8Array> {
   const s = new Surface(atlas);
   s.rect(0, 0, OG_W, OG_H, BG);
   for (let i = 0; i < 6; i++) s.rect(i * 200 + 100, 0, 100, OG_H, BAND);
@@ -130,6 +133,8 @@ export async function renderRunPng(picks: Player[], c: Campaign, atlas: Uint8Arr
   // "11W 0D 1L" (copy-final.md #3); a perfect run keeps "17-0". Atlas "record" has digits, "-", W, D, L, space.
   s.text("record", recordHeadline(c), 60, 200, INK);
   s.text("stats", `${c.won} won · ${c.drawn} drawn · ${c.lost} lost · ${c.points} league pts`, 66, 248, MUTED);
+  // The one added line (og v3): tier + the XI's "1 in N", right of the stats line (copy-stamp.md §4).
+  if (stamp) s.text("stats", `${stamp.tier} · 17-0 about 1 in ${stamp.n}`, OG_W - 64, 248, GOLD, "end");
   const box = 46, gap = 8, y0 = 282;
   c.results.forEach((m, i) => {
     const x = 64 + i * (box + gap);
@@ -148,7 +153,7 @@ export async function renderRunPng(picks: Player[], c: Campaign, atlas: Uint8Arr
     s.text("name", name, x + 62, y + 33, INK);
     s.text("rating", String(overall(p)), x + colW - 16, y + 33, GOLD, "end");
   });
-  s.text("cta", "Can your XI beat it?", OG_W - 64, 560, MUTED, "end");
+  s.text("cta", stamp ? `Can your XI beat 1 in ${stamp.n}?` : "Can your XI beat it?", OG_W - 64, 560, MUTED, "end");
   s.text("url", "ucl17-0.com", OG_W - 64, 598, INK, "end");
   return encodeIndexedPng(OG_W, OG_H, s.px, s.palette);
 }
