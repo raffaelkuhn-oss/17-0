@@ -10,7 +10,8 @@ import { xiStamp, type XiStamp } from "../xi-chance";
 export const OG_VERSION = 3; // v3 (18 Oct 2026): XI stamp line (tier + "1 in N") and "Can your XI beat 1 in N?"; v2: record as "11W 0D 1L"
 /** sha256 prefix of src/lib/og/run-image.ts at this OG_VERSION. scripts/test-run-pages.ts fails when the
  * layout file changes without updating this, as a reminder to bump OG_VERSION (and then this hash). */
-export const OG_LAYOUT_SHA = "255e360807904788";
+// 18 Oct: hash also covers xiDare() output; the dare moved into the shared helper with byte-identical og PNGs, so no version bump.
+export const OG_LAYOUT_SHA = "5e3c185f2ff3a889";
 export const RUN_OG_PATH = /^\/r\/([A-Za-z0-9_-]{1,80})\/og-v(\d+)\.png$/;
 export const runOgPath = (code: string) => `/r/${code}/og-v${OG_VERSION}.png`;
 /** For an older-version image path (e.g. og-v1.png in a link preview scraped before a layout bump), the

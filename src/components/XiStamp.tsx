@@ -1,4 +1,4 @@
-import type { XiStamp } from "@/lib/xi-chance";
+import { xiDare, type XiStamp } from "@/lib/xi-chance";
 
 /** The "1 in N" stamp on the result screen (copy-stamp.md §1–2, mock A). Computed on the device. */
 export function XiStampCard({ stamp }: { stamp: XiStamp }) {
@@ -29,5 +29,15 @@ export function XiStampCard({ stamp }: { stamp: XiStamp }) {
       </p>
       <p className="mt-1 text-xs opacity-80">{stamp.flavour}</p>
     </div>
+  );
+}
+
+/** The dare line (xiDare) just above Share result (mock A: white, extra bold, under the stamp).
+ * On the device only; it never adds anything to a link. */
+export function XiDareLine({ stamp }: { stamp: Pick<XiStamp, "n"> }) {
+  return (
+    <p className="mb-3 text-lg font-extrabold text-white" data-testid="xi-dare">
+      {xiDare(stamp)}
+    </p>
   );
 }

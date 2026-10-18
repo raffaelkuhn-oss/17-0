@@ -6,7 +6,7 @@ import STATS from "./sim-stats.json";
 import { SITE_URL } from "./site";
 import { recordWDL } from "./record";
 import type { Campaign } from "./sim";
-import type { XiStamp } from "./xi-chance";
+import { xiDare, type XiStamp } from "./xi-chance";
 
 /**
  * Rarity for a perfect run, from the real sims only.
@@ -71,7 +71,7 @@ export function shareText(input: ShareTextInput): { body: string; url: string; f
   const st = input.stamp;
   // Stamp lines: /workspace/aha/copy-stamp.md §3 (final copy, verbatim).
   const myXi = st ? `My XI: ${st.tier} · goes 17-0 about 1 in ${st.n}` : null;
-  const dare = st ? `Can your XI beat 1 in ${st.n}?` : "Think you can go 17-0?";
+  const dare = st ? xiDare(st) : "Think you can go 17-0?";
   let lines: (string | null)[];
   if (input.dailyNumber !== undefined) {
     const streak = input.dailyStreak ?? 0;
