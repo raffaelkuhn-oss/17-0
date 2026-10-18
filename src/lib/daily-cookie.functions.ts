@@ -4,7 +4,8 @@ import { dailyKey } from "@/lib/daily";
 import {
   createDailyCookie,
   DAILY_COOKIE,
-  newCookieId,
+  DAILY_COOKIE_MAX_AGE,
+  dailyPlayedState,
   verifyDailyCookie,
   type DailyCookie,
   type DailyCookieState,
@@ -22,23 +23,29 @@ export async function readDailyCookie(dayKey: string): Promise<DailyCookie | nul
   return c && c.dayKey === dayKey ? c : null;
 }
 
+/**
+ * Cookie flags. Only ever read by same-origin server-function calls, so SameSite=Strict
+ * (was Lax) and Secure always (was production-only) are safe and stricter. Browsers accept
+ * Secure cookies on http://localhost, so local dev keeps working.
+ */
+export const DAILY_COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: "strict",
+  secure: true,
+  path: "/",
+  maxAge: DAILY_COOKIE_MAX_AGE,
+} as const;
+
 /** Sets (or upgrades) the signed httpOnly cookie. Silently does nothing without a secret. */
 export async function writeDailyCookie(dayKey: string, state: DailyCookieState): Promise<boolean> {
   const existing = await readDailyCookie(dayKey);
   const value = await createDailyCookie(dailySecret(), {
     dayKey,
     state: existing?.state === "b" ? "b" : state,
-    id: existing?.id ?? newCookieId(),
   });
   if (!value) return false;
   const { setCookie } = await import("@tanstack/react-start/server");
-  setCookie(DAILY_COOKIE, value, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env["NODE_ENV"] === "production",
-    path: "/",
-    maxAge: 60 * 60 * 36,
-  });
+  setCookie(DAILY_COOKIE, value, DAILY_COOKIE_OPTIONS);
   return true;
 }
 
@@ -47,8 +54,18 @@ export const getDailyPlayedStatus = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => dayInput.parse(data))
   .handler(async ({ data }) => {
     if (data.dayKey !== dailyKey()) return { played: false as const };
-    const c = await readDailyCookie(data.dayKey);
-    return { played: c !== null };
+    const { getCookie } = await import("@tanstack/react-start/server");
+    const s = await dailyPlayedState(dailySecret(), getCookie(DAILY_COOKIE), data.dayKey);
+    // A valid old-format (v1, with random id) cookie for today counts as played and is
+    // rewritten right away in the id-free v2 format.
+    if (s.upgrade && s.state) {
+      try {
+        await writeDailyCookie(data.dayKey, s.state);
+      } catch (e) {
+        console.error("daily cookie upgrade failed", e);
+      }
+    }
+    return { played: s.played };
   });
 
 /** Called when a daily run finishes. Best-effort; never throws. */
