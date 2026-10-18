@@ -3,10 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import { AdBanner } from "@/components/AdBanner";
 import { Celebration } from "@/components/Celebration";
 import { ShareButton, ShareCard } from "@/components/ShareCard";
+import { XiStampCard } from "@/components/XiStamp";
 import { FORMATION, PLAYERS, overall, type Player } from "@/lib/players";
 import { pointsLine, recordHeadline, recordWords } from "@/lib/record";
 import { trackEvent, type RetentionMode } from "@/lib/retention";
 import { PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
+import { xiStamp } from "@/lib/xi-chance";
 import { encodeChallenge, replayChallenge, slotCandidates, type Challenge } from "@/lib/challenge";
 
 export type Mode = "classic" | "legend";
@@ -325,6 +327,7 @@ export function Results({
   }
   const { results, won: w, drawn: d, lost: l, points, eliminatedIn, champion, perfect } = campaign;
   const r = teamRatings(picks);
+  const stamp = useMemo(() => (picks.length === 11 ? xiStamp(picks) : undefined), [picks]);
 
   const verdict = perfect
     ? "17-0. Seventeen matches, seventeen wins, the trophy and immortality."
@@ -356,6 +359,7 @@ export function Results({
         )}
 
         <p className="mt-3 text-lg text-muted-foreground">{verdict}</p>
+        {stamp && <XiStampCard stamp={stamp} />}
         {champion && (
           <p className="animate-fade-in mt-4 font-display text-3xl text-primary">
             {perfect ? "PERFECT CAMPAIGN 🏆" : "EUROPEAN CHAMPIONS 🏆"}
@@ -369,6 +373,8 @@ export function Results({
         <div className="mx-auto mt-5 max-w-sm">
           <ShareButton
             campaign={campaign}
+            picks={picks}
+            contextLabel={contextLabel}
             challengeCode={challengeCode}
             dailyNumber={dailyNumber}
             dailyStreak={dailyStreak}

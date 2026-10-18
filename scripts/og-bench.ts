@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { encodeChallenge, replayChallenge } from "../src/lib/challenge";
 import { renderRunPng, warmRenderer } from "../src/lib/og/run-image";
+import { xiStamp } from "../src/lib/xi-chance";
 const atlas = new Uint8Array(readFileSync(new URL("../src/assets/og/atlas.bin", import.meta.url)));
 // Same as the Worker: sync warm-up at startup (not counted as request CPU).
 const tw = performance.now();
@@ -13,7 +14,8 @@ for (let i = 0; i < 50; i++) {
   const ch = { mode: "classic" as const, seed: 1000 + i * 7777, picks: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2].map((p) => (p + i) % 4) };
   const run = replayChallenge(ch)!;
   const t0 = performance.now();
-  const png = await renderRunPng(run.picks, run.campaign, atlas);
+  // Timed like the Worker handler: the XI stamp is computed per request, then the render.
+  const png = await renderRunPng(run.picks, run.campaign, atlas, xiStamp(run.picks));
   times.push(performance.now() - t0); sizes.push(png.length);
   if (i === 0) { sample = png; code = encodeChallenge(ch); }
 }

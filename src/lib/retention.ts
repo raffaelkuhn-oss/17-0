@@ -47,7 +47,7 @@ export const SOURCES = [
 export type Source = (typeof SOURCES)[number];
 
 /** Which share path was used (share_click only; closed list). */
-export const SHARE_VIAS = ["native", "copy", "x", "whatsapp", "download", "challenge"] as const;
+export const SHARE_VIAS = ["native", "file", "copy", "x", "whatsapp", "download", "challenge"] as const;
 export type ShareVia = (typeof SHARE_VIAS)[number];
 
 /** Creator codes for the creator test (closed list; anything else is ignored). */

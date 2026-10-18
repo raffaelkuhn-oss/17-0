@@ -3,7 +3,7 @@ import { absUrl } from "@/lib/site";
 import { overall } from "@/lib/players";
 import { pointsLine, recordHeadline, recordWDL, recordWords } from "@/lib/record";
 import { exitPhrase } from "@/lib/share-text";
-import { runFromCode, runOgPath, runTitle } from "@/lib/og/run-page";
+import { runFromCode, runOgPath, runOgTitle, runStamp, runTitle } from "@/lib/og/run-page";
 
 /**
  * /r/<code>: a shared run, rebuilt from the challenge code alone (nothing stored server-side).
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/r/$code")({
   loader: ({ params }) => {
     const run = runFromCode(params.code);
     return run
-      ? { ok: true as const, title: runTitle(run.campaign), record: recordWDL(run.campaign), headline: recordHeadline(run.campaign), perfect: run.campaign.perfect, exit: exitPhrase(run.campaign) }
+      ? { ok: true as const, title: runTitle(run.campaign), ogTitle: runOgTitle(run.campaign, runStamp(run)), record: recordWDL(run.campaign), headline: recordHeadline(run.campaign), perfect: run.campaign.perfect, exit: exitPhrase(run.campaign) }
       : { ok: false as const };
   },
   head: ({ loaderData, params }) => {
@@ -21,8 +21,8 @@ export const Route = createFileRoute("/r/$code")({
     if (!loaderData?.ok) {
       return { meta: [{ title: "Run not found — 17-0 Draft" }, robots] };
     }
-    // og:title per copy-final.md #3; a perfect run keeps the brand label "17-0".
-    const title = `${loaderData.perfect ? loaderData.headline : loaderData.record} in 17-0 Draft. Can your XI beat it?`;
+    // og:title per copy-stamp.md §4; a perfect run keeps the brand label "17-0" (copy-final.md #3).
+    const title = loaderData.ogTitle;
     const desc = `An all-time Champions League XI went ${loaderData.record} (${loaderData.exit}). Draft your own and see if you can go 17-0.`;
     const img = absUrl(runOgPath(params.code));
     const alt = `17-0 Draft run: ${loaderData.title}, with the XI and every match result`;
@@ -70,6 +70,7 @@ function RunPage() {
   }
 
   const { campaign: c, picks } = run;
+  const stamp = runStamp(run);
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-10" data-testid="run-page">
       <div className="text-center">
@@ -87,6 +88,9 @@ function RunPage() {
         )}
         <p className="mt-3 text-lg text-muted-foreground">
           {c.perfect ? "Seventeen matches, seventeen wins. Can you match it?" : `This XI went ${recordWDL(c)}, ${exitPhrase(c)}. Think you can go 17-0?`}
+        </p>
+        <p className="mt-3 font-semibold" data-testid="run-stamp">
+          Their XI goes 17-0 about 1 in {stamp.n}. Can yours beat it?
         </p>
         <div className="mx-auto mt-6 flex max-w-sm flex-col gap-3">
           <Link to="/draft" className="btn-primary hover:btn-primary-hover w-full" data-testid="run-build">
