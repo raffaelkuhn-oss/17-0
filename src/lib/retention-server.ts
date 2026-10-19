@@ -1,5 +1,5 @@
 import { trafficFor } from "./traffic";
-import { BUCKETS, MODES, REFS, RETENTION_EVENTS, SHARE_VIAS, SOURCES } from "./retention";
+import { BUCKETS, MODES, RETENTION_EVENTS, SHARE_VIAS, SOURCES } from "./retention";
 
 /** Minimal Workers Analytics Engine binding shape (avoids depending on generated types). */
 export type AnalyticsEngineLike = {
@@ -27,10 +27,11 @@ export async function handleRetentionEvent(request: Request, env: unknown): Prom
   } catch {
     return done;
   }
-  const { event, bucket, mode, source, ref, via } = body;
+  const { event, bucket, mode, source, via } = body;
   if (!has(RETENTION_EVENTS, event) || !has(BUCKETS, bucket) || !has(SOURCES, source)) return done;
   const m = has(MODES, mode) ? mode : "none";
-  const r = has(REFS, ref) ? ref : "none";
+  // Rollback: creator codes are not recorded, even if an old cached client still sends one.
+  const r = "none";
   const v = event === "share_click" && has(SHARE_VIAS, via) ? via : "none";
   try {
     ds.writeDataPoint({ blobs: [event, bucket, m, source, r, trafficFor(request.headers.get("user-agent")), v], doubles: [1], indexes: [event] });

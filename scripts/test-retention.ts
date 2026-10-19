@@ -32,11 +32,15 @@ t("day 8 after d7 fired: no second return_d7", c2.events.join() === "visit");
 t("parseRef c01..c10", parseRef("c01") === "c01" && parseRef(" C10 ") === "c10");
 t("parseRef rejects others", [null, "", "c00", "c11", "c1", "c001", "john", "c01x", "c01&x=1"].every((v) => parseRef(v) === null));
 const r0 = nextVisit(null, d("2026-10-01"), "other", parseRef("c03"));
-t("first visit stores ref", r0.state.ref === "c03");
+t("rollback: first visit does not store ref", !("ref" in r0.state));
 const rBad = nextVisit(null, d("2026-10-01"), "other", parseRef("evil"));
 t("invalid ref not stored", !("ref" in rBad.state));
 const r1v = nextVisit(r0.state, d("2026-10-02"), "x", parseRef("c05"));
-t("later visit never overwrites ref", r1v.state.ref === "c03");
+t("rollback: later visit does not store ref either", !("ref" in r1v.state));
+const tidy = nextVisit({ firstSeen: "2026-10-01", lastSeen: "2026-10-01", source: "x", ref: "c03" }, d("2026-10-02"), "x");
+t("rollback: a ref stored by an older build is removed on the next load (source kept)", !("ref" in tidy.state) && tidy.state.source === "x" && tidy.state.firstSeen === "2026-10-01");
+const tidySameDay = nextVisit({ firstSeen: "2026-10-01", lastSeen: "2026-10-01", source: "x", ref: "c03" }, d("2026-10-01"), "x");
+t("rollback: removed even on a same-day reload", !("ref" in tidySameDay.state));
 const old = nextVisit({ firstSeen: "2026-10-01", lastSeen: "2026-10-01", source: "direct" }, d("2026-10-02"), "x", parseRef("c02"));
 t("existing visitor (no ref) does not pick one up later", !("ref" in old.state));
 
@@ -51,8 +55,8 @@ const mig = nextVisit({ firstSeen: "2026-10-01", lastSeen: "2026-10-08", source:
 t("migration: already visited on day 7+ under old logic -> no duplicate", !mig.events.includes("return_d7") && mig.state.d7 === true);
 
 // ---- ref on events ----
-t("ref attached to draft_start/sim_complete/share_click/return_d7/visit",
-  ["draft_start", "sim_complete", "share_click", "return_d7", "visit"].every((e) => eventBody(e as never, "d0", "x", "none", "c04").ref === "c04"));
+t("rollback: ref is none on every event, even if one is passed in",
+  ["draft_start", "sim_complete", "share_click", "return_d7", "visit"].every((e) => eventBody(e as never, "d0", "x", "none", "c04").ref === "none"));
 t("ref not attached to return_d1/daily_complete",
   ["return_d1", "daily_complete"].every((e) => eventBody(e as never, "d1", "x", "none", "c04").ref === "none"));
 t("no ref -> none", eventBody("draft_start", "d0", "x", "classic", undefined).ref === "none");
@@ -76,7 +80,7 @@ await handleRetentionEvent(req({ event: "draft_start", bucket: "d0", mode: "clas
 await handleRetentionEvent(req({ event: "draft_start", bucket: "d0", mode: "classic", source: "other", ref: "raffael@example.com" }), env);
 await handleRetentionEvent(req({ event: "draft_start", bucket: "d0", mode: "classic", source: "other" }), env);
 const blobs = writes.map((w) => (w as { blobs: string[] }).blobs[4]);
-t("server: valid ref is blob5, invalid/missing -> none", blobs.join() === "c07,none,none");
+t("rollback: server writes blob5 = none even for a valid ref from an old client", blobs.join() === "none,none,none");
 
 // ---- report ----
 const sum = summarize([

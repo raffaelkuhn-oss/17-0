@@ -2,8 +2,9 @@
  * Cookieless, anonymous retention measurement (see README "Retention tracking").
  *
  * Browser side keeps ONE localStorage entry: first-seen day, last-seen day, the
- * acquisition-source bucket and creator code (c01-c10, if any) of the first visit, and a
- * "day-7 return already counted" flag. No ID, no cookie, nothing personal.
+ * acquisition-source bucket of the first visit, and a "day-7 return already counted" flag.
+ * No ID, no cookie, nothing personal. Creator codes (?ref) are NOT read or stored (rolled back
+ * pending privacy approval); a ref left in storage by an older build is removed on the next load.
  * Events carry only {event, bucket, mode, source, ref, via}; the Worker turns them into aggregate
  * counters. Off unless VITE_RETENTION_ENABLED=1 at build time AND the Worker has the
  * RETENTION Analytics Engine binding.
@@ -62,7 +63,8 @@ export function parseRef(raw: string | null | undefined): Ref | null {
 }
 
 /**
- * ref: creator code from the FIRST visit only (never overwritten).
+ * ref: no longer written (rollback); only present in entries saved by an older build, and
+ * nextVisit() removes it.
  * d7: true once return_d7 has fired (or a day-7+ visit already happened), so it fires once per browser.
  */
 export type RetentionState = { firstSeen: string; lastSeen: string; source: Source; ref?: Ref; d7?: true };
@@ -125,18 +127,18 @@ export function nextVisit(
   prev: RetentionState | null,
   now: Date,
   source: Source,
-  ref: Ref | null = null,
+  _ref: Ref | null = null, // ignored (rollback): creator codes are not stored
 ): { state: RetentionState; events: RetentionEvent[]; bucket: Bucket } {
   const today = toDay(now);
   if (!prev || !/^\d{4}-\d{2}-\d{2}$/.test(prev.firstSeen)) {
     const state: RetentionState = { firstSeen: today, lastSeen: today, source };
-    if (ref) state.ref = ref;
     return { state, events: ["visit"], bucket: "d0" };
   }
   const since = Math.max(0, daysBetween(prev.firstSeen, today));
   const bucket = bucketFor(since);
   const state: RetentionState = { ...prev, lastSeen: today };
-  if (state.ref && !parseRef(state.ref)) delete state.ref;
+  // Tidy-up: drop any creator code stored by an older build.
+  delete state.ref;
   // Migration: a browser that already had a visit on day 7+ (old "exactly day 7" logic) is done.
   if (!state.d7 && /^\d{4}-\d{2}-\d{2}$/.test(prev.lastSeen) && daysBetween(prev.firstSeen, prev.lastSeen) >= 7) {
     state.d7 = true;
@@ -151,8 +153,8 @@ export function nextVisit(
   return { state, events, bucket };
 }
 
-/** Events that carry the creator ref (visit is included because it is the denominator). */
-export const REF_EVENTS: readonly RetentionEvent[] = ["visit", "draft_start", "sim_complete", "share_click", "return_d7"];
+/** Events that carried the creator ref before the rollback; none carries it now. */
+export const REF_EVENTS: readonly RetentionEvent[] = [];
 
 /** Pure: the JSON body sent to POST /e. */
 export function eventBody(
@@ -160,10 +162,10 @@ export function eventBody(
   bucket: Bucket,
   source: Source,
   mode: RetentionMode,
-  ref: Ref | null | undefined,
+  _ref?: Ref | null,
   via?: ShareVia,
 ) {
-  const r: RefOrNone = REF_EVENTS.includes(event) && ref && parseRef(ref) ? ref : "none";
+  const r: RefOrNone = "none"; // rollback: creator codes are never sent
   const v: ShareVia | "none" = event === "share_click" && via && (SHARE_VIAS as readonly string[]).includes(via) ? via : "none";
   return { event, bucket, mode, source, ref: r, via: v };
 }
@@ -207,13 +209,14 @@ export function trackVisit() {
   if (!ENABLED || typeof window === "undefined" || !hasStorage()) return;
   const params = new URLSearchParams(window.location.search);
   const src = sourceBucket(params.get("utm_source"), document.referrer, window.location.hostname);
-  const { state, events, bucket } = nextVisit(load(), new Date(), src, parseRef(params.get("ref")));
+  // ?ref is not read (rollback). nextVisit also removes a ref saved by an older build.
+  const { state, events, bucket } = nextVisit(load(), new Date(), src);
   try {
     localStorage.setItem(RETENTION_KEY, JSON.stringify(state));
   } catch {
     return;
   }
-  for (const e of events) send(e, bucket, state.source, "none", state.ref);
+  for (const e of events) send(e, bucket, state.source, "none");
 }
 
 /** Gameplay events (draft_start, sim_complete, daily_complete, share_click + via). */
@@ -221,5 +224,5 @@ export function trackEvent(event: RetentionEvent, mode: RetentionMode = "none", 
   if (!ENABLED || typeof window === "undefined") return;
   const s = load();
   if (!s) return;
-  send(event, bucketFor(Math.max(0, daysBetween(s.firstSeen, toDay(new Date())))), s.source, mode, s.ref, via);
+  send(event, bucketFor(Math.max(0, daysBetween(s.firstSeen, toDay(new Date())))), s.source, mode, undefined, via);
 }

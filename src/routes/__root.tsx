@@ -309,10 +309,9 @@ function SiteFooter() {
         </p>
         <p className="text-xs">
           To count returning visitors, this site stores an anonymous first-visit date in your
-          browser and the link you arrived from (e.g. a creator code), and counts game events like
-          drafts, finished runs and shares in aggregate; no ID, no tracking cookies, no personal
-          data. A small cookie only stops the daily challenge from being replayed, and Cloudflare
-          Web Analytics counts visits without cookies.{" "}
+          browser; there are no tracking cookies and no personal data. A small cookie only stops the
+          daily challenge from being replayed, and Cloudflare Web Analytics counts visits without
+          cookies.{" "}
           <span data-testid="footer-daily-privacy">
             Your Daily results, streak and stats stay in your browser only and are never sent to us.
           </span>
