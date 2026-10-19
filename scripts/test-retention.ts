@@ -1,6 +1,6 @@
 // Run: bun scripts/test-retention.ts
 import { bucketFor, eventBody, nextVisit, parseRef, sourceBucket } from "../src/lib/retention";
-import { formatTable, reportSql, summarize } from "../src/lib/creator-report";
+import { excludedSql, formatTable, reportSql, summarize } from "../src/lib/creator-report";
 import { handleRetentionEvent } from "../src/lib/retention-server";
 import { INTERNAL_UA_TOKEN, trafficFor } from "../src/lib/traffic";
 let fails = 0;
@@ -96,16 +96,28 @@ t("sql clamps days", reportSql(500).includes("'90' DAY") && reportSql(0).include
 t("traffic: token/headless -> internal, normal UA/none -> public",
   trafficFor(`Mozilla/5.0 ${INTERNAL_UA_TOKEN}`) === "internal" && trafficFor("Mozilla/5.0 HeadlessChrome/120") === "internal" &&
   trafficFor("Mozilla/5.0 (iPhone) Safari") === "public" && trafficFor(null) === "public");
+t("traffic: self-declared crawlers -> bot",
+  ["Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)", "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0)",
+   "Mozilla/5.0 (compatible; GPTBot/1.0)", "Mozilla/5.0 (compatible; Bytespider; spider-feedback@bytedance.com)", "facebookexternalhit/1.1",
+   "Mozilla/5.0 Chrome/120 Safari/537.36 Chrome-Lighthouse", "python-requests/2.31", "curl/8.4.0"].every((u) => trafficFor(u) === "bot"));
+t("traffic: real browsers and in-app webviews stay public (incl. CUBOT phones, TikTok/Instagram in-app)",
+  ["Mozilla/5.0 (Linux; Android 13; CUBOT P50 Build/TP1A) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36",
+   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 musical_ly_35.1.0 BytedanceWebview/d8a21c6",
+   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Instagram 330.0.0.40.92",
+   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36"].every((u) => trafficFor(u) === "public"));
+t("traffic: internal marker wins over bot patterns", trafficFor(`curl/8 ${INTERNAL_UA_TOKEN}`) === "internal");
 writes.length = 0;
 await handleRetentionEvent(new Request("https://x/e", { method: "POST", body: JSON.stringify({ event: "visit", bucket: "d0", source: "x" }), headers: { "user-agent": `curl/8 ${INTERNAL_UA_TOKEN}` } }), env);
 await handleRetentionEvent(req({ event: "visit", bucket: "d0", source: "x" }), env);
-t("server: blob6 = internal/public, UA itself not stored",
-  writes.map((w) => (w as { blobs: string[] }).blobs[5]).join() === "internal,public" && !JSON.stringify(writes).includes("curl"));
+await handleRetentionEvent(new Request("https://x/e", { method: "POST", body: JSON.stringify({ event: "visit", bucket: "d0", source: "x" }), headers: { "user-agent": "Mozilla/5.0 (compatible; Googlebot/2.1)" } }), env);
+t("server: blob6 = internal/public/bot, UA itself not stored, still 7 blobs",
+  writes.map((w) => (w as { blobs: string[] }).blobs[5]).join() === "internal,public,bot" && !JSON.stringify(writes).includes("curl") && !JSON.stringify(writes).includes("Googlebot") && writes.every((w) => (w as { blobs: string[] }).blobs.length === 7));
 writes.length = 0;
 await handleRetentionEvent(req({ event: "share_click", bucket: "d0", source: "x", via: "native" }), env);
 await handleRetentionEvent(req({ event: "share_click", bucket: "d0", source: "x", via: "me@x.com" }), env);
 await handleRetentionEvent(req({ event: "visit", bucket: "d0", source: "x", via: "copy" }), env);
 t("server: via is blob7, allow-listed, share_click only", writes.map((w) => (w as { blobs: string[] }).blobs[6]).join() === "native,none,none");
-t("sql excludes internal", reportSql(7).includes("blob6 != 'internal'"));
+t("sql excludes internal and bot", reportSql(7).includes("blob6 NOT IN ('internal','bot')"));
+t("excluded-count sql counts only internal and bot", excludedSql(7).includes("blob6 IN ('internal','bot')") && excludedSql(7).includes("GROUP BY traffic"));
 t("GET -> 405", (await handleRetentionEvent(new Request("https://x/e"), env)).status === 405);
 process.exit(fails ? 1 : 0);
