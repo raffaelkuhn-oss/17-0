@@ -1,7 +1,7 @@
 // Creator-test dashboard: prints one row per ref code from Analytics Engine (read-only).
 // Run: CF_ACCOUNT_ID=<id> CF_ANALYTICS_TOKEN=<token> bun scripts/creator-dashboard.ts [days=30]
 // Token needs only "Account Analytics: Read". It is read from the env and never printed.
-import { formatTable, reportSql, summarize, type ReportRow } from "../src/lib/creator-report";
+import { excludedSql, formatTable, reportSql, summarize, type ReportRow } from "../src/lib/creator-report";
 
 const account = process.env.CF_ACCOUNT_ID?.trim();
 const token = process.env.CF_ANALYTICS_TOKEN?.trim();
@@ -35,3 +35,16 @@ console.log(
   `17-0 creator test, last ${Math.min(90, Math.max(1, Math.floor(days) || 30))} days (Analytics Engine, sampled counts)\n`,
 );
 console.log(formatTable(summarize(rows)));
+// Footnote: rows left out (our own checks = internal, self-declared crawlers = bot). Aggregate counts only.
+const ex = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/analytics_engine/sql`, {
+  method: "POST",
+  headers: { Authorization: `Bearer ${token}` },
+  body: excludedSql(days),
+});
+if (ex.ok) {
+  const exRows = ((await ex.json()) as { data?: Array<Record<string, unknown>> }).data ?? [];
+  const by = Object.fromEntries(exRows.map((r) => [String(r.traffic), Number(r.n)]));
+  console.log(`\nexcluded events: internal ${by.internal ?? 0}, bot ${by.bot ?? 0}`);
+} else {
+  console.log(`\nexcluded events: unknown (HTTP ${ex.status})`);
+}

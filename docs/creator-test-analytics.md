@@ -2,7 +2,7 @@
 
 Links: `https://ucl17-0.com/?ref=c01&utm_source=tiktok&utm_medium=creator&utm_campaign=creator-test` (c01–c10).
 Data: Workers Analytics Engine dataset `ucl170_retention`, aggregate counts only (no IP, cookie or ID).
-Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source · `blob5` ref (`c01`–`c10`/`none`; empty for rows written before this change) · `blob6` traffic (`internal`/`public`; empty for rows written before 18 Oct 2026) · `blob7` share path on `share_click` (`native`/`copy`/`x`/`whatsapp`/`download`/`challenge`; `none` otherwise, empty before the share PR).
+Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source · `blob5` ref (`c01`–`c10`/`none`; empty for rows written before this change) · `blob6` traffic (`internal`/`bot`/`public`; empty for rows written before 18 Oct 2026; `bot` from 19 Oct) · `blob7` share path on `share_click` (`native`/`copy`/`x`/`whatsapp`/`download`/`challenge`; `none` otherwise, empty before the share PR).
 
 ## Dashboard (terminal)
 
@@ -43,7 +43,7 @@ Shares per path (share rate per finished run = shares ÷ sim_complete):
 ```sql
 SELECT blob7 AS via, SUM(_sample_interval) AS shares
 FROM ucl170_retention
-WHERE timestamp > NOW() - INTERVAL '14' DAY AND blob1 = 'share_click' AND blob6 != 'internal'
+WHERE timestamp > NOW() - INTERVAL '14' DAY AND blob1 = 'share_click' AND blob6 NOT IN ('internal','bot')
 GROUP BY via ORDER BY shares DESC
 ```
 
@@ -54,10 +54,22 @@ Our own scripted checks (post-deploy-check, Playwright/headless runs) send the f
 the UA itself is never stored. `creator-dashboard.ts` already excludes it. In your own queries add:
 
 ```sql
-  AND blob6 != 'internal'   -- keeps 'public' and pre-marker rows (blob6 = '')
+  AND blob6 NOT IN ('internal','bot')   -- keeps 'public' and pre-marker rows (blob6 = '')
 ```
 
 Internal-only view: `WHERE blob6 = 'internal'`.
+
+## Bot traffic (from 19 Oct)
+
+The Worker also maps self-declared crawlers and automation libraries (`Googlebot/2.1`, `bingbot/2.0`,
+`GPTBot/1.0`, `Bytespider`, `facebookexternalhit`, Lighthouse, `python-requests`, `curl/`, …; see
+`BOT_UA` in `src/lib/traffic.ts`) to `blob6 = 'bot'`. Same mechanism as `internal`: the UA is matched
+against fixed patterns and never stored; nothing new is collected. The dashboard excludes `internal` and
+`bot` and prints how many events it left out.
+
+Many plays per visit is **not** treated as a bot: `visit` counts once per browser per UTC day while every
+draft counts, so one keen player can produce 20+ drafts from 1 visit (e.g. 19 Oct 06:10–06:46 UTC: 1 Daily +
+~22 classic drafts at ~1/min with pauses and a file share, which needs a real phone's share sheet).
 
 Any new script that loads the site must send the token:
 - curl: `-A "my-check ucl170-internal-check"`
