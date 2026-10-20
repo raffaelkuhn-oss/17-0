@@ -20,3 +20,6 @@ jobs:
       - run: bun run build
       # No legacy v1 or flag-gated live player names in the shipped client bundle.
       - run: bun run test:bundle
+      # Served <head> of every sitemap page (titles, descriptions, canonical, no noindex), the fan-made
+      # footer line on every page, workers.dev noindex, IndexNow key file.
+      - run: bun run test:seo

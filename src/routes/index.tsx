@@ -1,4 +1,5 @@
 import { SITE_URL, absUrl } from "@/lib/site";
+import { HOME_DESCRIPTION, HOME_TITLE } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HomeLeaderboard } from "@/components/HomeLeaderboard";
 import { AdBanner } from "@/components/AdBanner";
@@ -10,24 +11,12 @@ import { POSITION_PAGES, POSITION_SLUGS } from "@/lib/position-pages";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Draft the Perfect Champions League XI | 17-0 Draft" },
-      {
-        name: "description",
-        content:
-          "Draft 11 Champions League legends and try to win all 17 matches. Free browser game, no sign-up.",
-      },
-      { property: "og:title", content: "17-0 — Draft the Perfect Champions League XI" },
-      { name: "twitter:title", content: "17-0 — Draft the Perfect Champions League XI" },
-      {
-        property: "og:description",
-        content:
-          "Draft 11 Champions League legends and try to win all 17 matches. Free browser game, no sign-up.",
-      },
-      {
-        name: "twitter:description",
-        content:
-          "Draft 11 Champions League legends and try to win all 17 matches. Free browser game, no sign-up.",
-      },
+      { title: HOME_TITLE },
+      { name: "description", content: HOME_DESCRIPTION },
+      { property: "og:title", content: HOME_TITLE },
+      { name: "twitter:title", content: HOME_TITLE },
+      { property: "og:description", content: HOME_DESCRIPTION },
+      { name: "twitter:description", content: HOME_DESCRIPTION },
       { property: "og:type", content: "website" },
       { property: "og:url", content: absUrl("/") },
       { name: "twitter:card", content: "summary_large_image" },
@@ -39,7 +28,7 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "VideoGame",
-          name: "17-0 — Champions League Draft Simulator",
+          name: "17-0 Draft — Champions League Draft Simulator",
           url: SITE_URL,
           description:
             "Free browser game: draft an all-time Champions League XI from a pool of European legends and simulate a 17-match campaign — 8 league-phase games, four two-legged knockout rounds and the final.",

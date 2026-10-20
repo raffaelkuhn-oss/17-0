@@ -49,14 +49,14 @@ const FAQ = [
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
     meta: [
-      { title: "How the 17-0 Champions League Simulator Works" },
+      { title: "How the Champions League Simulator Works | 17-0 Draft" },
       {
         name: "description",
         content:
           "How 17-0 works: draft an all-time Champions League XI, simulate 8 league-phase games and four two-legged knockout rounds, and see how often 17-0 happens.",
       },
-      { property: "og:title", content: "How the 17-0 Champions League Simulator Works" },
-      { name: "twitter:title", content: "How the 17-0 Champions League Simulator Works" },
+      { property: "og:title", content: "How the Champions League Simulator Works | 17-0 Draft" },
+      { name: "twitter:title", content: "How the Champions League Simulator Works | 17-0 Draft" },
       {
         property: "og:description",
         content:
@@ -90,7 +90,7 @@ export const Route = createFileRoute("/how-it-works")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "VideoGame",
-          name: "17-0 — Champions League Draft Simulator",
+          name: "17-0 Draft — Champions League Draft Simulator",
           url: SITE_URL,
           description:
             `Free browser game: draft an all-time Champions League XI from ${PLAYERS.length} legends and simulate a 17-match European campaign.`,
