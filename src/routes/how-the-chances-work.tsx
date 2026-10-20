@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CHANCES_INTRO, CHANCES_POINTS, CHANCE_ROWS, STATS, chanceSentence } from "@/lib/chances-copy";
 
 const URL = absUrl("/how-the-chances-work");
-const TITLE = "How the chances work in 17-0, in plain words";
+const TITLE = "How the chances work in 17-0 Draft, in plain words";
 const DESC = `In plain words: how 17-0 decides your matches, and your real chance to win the title or go 17-0, from ${STATS.runs.toLocaleString("en-US")} simulated seasons per draft type.`;
 
 export const Route = createFileRoute("/how-the-chances-work")({

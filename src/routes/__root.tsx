@@ -1,4 +1,5 @@
 import { SITE_URL, absUrl } from "@/lib/site";
+import { HOME_DESCRIPTION, HOME_TITLE } from "@/lib/seo";
 import interWoff2 from "@/assets/fonts/inter-latin-var.woff2?url";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -82,12 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#246828" },
-      { title: "Champions League All-Time Draft | 17-0 Draft" },
-      {
-        name: "description",
-        content:
-          "Draft an all-time Champions League XI and simulate the whole campaign. Can you go 17-0?",
-      },
+      // Default meta for any page without its own (child routes override by name/property).
+      { title: HOME_TITLE },
+      { name: "description", content: HOME_DESCRIPTION },
+      { property: "og:title", content: HOME_TITLE },
+      { name: "twitter:title", content: HOME_TITLE },
+      { property: "og:description", content: HOME_DESCRIPTION },
+      { name: "twitter:description", content: HOME_DESCRIPTION },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "17-0 Draft" },
       { property: "og:image", content: absUrl("/og-image-v2.jpg") },
@@ -139,8 +141,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "17-0",
-          alternateName: "17-0 Champions League Draft Simulator",
+          name: "17-0 Draft",
+          alternateName: ["17-0 Champions League Draft", "17-0 Draft Champions League soccer game"],
           url: SITE_URL,
         }),
       },
@@ -149,7 +151,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "17-0",
+          name: "17-0 Draft",
           url: SITE_URL,
           logo: absUrl("/favicon.png"),
         }),

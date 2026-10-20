@@ -19,14 +19,14 @@ export const Route = createFileRoute("/draft")({
   loader: ({ deps }) => getLivePool({ data: { preview: deps.live } }),
   head: ({ match }) => ({
     meta: [
-      { title: match.search.c && isExpiredChallenge(match.search.c) ? EXPIRED_CHALLENGE_TITLE : "Draft Room — 17-0 Champions League Draft" },
+      { title: match.search.c && isExpiredChallenge(match.search.c) ? EXPIRED_CHALLENGE_TITLE : "Draft Room — Champions League Draft | 17-0 Draft" },
       {
         name: "description",
         content:
           "Pick your eleven from Champions League legends, then simulate all 17 matches of the campaign.",
       },
-      { property: "og:title", content: "Draft Room — 17-0 Champions League Draft" },
-      { name: "twitter:title", content: "Draft Room — 17-0 Champions League Draft" },
+      { property: "og:title", content: "Draft Room — Champions League Draft | 17-0 Draft" },
+      { name: "twitter:title", content: "Draft Room — Champions League Draft | 17-0 Draft" },
       {
         property: "og:description",
         content: "Pick eleven legends and simulate the full European campaign.",

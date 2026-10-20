@@ -12,7 +12,7 @@ export const Route = createFileRoute("/best/$position")({
   },
   head: ({ params }) => {
     const page = POSITION_PAGES[params.position as PositionSlug];
-    if (!page) return { meta: [{ title: "Not found — 17-0" }] };
+    if (!page) return { meta: [{ title: "Not found — 17-0 Draft" }] };
     const url = `${BASE}/best/${params.position}`;
     const title = `Best Champions League ${page.label} of All Time (Ranked)`;
     const desc = `The greatest Champions League ${page.label.toLowerCase()} ever, ranked by attack, defence, technique and big-game mentality. Draft them in the free 17-0 UCL simulator.`;

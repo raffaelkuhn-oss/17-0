@@ -28,14 +28,14 @@ import type { Campaign } from "@/lib/sim";
 export const Route = createFileRoute("/daily")({
   head: () => ({
     meta: [
-      { title: "Daily Challenge — One Champions League Draft a Day | 17-0" },
+      { title: "Daily Challenge — One Champions League XI a Day | 17-0 Draft" },
       {
         name: "description",
         content:
           "Every player in the world starts from the same seeded draft each day. Draft your XI, simulate the 17-match campaign, and build a streak.",
       },
-      { property: "og:title", content: "17-0 Daily Challenge — Same Draft for Everyone" },
-      { name: "twitter:title", content: "17-0 Daily Challenge — Same Draft for Everyone" },
+      { property: "og:title", content: "17-0 Draft Daily Challenge — Same Draft for Everyone" },
+      { name: "twitter:title", content: "17-0 Draft Daily Challenge — Same Draft for Everyone" },
       {
         property: "og:description",
         content:
