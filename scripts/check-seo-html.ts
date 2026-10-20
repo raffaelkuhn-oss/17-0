@@ -71,7 +71,7 @@ for (const [name, u] of [["404 page", `${SITE}/no-such-page`], ["unknown /r/ cod
   t(`${name}: default og:title present (no empty link preview)`, metas(html, "og:title").length === 1);
 }
 
-const dev = await get("https://ucl-17-0.raffaelkuhn.workers.dev/");
+const dev = await get("https://ucl-17-0.ucl17zero.workers.dev/");
 t("workers.dev host: X-Robots-Tag noindex", /noindex/.test(dev.headers.get("x-robots-tag") ?? ""));
 
 const keys = readdirSync(new URL("../dist/client/", import.meta.url)).filter((f) => /^[0-9a-f]{32}\.txt$/.test(f));
