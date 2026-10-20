@@ -2,7 +2,7 @@
  * Cookieless, anonymous retention measurement (see README "Retention tracking").
  *
  * Browser side keeps ONE localStorage entry: first-seen day, last-seen day, the
- * acquisition-source bucket and creator code (c01-c10, if any) of the first visit, and a
+ * acquisition-source bucket and creator code (c01-c30, if any) of the first visit, and a
  * "day-7 return already counted" flag. No ID, no cookie, nothing personal.
  * Events carry only {event, bucket, mode, source, ref, via}; the Worker turns them into aggregate
  * counters. Off unless VITE_RETENTION_ENABLED=1 at build time AND the Worker has the
@@ -50,8 +50,13 @@ export type Source = (typeof SOURCES)[number];
 export const SHARE_VIAS = ["native", "file", "copy", "x", "whatsapp", "download", "challenge"] as const;
 export type ShareVia = (typeof SHARE_VIAS)[number];
 
-/** Creator codes for the creator test (closed list; anything else is ignored). */
-export const REFS = ["c01", "c02", "c03", "c04", "c05", "c06", "c07", "c08", "c09", "c10"] as const;
+/** Creator codes for the creator test, c01-c30 (closed list; anything else is ignored). c02/c07/c08 stay valid while unassigned. */
+// prettier-ignore
+export const REFS = [
+  "c01", "c02", "c03", "c04", "c05", "c06", "c07", "c08", "c09", "c10",
+  "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c19", "c20",
+  "c21", "c22", "c23", "c24", "c25", "c26", "c27", "c28", "c29", "c30",
+] as const;
 export type Ref = (typeof REFS)[number];
 export type RefOrNone = Ref | "none";
 

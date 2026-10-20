@@ -29,8 +29,49 @@ const c2 = nextVisit(c.state, d("2026-10-09"), "x");
 t("day 8 after d7 fired: no second return_d7", c2.events.join() === "visit");
 
 // ---- creator ref ----
-t("parseRef c01..c10", parseRef("c01") === "c01" && parseRef(" C10 ") === "c10");
-t("parseRef rejects others", [null, "", "c00", "c11", "c1", "c001", "john", "c01x", "c01&x=1"].every((v) => parseRef(v) === null));
+t(
+  "parseRef c01..c30",
+  parseRef("c01") === "c01" &&
+    parseRef(" C10 ") === "c10" &&
+    parseRef("c11") === "c11" &&
+    parseRef("C30") === "c30",
+);
+t(
+  "parseRef keeps unassigned c02/c07/c08 valid",
+  ["c02", "c07", "c08"].every((v) => parseRef(v) === v),
+);
+t(
+  "parseRef accepts every code c01..c30",
+  Array.from({ length: 30 }, (_, i) => "c" + String(i + 1).padStart(2, "0")).every(
+    (v) => parseRef(v) === v,
+  ),
+);
+t(
+  "parseRef rejects others",
+  [null, "", "c00", "c31", "c99", "c1", "c001", "c011", "john", "c01x", "c30x", "c11&x=1"].every(
+    (v) => parseRef(v) === null,
+  ),
+);
+const r11 = nextVisit(null, d("2026-10-01"), "other", parseRef("c11"));
+t(
+  "first visit stores c11, later c30 never overwrites",
+  r11.state.ref === "c11" &&
+    nextVisit(r11.state, d("2026-10-02"), "x", parseRef("c30")).state.ref === "c11",
+);
+t(
+  "c11/c30 attached to visit/draft_start/sim_complete/share_click like c01",
+  ["c01", "c11", "c30"].every((r) =>
+    ["visit", "draft_start", "sim_complete", "share_click"].every(
+      (e) => eventBody(e as never, "d0", "x", "none", r as never).ref === r,
+    ),
+  ),
+);
+t(
+  "c31/c00/garbage -> none in body",
+  ["c31", "c00", "garbage"].every(
+    (r) => eventBody("visit", "d0", "x", "none", r as never).ref === "none",
+  ),
+);
 const r0 = nextVisit(null, d("2026-10-01"), "other", parseRef("c03"));
 t("first visit stores ref", r0.state.ref === "c03");
 const rBad = nextVisit(null, d("2026-10-01"), "other", parseRef("evil"));
@@ -77,6 +118,20 @@ await handleRetentionEvent(req({ event: "draft_start", bucket: "d0", mode: "clas
 await handleRetentionEvent(req({ event: "draft_start", bucket: "d0", mode: "classic", source: "other" }), env);
 const blobs = writes.map((w) => (w as { blobs: string[] }).blobs[4]);
 t("server: valid ref is blob5, invalid/missing -> none", blobs.join() === "c07,none,none");
+writes.length = 0;
+for (const ref of ["c01", "c11", "c30", "c31", "c00", "garbage"])
+  for (const event of ["visit", "draft_start", "sim_complete", "share_click"])
+    await handleRetentionEvent(
+      req({ event, bucket: "d0", mode: "classic", source: "other", ref }),
+      env,
+    );
+const refBlobs = writes.map((w) => (w as { blobs: string[] }).blobs[4]);
+t(
+  "server: c11/c30 written as blob5 for all four events like c01; c31/c00/garbage -> none",
+  refBlobs.join() ===
+    ["c01", "c11", "c30", "none", "none", "none"].flatMap((r) => [r, r, r, r]).join() &&
+    writes.every((w) => (w as { blobs: string[] }).blobs.length === 7),
+);
 
 // ---- report ----
 const sum = summarize([
