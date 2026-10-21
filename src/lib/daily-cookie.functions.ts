@@ -36,7 +36,7 @@ export const DAILY_COOKIE_OPTIONS = {
   maxAge: DAILY_COOKIE_MAX_AGE,
 } as const;
 
-/** Sets (or upgrades) the signed httpOnly cookie. Silently does nothing without a secret. */
+/** Sets (or upgrades c -> b) the signed httpOnly cookie. Silently does nothing without a secret. */
 export async function writeDailyCookie(dayKey: string, state: DailyCookieState): Promise<boolean> {
   const existing = await readDailyCookie(dayKey);
   const value = await createDailyCookie(dailySecret(), {
@@ -56,15 +56,6 @@ export const getDailyPlayedStatus = createServerFn({ method: "GET" })
     if (data.dayKey !== dailyKey()) return { played: false as const };
     const { getCookie } = await import("@tanstack/react-start/server");
     const s = await dailyPlayedState(dailySecret(), getCookie(DAILY_COOKIE), data.dayKey);
-    // A valid old-format (v1, with random id) cookie for today counts as played and is
-    // rewritten right away in the id-free v2 format.
-    if (s.upgrade && s.state) {
-      try {
-        await writeDailyCookie(data.dayKey, s.state);
-      } catch (e) {
-        console.error("daily cookie upgrade failed", e);
-      }
-    }
     return { played: s.played };
   });
 
