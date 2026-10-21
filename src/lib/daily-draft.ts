@@ -1,10 +1,10 @@
 /**
- * Daily draft verification against a pool (pure, current pool by default).
- * The legacy (frozen v1 pool) grace path lives in daily-draft.server.ts so the v1 pool is never
- * bundled into the client; it is deleted with the 21 Oct v1 cookie PR.
+ * Daily draft verification and resolution (pure, current pool + current seed).
+ * Used by the leaderboard submit path to recompute the authoritative result.
  */
 import { FORMATION, PLAYERS, type Player } from "./players";
-import { candidatesFor } from "./sim";
+import { candidatesFor, simulate, type Campaign } from "./sim";
+import { DAILY_POOL_VERSION, dailySeed } from "./daily";
 
 function rngFactory(seed: number) {
   let a = seed;
@@ -32,4 +32,19 @@ export function verifyDraft(
     picks.push(chosen);
   }
   return picks;
+}
+
+export type ResolvedDailyDraft = {
+  picks: Player[];
+  seed: number;
+  version: typeof DAILY_POOL_VERSION;
+  campaign: Campaign;
+};
+
+/** Resolve a submitted Daily draft against the current pool and today's seed; null if it isn't valid. */
+export function resolveDailyDraft(names: string[], dayKey: string): ResolvedDailyDraft | null {
+  const seed = dailySeed(dayKey);
+  const picks = verifyDraft(names, seed, PLAYERS);
+  if (!picks) return null;
+  return { picks, seed, version: DAILY_POOL_VERSION, campaign: simulate(picks, seed) };
 }

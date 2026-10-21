@@ -1,11 +1,10 @@
 /**
  * Legend rule check (docs/legend-rule.md): a pool legend must not be registered in THIS season's
- * UEFA Champions League squad. Flags any PLAYERS (and frozen PLAYERS_V1) legend whose name matches a
+ * UEFA Champions League squad. Flags any PLAYERS legend whose name matches a
  * player in a current CL squad on football-data.org. WARNING ONLY: always exits 0 unless --strict.
  *
- * Usage: FOOTBALL_DATA_API_KEY=... bun scripts/legend-cl-check.ts [--names "Sergio Ramos,Paul Pogba"] [--include-v1] [--strict]
+ * Usage: FOOTBALL_DATA_API_KEY=... bun scripts/legend-cl-check.ts [--names "Sergio Ramos,Paul Pogba"] [--strict]
  *   --names       also report each named player's status explicitly (found in a CL squad or not)
- *   --include-v1  also check the frozen v1 pool (only decodes old share links; it is never drafted)
  * Exact name matches are WARN lines; same surname + same first initial (e.g. "Andy" vs "Andrew") is a
  * "possible" note to check by hand.
  * Requests: 1 (GET /v4/competitions/CL/teams, squads included); if squads come back empty, one
@@ -15,14 +14,12 @@
  * (src/lib/live/current-players.ts) that also appears in the legend pool (src/lib/players.ts).
  */
 import { PLAYERS, type Player } from "../src/lib/players";
-import { PLAYERS_V1 } from "../src/lib/legacy/players-v1";
 import { CURRENT_PLAYERS } from "../src/lib/live/current-players";
 
 const API = "https://api.football-data.org/v4";
 const MIN_GAP_MS = 6_500; // 10 requests/minute on the free tier
 const args = process.argv.slice(2);
 const strict = args.includes("--strict");
-const includeV1 = args.includes("--include-v1");
 const namesArg = args.includes("--names") ? (args[args.indexOf("--names") + 1] ?? "") : "";
 const key = (process.env["FOOTBALL_DATA_API_KEY"] ?? "").trim();
 
@@ -106,7 +103,6 @@ async function main() {
 
   const legends = new Map<string, { p: Player; pools: string[] }>();
   const pools: [string, readonly Player[]][] = [["players.ts", PLAYERS]];
-  if (includeV1) pools.push(["players-v1.ts", PLAYERS_V1]);
   for (const [pool, list] of pools)
     for (const p of list) {
       const e = legends.get(p.name) ?? { p, pools: [] };
