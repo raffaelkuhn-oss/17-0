@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 import ATLAS from "../src/assets/og/atlas.json";
 import { encodeChallenge, CHALLENGE_VERSION_LEGACY } from "../src/lib/challenge";
 import { PLAYERS } from "../src/lib/players";
-import { PLAYERS_V1 } from "../src/lib/legacy/players-v1";
 import { createHash } from "node:crypto";
 import { OG_LAYOUT_SHA, OG_VERSION, RUN_OG_PATH, isExpiredRunCode, runFromCode, runOgPath, runTitle, upgradedOgPath } from "../src/lib/og/run-page";
 import { renderRunPng } from "../src/lib/og/run-image";
@@ -29,7 +28,7 @@ t(`og layout unchanged at v${OG_VERSION} (else bump OG_VERSION and set OG_LAYOUT
 t("title has no betting words", !/odds|bet/i.test(runTitle(run!.campaign)));
 t("share link points at /r/<code>", shareText({ campaign: run!.campaign, challengeCode: code, origin: "https://ucl17-0.com" }).url === `https://ucl17-0.com/r/${code}`);
 const glyphs = (ATLAS.styles as unknown as Record<string, { glyphs: Record<string, unknown> }>).name!.glyphs;
-const missing = new Set([...PLAYERS, ...PLAYERS_V1].flatMap((p) => [...p.name]).filter((ch) => !glyphs[ch]));
+const missing = new Set(PLAYERS.flatMap((p) => [...p.name]).filter((ch) => !glyphs[ch]));
 t(`atlas covers every player-name character (missing: ${[...missing].join("") || "none"})`, missing.size === 0);
 // The big record is drawn from the "record" atlas style: every character the label can produce must be baked.
 const recGlyphs = (ATLAS.styles as unknown as Record<string, { glyphs: Record<string, unknown> }>).record!.glyphs;

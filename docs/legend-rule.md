@@ -6,7 +6,6 @@
 - **Kyle Walker, Andrew Robertson, David Alaba, Luka Modrić stay.** None of them is in a 2026/27 CL squad (see the check below). Modrić is on Milan's Europa League list, which is allowed.
 - **Mohamed Salah stays, by name.** This is a PM decision, recorded here so the check isn't read as a reason to remove him.
 - **No v3 pool.** The pool is not rebuilt for this rule. If the check flags someone, the PM decides case by case.
-- The frozen `src/lib/legacy/players-v1.ts` only decodes old share links and is never drafted, so the rule does not apply to it. `--include-v1` lists its matches for information only.
 
 ## The check
 `scripts/legend-cl-check.ts` compares every legend name with the current CL squads from football-data.org (`GET /v4/competitions/CL/teams`, squads included).

@@ -7,7 +7,6 @@ import { createMemoryHistory, createRootRoute, createRoute, createRouter, Router
 import { CHALLENGE_VERSION_LEGACY, decodeChallenge, encodeChallenge, isExpiredChallenge } from "../src/lib/challenge";
 import { isExpiredRunCode, runFromCode } from "../src/lib/og/run-page";
 import { PLAYERS } from "../src/lib/players";
-import { PLAYERS_V1 } from "../src/lib/legacy/players-v1";
 import { ExpiredChallenge, EXPIRED_CHALLENGE_COPY, EXPIRED_CHALLENGE_CTA } from "../src/components/ExpiredChallenge";
 
 let fails = 0;
@@ -38,8 +37,7 @@ t("note renders with the copy", html.includes('data-testid="challenge-expired"')
 const btn = /<a[^>]*data-testid="challenge-expired-draft"[^>]*>([^<]*)<\/a>/.exec(html);
 t("one primary button 'Draft your own XI'", !!btn && btn[1] === EXPIRED_CHALLENGE_CTA && /class="[^"]*btn-primary/.test(btn[0]));
 t("button starts a fresh draft (href /draft, no ?c=)", !!btn && /href="\/draft"/.test(btn[0]));
-const v1only = PLAYERS_V1.filter((p) => !PLAYERS.some((x) => x.name === p.name));
-t(`no player rendered (none of ${PLAYERS_V1.length} v1 names, e.g. Rafael Leão)`, PLAYERS_V1.every((p) => !html.includes(p.name)) && v1only.length > 0);
+t(`no player rendered (none of ${PLAYERS.length} pool names)`, PLAYERS.length > 0 && PLAYERS.every((p) => !html.includes(p.name)));
 
 // 4) Routes wire it up: 200 page (no notFound/404), DraftGame not rendered, default og image
 const draftSrc = readFileSync(new URL("../src/routes/draft.tsx", import.meta.url), "utf8");
