@@ -20,7 +20,7 @@ const FAQ = [
   },
   {
     q: "How is the draft scored?",
-    a: `Your XI produces attack, midfield, defence and mentality ratings. The engine simulates eight league-phase matches, four two-legged knockout rounds and the final. Winning all seventeen matches — a 17-0 — is rare. In the game's own simulations, a good draft goes 17-0 ${STATS.greedy.perfectPct}% of the time and the best possible XI ${STATS.bestXI.perfectPct}%, versus ${STATS.random.perfectPct}% for random picks.`,
+    a: `Your XI produces attack, midfield, defence and mentality ratings. The engine simulates eight league-phase matches, four two-legged knockout rounds and the final. Winning all seventeen matches — a 17-0 — is rare. In the game's own simulations, a good draft goes 17-0 ${STATS.greedy.perfectPct}% of the time and the highest-rated XI (top-rated legend in each slot) ${STATS.bestXI.perfectPct}%, versus ${STATS.random.perfectPct}% for random picks.`,
   },
 ];
 

@@ -29,7 +29,7 @@ const FAQ = [
   },
   {
     q: "What does a 17-0 mean?",
-    a: `Seventeen wins from seventeen matches plus the trophy. In our simulations (${STATS.runs.toLocaleString("en-US")} runs per draft type), a good draft achieves it ${STATS.greedy.perfectPct}% of the time and the best possible XI ${STATS.bestXI.perfectPct}%, versus ${STATS.random.perfectPct}% for random picks.`,
+    a: `Seventeen wins from seventeen matches plus the trophy. In our simulations (${STATS.runs.toLocaleString("en-US")} runs per draft type), a good draft achieves it ${STATS.greedy.perfectPct}% of the time and the highest-rated XI (top-rated legend in each slot) ${STATS.bestXI.perfectPct}%, versus ${STATS.random.perfectPct}% for random picks.`,
   },
 ];
 
