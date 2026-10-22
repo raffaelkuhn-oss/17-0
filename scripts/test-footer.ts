@@ -26,6 +26,14 @@ t("sponsor contact is in the footer", footer.includes("Sponsor or partner?") && 
 const DAILY_PRIVACY = "Your Daily results, streak and stats stay in your browser only and are never sent to us.";
 const flat = footer.replace(/\s+/g, " ");
 t("footer has the Daily privacy sentence verbatim", flat.includes(DAILY_PRIVACY));
+// Outcome-bucket line (approved by Raffael via the PM 22 Oct 20:47), verbatim, visible, right after the aggregate clause.
+const OUTCOME_PRIVACY = "For finished runs we also count how far they got (17-0, title, final, knockouts or league phase), never your picks or scores.";
+const aggAt = flat.indexOf("counts game events like drafts, finished runs and shares in aggregate; no ID, no tracking cookies, no personal data.");
+const opAt = flat.indexOf(OUTCOME_PRIVACY);
+t("footer has the outcome privacy line verbatim, after the aggregate clause and before the Daily sentence",
+  aggAt > 0 && opAt > aggAt && opAt < flat.indexOf(DAILY_PRIVACY));
+const opTag = footer.indexOf('data-testid="footer-outcome-privacy"');
+t("outcome privacy line is not hidden", opTag > 0 && !/\b(hidden|sr-only|invisible|opacity-0)\b/.test(footer.slice(footer.lastIndexOf("<p", opTag), opTag + 120)));
 const dpAt = footer.indexOf('data-testid="footer-daily-privacy"');
 t("Daily privacy sentence is not hidden", dpAt > 0 && !/\b(hidden|sr-only|invisible|opacity-0)\b/.test(footer.slice(footer.lastIndexOf("<p", dpAt), dpAt + 120)));
 const routesDir = new URL("../src/routes/", import.meta.url);

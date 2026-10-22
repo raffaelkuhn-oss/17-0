@@ -130,7 +130,7 @@ t(
   "server: c11/c30 written as blob5 for all four events like c01; c31/c00/garbage -> none",
   refBlobs.join() ===
     ["c01", "c11", "c30", "none", "none", "none"].flatMap((r) => [r, r, r, r]).join() &&
-    writes.every((w) => (w as { blobs: string[] }).blobs.length === 7),
+    writes.every((w) => (w as { blobs: string[] }).blobs.length === 8),
 );
 
 // ---- report ----
@@ -165,8 +165,8 @@ writes.length = 0;
 await handleRetentionEvent(new Request("https://x/e", { method: "POST", body: JSON.stringify({ event: "visit", bucket: "d0", source: "x" }), headers: { "user-agent": `curl/8 ${INTERNAL_UA_TOKEN}` } }), env);
 await handleRetentionEvent(req({ event: "visit", bucket: "d0", source: "x" }), env);
 await handleRetentionEvent(new Request("https://x/e", { method: "POST", body: JSON.stringify({ event: "visit", bucket: "d0", source: "x" }), headers: { "user-agent": "Mozilla/5.0 (compatible; Googlebot/2.1)" } }), env);
-t("server: blob6 = internal/public/bot, UA itself not stored, still 7 blobs",
-  writes.map((w) => (w as { blobs: string[] }).blobs[5]).join() === "internal,public,bot" && !JSON.stringify(writes).includes("curl") && !JSON.stringify(writes).includes("Googlebot") && writes.every((w) => (w as { blobs: string[] }).blobs.length === 7));
+t("server: blob6 = internal/public/bot, UA itself not stored, 8 blobs (blob8 outcome empty off sim_complete)",
+  writes.map((w) => (w as { blobs: string[] }).blobs[5]).join() === "internal,public,bot" && !JSON.stringify(writes).includes("curl") && !JSON.stringify(writes).includes("Googlebot") && writes.every((w) => (w as { blobs: string[] }).blobs.length === 8 && (w as { blobs: string[] }).blobs[7] === ""));
 writes.length = 0;
 await handleRetentionEvent(req({ event: "share_click", bucket: "d0", source: "x", via: "native" }), env);
 await handleRetentionEvent(req({ event: "share_click", bucket: "d0", source: "x", via: "me@x.com" }), env);

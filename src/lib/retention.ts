@@ -4,10 +4,12 @@
  * Browser side keeps ONE localStorage entry: first-seen day, last-seen day, the
  * acquisition-source bucket and creator code (c01-c30, if any) of the first visit, and a
  * "day-7 return already counted" flag. No ID, no cookie, nothing personal.
- * Events carry only {event, bucket, mode, source, ref, via}; the Worker turns them into aggregate
+ * Events carry only {event, bucket, mode, source, ref, via} (+ outcome on sim_complete); the Worker turns them into aggregate
  * counters. Off unless VITE_RETENTION_ENABLED=1 at build time AND the Worker has the
  * RETENTION Analytics Engine binding.
  */
+
+import type { Campaign } from "./sim";
 
 export const RETENTION_EVENTS = [
   "visit",
@@ -49,6 +51,36 @@ export type Source = (typeof SOURCES)[number];
 /** Which share path was used (share_click only; closed list). */
 export const SHARE_VIAS = ["native", "file", "copy", "x", "whatsapp", "download", "challenge"] as const;
 export type ShareVia = (typeof SHARE_VIAS)[number];
+
+/**
+ * How a finished run ended (sim_complete only; closed list, blob8). Mapped from sim.ts simulate():
+ * - perfect:  17-0 (8 league wins, both legs of all 4 two-legged ties, and the final) = Campaign.perfect
+ * - champion: won the final, not 17-0 (Campaign.champion && !perfect)
+ * - final:    lost the final (eliminatedIn "Final")
+ * - ko:       reached the knockouts (11+ league points) and went out in the Playoff, Round of 16,
+ *             Quarter-Final or Semi-Final. The Playoff counts as ko: it is the first two-legged
+ *             knockout tie in sim.ts (KO_ROUNDS[0]), played only after clearing the league cut-off.
+ * - league:   out in the league phase (eliminatedIn "League Phase", under PLAYOFF_CUTOFF points)
+ * Only the bucket is sent: no score, record, picks or anything about the player. Never sent for
+ * Daily runs (mode "daily"): the client leaves it out and the Worker forces blob8 to "".
+ */
+export const OUTCOMES = ["perfect", "champion", "final", "ko", "league"] as const;
+export type Outcome = (typeof OUTCOMES)[number];
+
+export function outcomeOf(c: Pick<Campaign, "perfect" | "champion" | "eliminatedIn">): Outcome {
+  if (c.perfect) return "perfect";
+  if (c.champion) return "champion";
+  if (c.eliminatedIn === "Final") return "final";
+  if (c.eliminatedIn === "League Phase") return "league";
+  return "ko";
+}
+
+/** Exact match only (no trimming or case folding): anything else is not an outcome. */
+export function parseOutcome(raw: unknown): Outcome | null {
+  return typeof raw === "string" && (OUTCOMES as readonly string[]).includes(raw)
+    ? (raw as Outcome)
+    : null;
+}
 
 /** Creator codes for the creator test, c01-c30 (closed list; anything else is ignored). c02/c07/c08 stay valid while unassigned. */
 // prettier-ignore
@@ -167,10 +199,15 @@ export function eventBody(
   mode: RetentionMode,
   ref: Ref | null | undefined,
   via?: ShareVia,
+  outcome?: Outcome | null,
 ) {
   const r: RefOrNone = REF_EVENTS.includes(event) && ref && parseRef(ref) ? ref : "none";
   const v: ShareVia | "none" = event === "share_click" && via && (SHARE_VIAS as readonly string[]).includes(via) ? via : "none";
-  return { event, bucket, mode, source, ref: r, via: v };
+  // Daily runs never carry an outcome: the footer promises Daily results are never sent (Raffael, 22 Oct).
+  const o = event === "sim_complete" && mode !== "daily" ? parseOutcome(outcome) : null;
+  return o
+    ? { event, bucket, mode, source, ref: r, via: v, outcome: o }
+    : { event, bucket, mode, source, ref: r, via: v };
 }
 
 // ---------------- browser side ----------------
@@ -195,9 +232,9 @@ function load(): RetentionState | null {
   }
 }
 
-function send(event: RetentionEvent, bucket: Bucket, source: Source, mode: RetentionMode = "none", ref?: Ref, via?: ShareVia) {
+function send(event: RetentionEvent, bucket: Bucket, source: Source, mode: RetentionMode = "none", ref?: Ref, via?: ShareVia, outcome?: Outcome) {
   try {
-    const body = JSON.stringify(eventBody(event, bucket, source, mode, ref, via));
+    const body = JSON.stringify(eventBody(event, bucket, source, mode, ref, via, outcome));
     const blob = new Blob([body], { type: "application/json" });
     if (!navigator.sendBeacon?.("/e", blob)) {
       void fetch("/e", { method: "POST", body, keepalive: true, credentials: "omit", headers: { "content-type": "application/json" } }).catch(() => {});
@@ -221,10 +258,10 @@ export function trackVisit() {
   for (const e of events) send(e, bucket, state.source, "none", state.ref);
 }
 
-/** Gameplay events (draft_start, sim_complete, daily_complete, share_click + via). */
-export function trackEvent(event: RetentionEvent, mode: RetentionMode = "none", via?: ShareVia) {
+/** Gameplay events (draft_start, sim_complete + outcome, daily_complete, share_click + via). */
+export function trackEvent(event: RetentionEvent, mode: RetentionMode = "none", via?: ShareVia, outcome?: Outcome) {
   if (!ENABLED || typeof window === "undefined") return;
   const s = load();
   if (!s) return;
-  send(event, bucketFor(Math.max(0, daysBetween(s.firstSeen, toDay(new Date())))), s.source, mode, s.ref, via);
+  send(event, bucketFor(Math.max(0, daysBetween(s.firstSeen, toDay(new Date())))), s.source, mode, s.ref, via, outcome);
 }
