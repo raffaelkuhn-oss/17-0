@@ -85,7 +85,7 @@ function Page() {
         </div>
         <p className="mt-4 text-sm text-muted-foreground">
           Where 82-0 wins: a longer season and the NBA crowd. Where 17-0 differs: knockout ties can
-          end your run in one bad night, so even the best possible XI goes a perfect 17-0 only about
+          end your run in one bad night, so even the highest-rated XI goes a perfect 17-0 only about
           {STATS.bestXI.perfectPct.toFixed(1)}% of the time in our simulations (a good draft: about{" "}
           {STATS.greedy.perfectPct.toFixed(1)}%).
         </p>

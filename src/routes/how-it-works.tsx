@@ -34,7 +34,7 @@ const FAQ = [
   },
   {
     q: "How rare is a 17-0?",
-    a: `In our simulations (${STATS.runs.toLocaleString("en-US")} runs per draft type, from the game's own engine), random picks win the title ${STATS.random.titlePct}% of the time but go a perfect 17-0 only ${STATS.random.perfectPct}% of the time. A good draft wins the title ${STATS.greedy.titlePct}% of the time and goes 17-0 ${STATS.greedy.perfectPct}% of the time. The best possible XI wins the title ${STATS.bestXI.titlePct}% of the time and goes 17-0 ${STATS.bestXI.perfectPct}% of the time. These are simulation results, not guarantees; individual runs vary a lot. See how the chances work for a plain-words explanation.`,
+    a: `In our simulations (${STATS.runs.toLocaleString("en-US")} runs per draft type, from the game's own engine), random picks win the title ${STATS.random.titlePct}% of the time but go a perfect 17-0 only ${STATS.random.perfectPct}% of the time. A good draft wins the title ${STATS.greedy.titlePct}% of the time and goes 17-0 ${STATS.greedy.perfectPct}% of the time. The highest-rated XI (the top-rated legend in each slot) wins the title ${STATS.bestXI.titlePct}% of the time and goes 17-0 ${STATS.bestXI.perfectPct}% of the time. These are simulation results, not guarantees; individual runs vary a lot. See how the chances work for a plain-words explanation.`,
   },
   {
     q: "What is Legend IQ mode?",

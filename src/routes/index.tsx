@@ -175,8 +175,8 @@ function Index() {
           knockout playoff, round of 16, quarter-final and semi-final over two legs each, and the
           final. Going 17-0 means winning all seventeen matches and lifting the trophy, which is
           rare: in our simulations, about {STATS.greedy.perfectPct.toFixed(1)}% of good drafts and about{" "}
-          {STATS.bestXI.perfectPct.toFixed(1)}% of the best possible XI go 17-0 (random picks:{" "}
-          {STATS.random.perfectPct}%).{" "}
+          {STATS.bestXI.perfectPct.toFixed(1)}% of runs with the highest-rated XI go 17-0
+          (random picks: {STATS.random.perfectPct}%).{" "}
           <Link to="/how-it-works" className="text-primary underline underline-offset-4">
             Read the full rules and FAQ
           </Link>
