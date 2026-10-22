@@ -11,7 +11,7 @@ const has = (list: readonly string[], v: unknown): v is string => typeof v === "
 /**
  * POST /e handler. Writes one aggregate data point: blobs [event, bucket, mode, source, ref, traffic, via, outcome],
  * double 1. outcome (blob8) is perfect/champion/final/ko/league on sim_complete only (exact allow-list match);
- * anything else, a missing value, or any other event writes "" and the event is still logged. traffic is "internal" when the user agent carries our fixed test marker (see traffic.ts),
+ * anything else, a missing value, any other event, or mode "daily" writes "" and the event is still logged. traffic is "internal" when the user agent carries our fixed test marker (see traffic.ts),
  * else "public". Never stores IP, user agent, cookies or any identifier.
  * Returns 204 in every case (including when the RETENTION binding is missing).
  */
@@ -33,7 +33,8 @@ export async function handleRetentionEvent(request: Request, env: unknown): Prom
   const m = has(MODES, mode) ? mode : "none";
   const r = has(REFS, ref) ? ref : "none";
   const v = event === "share_click" && has(SHARE_VIAS, via) ? via : "none";
-  const o = event === "sim_complete" ? (parseOutcome(outcome) ?? "") : "";
+  // Defence in depth: Daily runs never store an outcome, whatever the client sends.
+  const o = event === "sim_complete" && m !== "daily" ? (parseOutcome(outcome) ?? "") : "";
   try {
     ds.writeDataPoint({ blobs: [event, bucket, m, source, r, trafficFor(request.headers.get("user-agent")), v, o], doubles: [1], indexes: [event] });
   } catch (e) {

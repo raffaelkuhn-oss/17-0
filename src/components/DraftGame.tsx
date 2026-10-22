@@ -85,7 +85,8 @@ export function DraftGame({
   function run() {
     const campaign = simulate(picks, seed);
     setResults(campaign);
-    trackEvent("sim_complete", isDaily ? "daily" : mode, undefined, outcomeOf(campaign));
+    // No outcome for Daily runs (Daily results are never sent); classic and Legend IQ send the bucket.
+    trackEvent("sim_complete", isDaily ? "daily" : mode, undefined, isDaily ? undefined : outcomeOf(campaign));
     if (isDaily) trackEvent("daily_complete", "daily");
     // Challenge runs never report to the Daily / leaderboard handlers.
     if (!inChallenge) onComplete?.(campaign, picks);

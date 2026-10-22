@@ -313,7 +313,12 @@ function SiteFooter() {
           To count returning visitors, this site stores an anonymous first-visit date in your
           browser and the link you arrived from (e.g. a creator code), and counts game events like
           drafts, finished runs and shares in aggregate; no ID, no tracking cookies, no personal
-          data. A small cookie only stops the daily challenge from being replayed, and Cloudflare
+          data.{" "}
+          <span data-testid="footer-outcome-privacy">
+            For finished runs we also count how far they got (17-0, title, final, knockouts or
+            league phase), never your picks or scores.
+          </span>{" "}
+          A small cookie only stops the daily challenge from being replayed, and Cloudflare
           Web Analytics counts visits without cookies.{" "}
           <span data-testid="footer-daily-privacy">
             Your Daily results, streak and stats stay in your browser only and are never sent to us.

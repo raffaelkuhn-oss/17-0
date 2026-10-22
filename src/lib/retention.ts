@@ -61,7 +61,8 @@ export type ShareVia = (typeof SHARE_VIAS)[number];
  *             Quarter-Final or Semi-Final. The Playoff counts as ko: it is the first two-legged
  *             knockout tie in sim.ts (KO_ROUNDS[0]), played only after clearing the league cut-off.
  * - league:   out in the league phase (eliminatedIn "League Phase", under PLAYOFF_CUTOFF points)
- * Only the bucket is sent: no score, record, picks or anything about the player.
+ * Only the bucket is sent: no score, record, picks or anything about the player. Never sent for
+ * Daily runs (mode "daily"): the client leaves it out and the Worker forces blob8 to "".
  */
 export const OUTCOMES = ["perfect", "champion", "final", "ko", "league"] as const;
 export type Outcome = (typeof OUTCOMES)[number];
@@ -202,7 +203,8 @@ export function eventBody(
 ) {
   const r: RefOrNone = REF_EVENTS.includes(event) && ref && parseRef(ref) ? ref : "none";
   const v: ShareVia | "none" = event === "share_click" && via && (SHARE_VIAS as readonly string[]).includes(via) ? via : "none";
-  const o = event === "sim_complete" ? parseOutcome(outcome) : null;
+  // Daily runs never carry an outcome: the footer promises Daily results are never sent (Raffael, 22 Oct).
+  const o = event === "sim_complete" && mode !== "daily" ? parseOutcome(outcome) : null;
   return o
     ? { event, bucket, mode, source, ref: r, via: v, outcome: o }
     : { event, bucket, mode, source, ref: r, via: v };

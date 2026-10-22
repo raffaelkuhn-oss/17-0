@@ -58,8 +58,17 @@ t(
   eventBody("sim_complete", "d0", "x", "classic", null, undefined, "ko").outcome === "ko",
 );
 t(
-  "body: daily sim_complete carries outcome too",
-  eventBody("sim_complete", "d0", "x", "daily", null, undefined, "perfect").outcome === "perfect",
+  "body: classic and Legend IQ sim_complete carry the outcome",
+  (["classic", "legend"] as const).every(
+    (m) => eventBody("sim_complete", "d0", "x", m, null, undefined, "perfect").outcome === "perfect",
+  ),
+);
+t(
+  "body: daily sim_complete never carries an outcome, even a valid one",
+  OUTCOMES.every((o) => {
+    const b = eventBody("sim_complete", "d0", "x", "daily", null, undefined, o);
+    return !("outcome" in b) && Object.keys(b).sort().join() === "bucket,event,mode,ref,source,via";
+  }),
 );
 t(
   "body: invalid outcome is dropped, event otherwise unchanged",
@@ -73,6 +82,13 @@ t(
   (
     ["visit", "draft_start", "daily_complete", "share_click", "return_d1", "return_d7"] as const
   ).every((e) => !("outcome" in eventBody(e, "d0", "x", "classic", null, undefined, "perfect"))),
+);
+
+// DraftGame: Daily runs pass no outcome to trackEvent; classic / Legend IQ pass outcomeOf(campaign).
+const dg = (await import("node:fs")).readFileSync(new URL("../src/components/DraftGame.tsx", import.meta.url), "utf8");
+t(
+  "DraftGame: sim_complete sends no outcome for Daily, outcomeOf(campaign) otherwise",
+  dg.includes('trackEvent("sim_complete", isDaily ? "daily" : mode, undefined, isDaily ? undefined : outcomeOf(campaign));'),
 );
 
 // ---- server: blob8 ----
@@ -116,6 +132,18 @@ t(
   "server: outcome ignored on other events",
   writes.length === 2 && writes.every((w) => w.blobs[7] === "" && w.blobs.length === 8),
 );
+writes.length = 0;
+for (const o of OUTCOMES) await handleRetentionEvent(req({ ...base, mode: "daily", outcome: o }), env);
+t(
+  "server: daily sim_complete -> blob8 '' even with a valid outcome, event still logged",
+  writes.length === OUTCOMES.length &&
+    writes.every(
+      (w) => w.blobs[7] === "" && w.blobs.slice(0, 3).join() === "sim_complete,d0,daily" && w.blobs.length === 8,
+    ),
+);
+writes.length = 0;
+for (const m of ["classic", "legend"]) await handleRetentionEvent(req({ ...base, mode: m, outcome: "champion" }), env);
+t("server: classic and Legend IQ still store the outcome", writes.map((w) => w.blobs[7]).join() === "champion,champion");
 writes.length = 0;
 await handleRetentionEvent(
   req({ ...base, outcome: "ko", score: "3-1", picks: ["Messi"], id: "abc" }),
