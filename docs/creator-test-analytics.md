@@ -2,7 +2,7 @@
 
 Links: `https://ucl17-0.com/?ref=c01&utm_source=tiktok&utm_medium=creator&utm_campaign=creator-test` (c01–c30).
 Data: Workers Analytics Engine dataset `ucl170_retention`, aggregate counts only (no IP, cookie or ID).
-Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source · `blob5` ref (`c01`–`c30`/`none`; empty for rows written before this change) · `blob6` traffic (`internal`/`bot`/`public`; empty for rows written before 18 Oct 2026; `bot` from 19 Oct) · `blob7` share path on `share_click` (`native`/`copy`/`x`/`whatsapp`/`download`/`challenge`; `none` otherwise, empty before the share PR).
+Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source · `blob5` ref (`c01`–`c30`/`none`; empty for rows written before this change) · `blob6` traffic (`internal`/`bot`/`public`; empty for rows written before 18 Oct 2026; `bot` from 19 Oct) · `blob7` share path on `share_click` (`native`/`copy`/`x`/`whatsapp`/`download`/`challenge`; `none` otherwise, empty before the share PR) · `blob8` outcome on `sim_complete` (`perfect`/`champion`/`final`/`ko`/`league`, see `outcomeOf()` in `src/lib/retention.ts`; empty on other events, on invalid values and for rows written before the outcome PR).
 
 ## Dashboard (terminal)
 

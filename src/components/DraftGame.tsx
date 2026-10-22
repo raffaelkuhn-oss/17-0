@@ -6,7 +6,7 @@ import { ShareButton, ShareCard } from "@/components/ShareCard";
 import { XiStampCard } from "@/components/XiStamp";
 import { FORMATION, PLAYERS, overall, type Player } from "@/lib/players";
 import { pointsLine, recordHeadline, recordWords } from "@/lib/record";
-import { trackEvent, type RetentionMode } from "@/lib/retention";
+import { outcomeOf, trackEvent, type RetentionMode } from "@/lib/retention";
 import { PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
 import { xiStamp } from "@/lib/xi-chance";
 import { encodeChallenge, replayChallenge, slotCandidates, type Challenge } from "@/lib/challenge";
@@ -85,7 +85,7 @@ export function DraftGame({
   function run() {
     const campaign = simulate(picks, seed);
     setResults(campaign);
-    trackEvent("sim_complete", isDaily ? "daily" : mode);
+    trackEvent("sim_complete", isDaily ? "daily" : mode, undefined, outcomeOf(campaign));
     if (isDaily) trackEvent("daily_complete", "daily");
     // Challenge runs never report to the Daily / leaderboard handlers.
     if (!inChallenge) onComplete?.(campaign, picks);
