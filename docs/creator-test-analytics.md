@@ -2,7 +2,27 @@
 
 Links: `https://ucl17-0.com/?ref=c01&utm_source=tiktok&utm_medium=creator&utm_campaign=creator-test` (c01–c30).
 Data: Workers Analytics Engine dataset `ucl170_retention`, aggregate counts only (no IP, cookie or ID).
-Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source · `blob5` ref (`c01`–`c30`/`none`; empty for rows written before this change) · `blob6` traffic (`internal`/`bot`/`public`; empty for rows written before 18 Oct 2026; `bot` from 19 Oct) · `blob7` share path on `share_click` (`native`/`copy`/`x`/`whatsapp`/`download`/`challenge`; `none` otherwise, empty before the share PR) · `blob8` outcome on `sim_complete` (`perfect`/`champion`/`final`/`ko`/`league`, see `outcomeOf()` in `src/lib/retention.ts`; empty on other events, on invalid values and for rows written before the outcome PR).
+Columns: `blob1` event · `blob2` day bucket · `blob3` mode · `blob4` source (`direct`/`x`/`reddit`/`hn`/`google`/`bing`/`duckduckgo`/`facebook`/`instagram`/`linkedin`/`youtube`/`tiktok`/`producthunt`/`newsletter`/`share`/`other`; `share` = landed on a shared run `/r/<code>` or a Challenge link `/draft?c=<code>`, from the share PR, see below) · `blob5` ref (`c01`–`c30`/`none`; empty for rows written before this change) · `blob6` traffic (`internal`/`bot`/`public`; empty for rows written before 18 Oct 2026; `bot` from 19 Oct) · `blob7` share path on `share_click` (`native`/`file`/`copy`/`x`/`whatsapp`/`download`/`challenge`; `none` otherwise, empty before the share PR) · `blob8` outcome on `sim_complete` (`perfect`/`champion`/`final`/`ko`/`league`, see `outcomeOf()` in `src/lib/retention.ts`; empty on other events, on invalid values and for rows written before the outcome PR).
+
+## Share landings (`blob4 = 'share'`)
+
+Share links carry no tag (no `utm`/`ref`: long tagged links look like scams in DMs), so a share landing is
+recognised by its path. Precedence for the source of a visit (`landingSource()` in `src/lib/retention.ts`):
+1. explicit tag on the URL: `utm_source`, or a valid creator `ref` (`c01`–`c30`): source as before (utm bucket, else referrer);
+2. landing path `/r/<code>` (all Classic/Legend shares) or `/draft?c=<code>` (Challenge a friend): `share`;
+3. same-site referrer that is one of those paths (tapped through from `/r/` before the page hydrated): `share`;
+4. otherwise the referrer bucket (`direct` when none).
+
+| Share path | URL | Source on landing |
+| --- | --- | --- |
+| Image-file share, native share, copy fallback, Post on X, WhatsApp, Copy text (Classic/Legend) | `https://ucl17-0.com/r/<code>` | `share` |
+| Challenge a friend | `https://ucl17-0.com/draft?c=<code>` | `share` |
+| Daily (all paths) | `https://ucl17-0.com/daily` | unattributed (referrer/`direct`) |
+| Live-preview / extra-pool runs | `https://ucl17-0.com/draft` | unattributed (no code: picks aren't in the legends pool, so `/r/` can't rebuild them) |
+| Save image | no link | n/a |
+
+As with every source, only the browser's **first** visit sets it; nothing new is stored (same `ucl170:retention` key, same blobs).
+Share landings are counted from the deploy of this change; earlier WhatsApp/iMessage landings show as `direct`.
 
 ## Dashboard (terminal)
 
