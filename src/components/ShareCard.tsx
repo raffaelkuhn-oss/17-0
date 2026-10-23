@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { copyText } from "@/lib/copy-text";
 import { shareImageFor } from "@/lib/share-image";
 import { pickShareMethod, runShare } from "@/lib/share-file";
-import { shareText } from "@/lib/share-text";
+import { shareText, whatsappUrl, xIntentUrl } from "@/lib/share-text";
 import { xiStamp } from "@/lib/xi-chance";
 import { XiDareLine } from "@/components/XiStamp";
 import { trackEvent, type RetentionMode, type ShareVia } from "@/lib/retention";
@@ -188,8 +188,8 @@ export function ShareCard({
     track("download", trackMode);
   }
 
-  const xUrl = `https://x.com/intent/post?text=${encodeURIComponent(t.body)}&url=${encodeURIComponent(t.url)}`;
-  const waUrl = `https://wa.me/?text=${encodeURIComponent(t.full)}`;
+  const xUrl = xIntentUrl(t);
+  const waUrl = whatsappUrl(t);
 
   return (
     <div className="surface rounded-2xl p-5 text-center">

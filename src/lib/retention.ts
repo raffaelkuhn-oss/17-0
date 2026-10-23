@@ -44,6 +44,8 @@ export const SOURCES = [
   "tiktok",
   "producthunt",
   "newsletter",
+  /** Landed on a shared run (/r/<code>) or a Challenge link (/draft?c=<code>); see landingSource(). */
+  "share",
   "other",
 ] as const;
 export type Source = (typeof SOURCES)[number];
@@ -136,6 +138,60 @@ export function sourceBucket(utmSource: string | null | undefined, referrer: str
     if (base.split(".").includes(name)) return name;
   }
   return "other";
+}
+
+/**
+ * True when a landing path is one of our share links: a shared run /r/<code> (every Classic/Legend
+ * share) or a Challenge link /draft?c=<code>. Share URLs carry no tag (long ?utm links look like scams
+ * in DMs), so the path itself is the signal. Pure; `search` is location.search ("?c=..." or "").
+ */
+export function isShareLanding(pathname: string | null | undefined, search: string | null | undefined): boolean {
+  const p = (pathname ?? "").replace(/\/+$/, "");
+  if (/^\/r\/[^/]+$/.test(p)) return true;
+  if (p === "/draft") {
+    try {
+      return !!new URLSearchParams(search ?? "").get("c");
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
+ * Pure: the source bucket for a landing. Precedence (first match wins):
+ *  1. An explicit tag on the URL: utm_source, or a valid creator ref (?ref=c01..c30). Then the
+ *     source is exactly what it was before share attribution (utm bucket, else referrer bucket),
+ *     so tagged creator / campaign links are never relabelled as "share".
+ *  2. The landing path is a share link (isShareLanding): "share", whatever the referrer
+ *     (WhatsApp/iMessage send none; X sends t.co; either way it came from a share).
+ *  3. Same-site referrer whose path is a share link: "share". Covers a first-time visitor who opens
+ *     /r/<code> and taps "Build your own XI" before the app has hydrated, so the visit is first
+ *     counted on /draft (full page load, referrer https://ucl17-0.com/r/<code>). Nothing is stored for this.
+ *  4. Otherwise sourceBucket(): referrer host bucket, same-site / no referrer = "direct".
+ * Like every source, it only sticks on the browser's first visit (nextVisit keeps the first source).
+ */
+export function landingSource(l: {
+  utmSource?: string | null | undefined;
+  ref?: string | null | undefined;
+  pathname?: string | null | undefined;
+  search?: string | null | undefined;
+  referrer?: string | null | undefined;
+  ownHost?: string | undefined;
+}): Source {
+  const utm = (l.utmSource ?? "").trim();
+  if (utm || parseRef(l.ref)) return sourceBucket(utm, l.referrer, l.ownHost);
+  if (isShareLanding(l.pathname, l.search)) return "share";
+  if (l.referrer && l.ownHost) {
+    try {
+      const u = new URL(l.referrer);
+      const host = u.hostname.toLowerCase();
+      if ((host === l.ownHost || host.endsWith("." + l.ownHost)) && isShareLanding(u.pathname, u.search)) return "share";
+    } catch {
+      /* not a URL: fall through */
+    }
+  }
+  return sourceBucket(null, l.referrer, l.ownHost);
 }
 
 const dayMs = 86_400_000;
@@ -244,11 +300,27 @@ function send(event: RetentionEvent, bucket: Bucket, source: Source, mode: Reten
   }
 }
 
+/**
+ * The URL the page was loaded with, read once when this module is evaluated (before hydration), so a
+ * client-side navigation (e.g. /r/<code> -> /draft) before trackVisit's effect runs can't lose the
+ * share landing. In memory only; nothing is stored.
+ */
+const LANDING: { pathname: string; search: string } | null =
+  typeof window !== "undefined" && window.location ? { pathname: window.location.pathname, search: window.location.search } : null;
+
 /** Call once on app load (client only). No-op unless enabled at build time. */
 export function trackVisit() {
   if (!ENABLED || typeof window === "undefined" || !hasStorage()) return;
-  const params = new URLSearchParams(window.location.search);
-  const src = sourceBucket(params.get("utm_source"), document.referrer, window.location.hostname);
+  const landing = LANDING ?? { pathname: window.location.pathname, search: window.location.search };
+  const params = new URLSearchParams(landing.search);
+  const src = landingSource({
+    utmSource: params.get("utm_source"),
+    ref: params.get("ref"),
+    pathname: landing.pathname,
+    search: landing.search,
+    referrer: document.referrer,
+    ownHost: window.location.hostname,
+  });
   const { state, events, bucket } = nextVisit(load(), new Date(), src, parseRef(params.get("ref")));
   try {
     localStorage.setItem(RETENTION_KEY, JSON.stringify(state));

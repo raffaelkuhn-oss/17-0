@@ -57,10 +57,34 @@ export type ShareTextInput = {
 /** X's limit; the "My XI: …" line is dropped first if a text would run over (copy-stamp.md §3). */
 export const X_LIMIT = 280;
 
+/**
+ * Every share URL is built here, from SITE_URL, short and with no tag (no utm/ref: long tagged links look
+ * like scams in DMs). Landings are attributed by path instead (retention.ts landingSource):
+ * - Classic/Legend run (all text/file share paths): SITE_URL/r/<code>  -> source "share"
+ * - Daily: SITE_URL/daily (no code, unattributed on purpose)
+ * - Live-preview / extra-pool runs: SITE_URL/draft (no code: their picks aren't in the legends pool,
+ *   so /r/<code> could not rebuild them)
+ * - Challenge a friend: challengeLink() = SITE_URL/draft?c=<code> -> source "share"
+ */
 export function runLink({ dailyNumber, challengeCode, origin = SITE_URL }: Omit<ShareTextInput, "campaign" | "dailyStreak">): string {
   if (challengeCode) return `${origin}/r/${challengeCode}`;
   if (dailyNumber !== undefined) return `${origin}/daily`;
   return `${origin}/draft`;
+}
+
+/** "Challenge a friend" link: same pool, same 17 matches, replayed by /draft (the ?c= code is the run, not a tag). */
+export function challengeLink(challengeCode: string, origin: string = SITE_URL): string {
+  return `${origin}/draft?c=${challengeCode}`;
+}
+
+/** "Post on X" intent: body as text, the share link as url (X counts any URL as 23). */
+export function xIntentUrl(t: { body: string; url: string }): string {
+  return `https://x.com/intent/post?text=${encodeURIComponent(t.body)}&url=${encodeURIComponent(t.url)}`;
+}
+
+/** WhatsApp: the full text with the link on its last line. */
+export function whatsappUrl(t: { full: string }): string {
+  return `https://wa.me/?text=${encodeURIComponent(t.full)}`;
 }
 
 /** Returns the message body (without the link) and the link, plus the full text for copying. */

@@ -9,6 +9,7 @@ import { pointsLine, recordHeadline, recordWords } from "@/lib/record";
 import { outcomeOf, trackEvent, type RetentionMode } from "@/lib/retention";
 import { PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
 import { xiStamp } from "@/lib/xi-chance";
+import { challengeLink } from "@/lib/share-text";
 import { encodeChallenge, replayChallenge, slotCandidates, type Challenge } from "@/lib/challenge";
 
 export type Mode = "classic" | "legend";
@@ -317,7 +318,7 @@ export function Results({
   const [copied, setCopied] = useState(false);
   async function shareChallenge() {
     if (!challengeCode) return;
-    const url = `${window.location.origin}/draft?c=${challengeCode}`;
+    const url = challengeLink(challengeCode);
     try {
       await navigator.clipboard.writeText(url);
     } catch {
