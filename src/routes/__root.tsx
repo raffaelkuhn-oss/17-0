@@ -321,7 +321,7 @@ function SiteFooter() {
           A small cookie only stops the daily challenge from being replayed, and Cloudflare
           Web Analytics counts visits without cookies.{" "}
           <span data-testid="footer-daily-privacy">
-            Your Daily results, streak and stats stay in your browser only and are never sent to us.
+            Your Daily results, streak, stats and saved best XI stay in your browser only and are never sent to us.
           </span>
         </p>
         <p className="text-xs" data-testid="footer-legal">

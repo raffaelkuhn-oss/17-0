@@ -2,6 +2,7 @@ import { SITE_URL, absUrl } from "@/lib/site";
 import { HOME_DESCRIPTION, HOME_TITLE } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HomeLeaderboard } from "@/components/HomeLeaderboard";
+import { HomePersonalBest } from "@/components/PersonalBestBar";
 import { AdBanner } from "@/components/AdBanner";
 import { SupportCard } from "@/components/SupportCard";
 import { PLAYERS } from "@/lib/players";
@@ -103,6 +104,7 @@ function Index() {
               Legend IQ
             </Link>
           </div>
+          <HomePersonalBest />
         </div>
       </section>
 

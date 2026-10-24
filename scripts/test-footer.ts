@@ -23,7 +23,7 @@ const rootComp = root.slice(root.indexOf("function RootComponent"), root.indexOf
 t("RootComponent renders <SiteFooter /> unconditionally after <Outlet />", /<Outlet \/>\s*\n\s*<SiteFooter \/>/.test(rootComp) && !/&&\s*<SiteFooter|\?\s*<SiteFooter/.test(rootComp));
 t("sponsor contact is in the footer", footer.includes("Sponsor or partner?") && footer.includes("mailto:ucl17zero@gmail.com"));
 // Mkt #4 privacy sentence (approved by Raffael 18 Oct 14:01), verbatim and visible in the footer.
-const DAILY_PRIVACY = "Your Daily results, streak and stats stay in your browser only and are never sent to us.";
+const DAILY_PRIVACY = "Your Daily results, streak, stats and saved best XI stay in your browser only and are never sent to us.";
 const flat = footer.replace(/\s+/g, " ");
 t("footer has the Daily privacy sentence verbatim", flat.includes(DAILY_PRIVACY));
 // Outcome-bucket line (approved by Raffael via the PM 22 Oct 20:47), verbatim, visible, right after the aggregate clause.
