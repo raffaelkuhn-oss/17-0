@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AdBanner } from "@/components/AdBanner";
 import { Celebration } from "@/components/Celebration";
+import { PersonalBestBar } from "@/components/PersonalBestBar";
 import { ShareButton, ShareCard } from "@/components/ShareCard";
 import { XiStampCard } from "@/components/XiStamp";
 import { FORMATION, PLAYERS, overall, type Player } from "@/lib/players";
@@ -9,6 +10,7 @@ import { pointsLine, recordHeadline, recordWords } from "@/lib/record";
 import { outcomeOf, trackEvent, type RetentionMode } from "@/lib/retention";
 import { PLAYOFF_CUTOFF, simulate, teamRatings, type Campaign } from "@/lib/sim";
 import { xiStamp } from "@/lib/xi-chance";
+import { loadPersonalBest, savePersonalBest, type PersonalBestRecord } from "@/lib/personal-best";
 import { challengeLink } from "@/lib/share-text";
 import { encodeChallenge, replayChallenge, slotCandidates, type Challenge } from "@/lib/challenge";
 
@@ -62,9 +64,11 @@ export function DraftGame({
   const [pickIdx, setPickIdx] = useState<number[]>([]);
   const [results, setResults] = useState<Campaign | null>(null);
   const [inChallenge, setInChallenge] = useState(!!challenge);
+  const [personalBest, setPersonalBest] = useState<PersonalBestRecord | null>(null);
 
   useEffect(() => {
     if (fixedSeed === undefined && !challenge) setSeed(Math.floor(Math.random() * 1e9));
+    setPersonalBest(loadPersonalBest());
   }, [fixedSeed, challenge]);
 
   const step = picks.length;
@@ -89,6 +93,11 @@ export function DraftGame({
     // No outcome for Daily runs (Daily results are never sent); classic and Legend IQ send the bucket.
     trackEvent("sim_complete", isDaily ? "daily" : mode, undefined, isDaily ? undefined : outcomeOf(campaign));
     if (isDaily) trackEvent("daily_complete", "daily");
+    // Save/update personal best + XI in localStorage on finished legends-pool runs (device only).
+    if (pool === PLAYERS) {
+      const saved = savePersonalBest(campaign, picks, isDaily ? "daily" : mode);
+      if (saved.best) setPersonalBest(saved.best);
+    }
     // Challenge runs never report to the Daily / leaderboard handlers.
     if (!inChallenge) onComplete?.(campaign, picks);
   }
@@ -128,6 +137,8 @@ export function DraftGame({
           <strong data-testid="challenge-theirs">{recordHeadline(theirs.campaign)}</strong>. Can you do better?
         </p>
       )}
+
+      <PersonalBestBar best={personalBest} className="mt-2 -mb-8" />
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div>
